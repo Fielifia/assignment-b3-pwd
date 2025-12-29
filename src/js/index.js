@@ -52,7 +52,10 @@ class PwdShell {
   }
 
   /**
-   * Initializes the dock with applicaiton icons and click events.
+   * Initializes the dock with applicaiton icons.
+   *
+   * Each icon represents a sub-application and is clickable.
+   * When an icon is clicked, a new window is created for the app and focused.
    *
    * @returns {void}
    */
@@ -81,6 +84,10 @@ class PwdShell {
   /**
    * Creates a new window element in the PWD.
    *
+   * Adds a title bar, close button, default position, and z-index.
+   * The new window is appended to the window container and tracked in
+   * the global state.
+   *
    * @param {string} title - The title of the window.
    * @returns {HTMLElement} The created window element.
    */
@@ -105,6 +112,50 @@ class PwdShell {
 
     this.windowContainer.appendChild(win)
 
+    // Drag functionality
+    titleBar.style.cursor = 'move'
+    titleBar.addEventListener('mousedown', (e) => {
+      const offsetX = e.clientX - win.getBoundingClientRect().left
+      const offsetY = e.clientY - win.getBoundingClientRect().top
+
+      /**
+       * Handles the window's `left`and `top` style properties
+       * based on the current nmouse position and the initial offset.
+       *
+       * @param {MouseEvent} eMove - The mousemove event.
+       * @returns {void}
+       */
+      const onMouseMove = (eMove) => {
+        win.style.left = `${eMove.clientX - offsetX}px`
+        win.style.top = `${eMove.clientY - offsetY}px`
+      }
+
+      /**
+       * Handles the end of a window drag action.
+       *
+       * Removes the mousemove and mouseup event listeners
+       * to stop the dragging behavior.
+       *
+       * @returns {void}
+       */
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove)
+        document.removeEventListener('mouseup', onMouseUp)
+      }
+
+      document.addEventListener('mousemove', onMouseMove)
+      document.addEventListener('mouseup', onMouseUp)
+    })
+
+    const closeBtn = document.createElement('button')
+    closeBtn.classList.add('close-btn')
+    closeBtn.textContent = 'X'
+    titleBar.appendChild(closeBtn)
+
+    closeBtn.addEventListener('click', () => {
+      this.closeWindow(win)
+    })
+
     this.state.openWindows.push({
       id: this.state.nextWindowId,
       element: win
@@ -114,7 +165,9 @@ class PwdShell {
     return win
   }
 
-  /** Brings the specified window to the fron by updating z-index.
+  /** Brings the specified window to the front by updating z-index.
+   *
+   * Updates the global state to reflect the currently focused window.
    *
    * @param {HTMLElement} win - The window to focus.
    * @returns {void}
@@ -125,6 +178,30 @@ class PwdShell {
     win.style.zIndex = this.topZ
 
     this.state.focusedWindows = win.dataset.windowId
+  }
+
+  /**
+   * Closes a given window and removes it from both the DOM
+   * and the global state.
+   *
+   * If the closed window was focused, clears the focus in the state.
+   *
+   * @param {HTMLElement} win - The window element to close.
+   * @returns {void}
+   */
+  closeWindow (win) {
+    if (!win) return
+
+    // Remove from DOM
+    win.remove()
+
+    // Remove from state
+    this.state.openWindows = this.state.openWindows.filter(w => w.element !== win)
+
+    // Clear focus if needed
+    if (this.state.focusedWindows === win.dataset.windowId) {
+      this.state.focusedWindows = null
+    }
   }
 }
 
