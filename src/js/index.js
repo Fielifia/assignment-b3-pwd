@@ -26,6 +26,7 @@ class PwdShell {
     this.topZ = 1
 
     this.createLayout()
+    this.initDock()
   }
 
   /**
@@ -48,6 +49,33 @@ class PwdShell {
 
     this.root.appendChild(this.windowContainer)
     this.root.appendChild(this.dockContainer)
+  }
+
+  /**
+   * Initializes the dock with applicaiton icons and click events.
+   *
+   * @returns {void}
+   */
+  initDock () {
+    const apps = [
+      { title: 'Chat', iconText: '💬' },
+      { title: 'Memory', iconText: '🧠' }
+    ]
+
+    apps.forEach(app => {
+      const icon = document.createElement('div')
+      icon.classList.add('dock-icon')
+      icon.textContent = app.iconText
+      icon.title = app.title
+
+      // Click event opens a new window
+      icon.addEventListener('click', () => {
+        const win = this.createWindow(app.title)
+        this.focusWindow(win)
+      })
+
+      this.dockContainer.appendChild(icon)
+    })
   }
 
   /**
@@ -101,8 +129,4 @@ class PwdShell {
 }
 
 // Start the application
-const shell = new PwdShell()
-const win1 = shell.createWindow('Test Window 1')
-const win2 = shell.createWindow('Test Window 2')
-shell.focusWindow(win1)
-shell.focusWindow(win2)
+new PwdShell()
