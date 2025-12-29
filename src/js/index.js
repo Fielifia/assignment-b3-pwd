@@ -121,6 +121,11 @@ class PwdShell {
     })
     this.state.nextWindowId++
 
+    // Bring window to front on click
+    win.addEventListener('click', () => {
+      this.focusWindow(win)
+    })
+
     // Drag functionality
     titleBar.style.cursor = 'move'
     titleBar.addEventListener('mousedown', (e) => {
