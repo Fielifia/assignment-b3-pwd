@@ -8,7 +8,7 @@ class PwdShell {
   /**
    * Creates an instance of the PWD Shell.
    */
-  constructor () {
+  constructor() {
     // Root element for the entire application
     this.root = document.querySelector('#pwd-root')
 
@@ -40,7 +40,7 @@ class PwdShell {
    *
    * @returns {void} This method does not return a value.
    */
-  createLayout () {
+  createLayout() {
     this.windowContainer = document.createElement('div')
     this.windowContainer.classList.add('window-container')
 
@@ -59,10 +59,11 @@ class PwdShell {
    *
    * @returns {void}
    */
-  initDock () {
+  initDock() {
     const apps = [
-      { title: 'Chat', iconText: '💬' },
-      { title: 'Memory', iconText: '🧠' }
+      { title: 'Chat', iconText: '💬', type: 'chat' },
+      { title: 'Memory', iconText: '🧠', type: 'memory' },
+      { title: 'Custom', iconText: '💫', type: 'custom' }
     ]
 
     apps.forEach(app => {
@@ -73,7 +74,7 @@ class PwdShell {
 
       // Click event opens a new window
       icon.addEventListener('click', () => {
-        const win = this.createWindow(app.title)
+        const win = this.createWindow(app.title, app.type)
         this.focusWindow(win)
       })
 
@@ -91,7 +92,7 @@ class PwdShell {
    * @param {string} title - The title of the window.
    * @returns {HTMLElement} The created window element.
    */
-  createWindow (title) {
+  createWindow(title, appType) {
     const win = document.createElement('div')
     win.classList.add('window')
     win.dataset.windowId = this.state.nextWindowId
@@ -112,6 +113,13 @@ class PwdShell {
 
     this.windowContainer.appendChild(win)
 
+    this.state.openWindows.push({
+      id: this.state.nextWindowId,
+      element: win,
+      type: appType
+    })
+    this.state.nextWindowId++
+
     // Drag functionality
     titleBar.style.cursor = 'move'
     titleBar.addEventListener('mousedown', (e) => {
@@ -121,10 +129,10 @@ class PwdShell {
       /**
        * Handles the window's `left`and `top` style properties
        * based on the current nmouse position and the initial offset.
-       *
-       * @param {MouseEvent} eMove - The mousemove event.
-       * @returns {void}
-       */
+      *
+      * @param {MouseEvent} eMove - The mousemove event.
+      * @returns {void}
+      */
       const onMouseMove = (eMove) => {
         win.style.left = `${eMove.clientX - offsetX}px`
         win.style.top = `${eMove.clientY - offsetY}px`
@@ -156,11 +164,6 @@ class PwdShell {
       this.closeWindow(win)
     })
 
-    this.state.openWindows.push({
-      id: this.state.nextWindowId,
-      element: win
-    })
-    this.state.nextWindowId++
 
     return win
   }
@@ -172,7 +175,7 @@ class PwdShell {
    * @param {HTMLElement} win - The window to focus.
    * @returns {void}
    */
-  focusWindow (win) {
+  focusWindow(win) {
     if (!win) return
     this.topZ++
     win.style.zIndex = this.topZ
@@ -189,7 +192,7 @@ class PwdShell {
    * @param {HTMLElement} win - The window element to close.
    * @returns {void}
    */
-  closeWindow (win) {
+  closeWindow(win) {
     if (!win) return
 
     // Remove from DOM
