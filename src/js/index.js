@@ -175,7 +175,7 @@ class PwdShell {
     win.appendChild(content)
 
     if (appType === 'chat') {
-      const chatEl = document.createElement('messagesa-app')
+      const chatEl = document.createElement('messages-app')
       content.appendChild(chatEl)
     } else if (appType === 'memory') {
       const memoryEl = document.createElement('memory-app')
