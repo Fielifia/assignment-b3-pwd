@@ -23,6 +23,8 @@ class PwdShell {
       nextWindowId: 1
     }
 
+    this.topZ = 1
+
     this.createLayout()
   }
 
@@ -47,7 +49,22 @@ class PwdShell {
     this.root.appendChild(this.windowContainer)
     this.root.appendChild(this.dockContainer)
   }
+
+  /** Brings the specified window to the fron by updating z-index.
+   * 
+   * @param {HTMLElement} win - The window to focus.
+   * @returns {void}
+   */
+  focusWindow(win) {
+    if(!win) return
+    this.topZ++
+    win.style.zIndex = this.topZ
+
+    this.state.focusedWindows = win.dataset.windowId
+  }
 }
 
 // Start the application
-new PwdShell()
+const shell = new PwdShell()
+const win = document.querySelector('.test-window')
+shell.focusWindow(win)
