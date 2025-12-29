@@ -8,7 +8,7 @@ class PwdShell {
   /**
    * Creates an instance of the PWD Shell.
    */
-  constructor() {
+  constructor () {
     // Root element for the entire application
     this.root = document.querySelector('#pwd-root')
 
@@ -40,7 +40,7 @@ class PwdShell {
    *
    * @returns {void} This method does not return a value.
    */
-  createLayout() {
+  createLayout () {
     this.windowContainer = document.createElement('div')
     this.windowContainer.classList.add('window-container')
 
@@ -59,7 +59,7 @@ class PwdShell {
    *
    * @returns {void}
    */
-  initDock() {
+  initDock () {
     const apps = [
       { title: 'Chat', iconText: '💬', type: 'chat' },
       { title: 'Memory', iconText: '🧠', type: 'memory' },
@@ -90,9 +90,10 @@ class PwdShell {
    * the global state.
    *
    * @param {string} title - The title of the window.
+   * @param {string} appType - The type of the sub-app to inject.
    * @returns {HTMLElement} The created window element.
    */
-  createWindow(title, appType) {
+  createWindow (title, appType) {
     const win = document.createElement('div')
     win.classList.add('window')
     win.dataset.windowId = this.state.nextWindowId
@@ -129,10 +130,10 @@ class PwdShell {
       /**
        * Handles the window's `left`and `top` style properties
        * based on the current nmouse position and the initial offset.
-      *
-      * @param {MouseEvent} eMove - The mousemove event.
-      * @returns {void}
-      */
+       *
+       * @param {MouseEvent} eMove - The mousemove event.
+       * @returns {void}
+       */
       const onMouseMove = (eMove) => {
         win.style.left = `${eMove.clientX - offsetX}px`
         win.style.top = `${eMove.clientY - offsetY}px`
@@ -164,6 +165,20 @@ class PwdShell {
       this.closeWindow(win)
     })
 
+    const content = document.createElement('div')
+    content.classList.add('content')
+    win.appendChild(content)
+
+    if (appType === 'chat') {
+      const chatEl = document.createElement('messagesa-app')
+      content.appendChild(chatEl)
+    } else if (appType === 'memory') {
+      const memoryEl = document.createElement('memory-app')
+      content.appendChild(memoryEl)
+    } else if (appType === 'custom') {
+      const customEl = document.createElement('div')
+      content.appendChild(customEl)
+    }
 
     return win
   }
@@ -175,7 +190,7 @@ class PwdShell {
    * @param {HTMLElement} win - The window to focus.
    * @returns {void}
    */
-  focusWindow(win) {
+  focusWindow (win) {
     if (!win) return
     this.topZ++
     win.style.zIndex = this.topZ
@@ -192,7 +207,7 @@ class PwdShell {
    * @param {HTMLElement} win - The window element to close.
    * @returns {void}
    */
-  closeWindow(win) {
+  closeWindow (win) {
     if (!win) return
 
     // Remove from DOM
