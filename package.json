@@ -12,14 +12,31 @@
     "lint:fix": "npx eslint ./src --fix || exit 0"
   },
   "contributors": [
-    "Johan Leitet <johan.leitet@lnu.se>",
-    "Mats Loock <mats.loock@lnu.se>",
-    "// TODO: YOUR NAME <YOUR EMAIL>"
+    {
+      "name": "Johan Leitet",
+      "email": "johan.leitet@lnu.se"
+    },
+    {
+      "name": "Mats Loock",
+      "email": "mats.loock@lnu.se"
+    },
+    {
+      "name": "// TODO: YOUR NAME",
+      "email": "YOUR EMAIL"
+    }
   ],
   "license": "MIT",
   "private": true,
   "devDependencies": {
     "@lnu/eslint-config": "^1.1.10",
+    "eslint": "^9.39.2",
     "vite": "^4.4.9"
-  }
+  },
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.lnu.se:1dv025/student/sa226jf/assignment-b3-pwd.git"
+  },
+  "keywords": [],
+  "author": ""
 }
