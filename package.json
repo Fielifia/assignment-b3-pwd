@@ -21,15 +21,15 @@
       "email": "mats.loock@lnu.se"
     },
     {
-      "name": "// TODO: YOUR NAME",
-      "email": "YOUR EMAIL"
+      "name": "Sofia Andersson",
+      "email": "sa226@student.lnu.se"
     }
   ],
   "license": "MIT",
   "private": true,
   "devDependencies": {
     "@lnu/eslint-config": "^1.1.10",
-    "eslint": "^9.39.2",
+    "eslint": "^8.57.1",
     "vite": "^4.4.9"
   },
   "main": "vite.config.js",
