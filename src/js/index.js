@@ -1,3 +1,4 @@
+import './components/memory/memory-app.js'
 /**
  * Entry point for the Progresive Web Desktop application.
  *
@@ -108,8 +109,8 @@ class PwdShell {
     win.style.position = 'absolute'
     win.style.top = `${50 + this.state.nextWindowId * 30}px`
     win.style.left = `${50 + this.state.nextWindowId * 30}px`
-    win.style.width = '300px'
-    win.style.height = '200px'
+    win.style.width = 'auto'
+    win.style.height = 'auto'
     win.style.zIndex = this.topZ
 
     this.windowContainer.appendChild(win)
@@ -127,7 +128,6 @@ class PwdShell {
     })
 
     // Drag functionality
-    titleBar.style.cursor = 'move'
     titleBar.addEventListener('mousedown', (e) => {
       const offsetX = e.clientX - win.getBoundingClientRect().left
       const offsetY = e.clientY - win.getBoundingClientRect().top
@@ -163,7 +163,7 @@ class PwdShell {
 
     const closeBtn = document.createElement('button')
     closeBtn.classList.add('close-btn')
-    closeBtn.textContent = 'X'
+    closeBtn.textContent = '✖'
     titleBar.appendChild(closeBtn)
 
     closeBtn.addEventListener('click', () => {
