@@ -50,13 +50,49 @@ class PwdShell {
     this.root.appendChild(this.dockContainer)
   }
 
+  /**
+   * Creates a new window element in the PWD.
+   *
+   * @param {string} title - The title of the window.
+   * @returns {HTMLElement} The created window element.
+   */
+  createWindow (title) {
+    const win = document.createElement('div')
+    win.classList.add('window')
+    win.dataset.windowId = this.state.nextWindowId
+
+    // Add a simple titel bar
+    const titleBar = document.createElement('div')
+    titleBar.classList.add('title-bar')
+    titleBar.textContent = title
+    win.appendChild(titleBar)
+
+    // Position window at a default spot
+    win.style.position = 'absolute'
+    win.style.top = `${50 + this.state.nextWindowId * 30}px`
+    win.style.left = `${50 + this.state.nextWindowId * 30}px`
+    win.style.width = '300px'
+    win.style.height = '200px'
+    win.style.zIndex = this.topZ
+
+    this.windowContainer.appendChild(win)
+
+    this.state.openWindows.push({
+      id: this.state.nextWindowId,
+      element: win
+    })
+    this.state.nextWindowId++
+
+    return win
+  }
+
   /** Brings the specified window to the fron by updating z-index.
-   * 
+   *
    * @param {HTMLElement} win - The window to focus.
    * @returns {void}
    */
-  focusWindow(win) {
-    if(!win) return
+  focusWindow (win) {
+    if (!win) return
     this.topZ++
     win.style.zIndex = this.topZ
 
@@ -66,5 +102,7 @@ class PwdShell {
 
 // Start the application
 const shell = new PwdShell()
-const win = document.querySelector('.test-window')
-shell.focusWindow(win)
+const win1 = shell.createWindow('Test Window 1')
+const win2 = shell.createWindow('Test Window 2')
+shell.focusWindow(win1)
+shell.focusWindow(win2)
