@@ -107,8 +107,8 @@ class PwdShell {
 
     // Position window at a default spot
     win.style.position = 'absolute'
-    win.style.top = `${50 + this.state.nextWindowId * 30}px`
-    win.style.left = `${50 + this.state.nextWindowId * 30}px`
+    win.style.top = `${50 + this.state.nextWindowId * 10}px`
+    win.style.left = `${50 + this.state.nextWindowId * 10}px`
     win.style.width = 'auto'
     win.style.height = 'auto'
     win.style.zIndex = this.topZ

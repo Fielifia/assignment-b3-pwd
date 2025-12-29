@@ -7,17 +7,24 @@
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
+.content {
+height: fit-content;
+}
 .memory-game {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
     flex-wrap: wrap;
     gap: 1rem;
+    margin: 1rem;
     justify-content: center;
     align-items: center;
     font-family: sans-serif;
     font-size: 1.2rem;
-    width: 100%;
+}
+
+.status {
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 
 .tile {
@@ -26,7 +33,7 @@ template.innerHTML = `
     border: 2px solid black;
     border-radius: 6px;
     background: linear-gradient(135deg, #8cadc2, #c8d7e4);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -37,12 +44,11 @@ template.innerHTML = `
 }
 
 .tile:hover {
-  background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
-  transform: translateY(-1px) scale(1.01);
+    background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
+    transform: translateY(-1px) scale(1.01);
 }
 </style>
 <div class="memory-game">
-<p>Memory Game placeholder</p>
 </div>
 `
 /**
@@ -61,20 +67,13 @@ class MemoryApp extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-    /**
-     * Internal state of the game
-     *
-     * @type {object}
-     * @property {Array} board - The array representing the board tiles.
-     * @property {Array} flipped - Currently flipped tiles.
-     * @property {number} matches - Numbver of matches found.
-     * @property {number} attempts - Number of flip attempts.
-     */
     this.state = {
       board: [],
       flipped: [],
       matches: 0,
-      attempts: 0
+      attempts: 0,
+      time: 0,
+      timerId: null
     }
   }
 
@@ -98,6 +97,21 @@ class MemoryApp extends HTMLElement {
     this.state.board = this.createTiles()
     this.state.matches = 0
     this.state.attempts = 0
+    this.state.time = 0
+
+    if (this.state.timerId) clearInterval(this.state.timerId)
+
+    const container = document.querySelector('.content')
+    // Status bar
+    this.statusEl = document.createElement('div')
+    this.statusEl.classList.add('status')
+    container.appendChild(this.statusEl)
+
+    this.state.timerId = setInterval(() => {
+      this.state.time++
+      this.updateStatus()
+    }, 1000)
+
     this.renderBoard()
   }
 
@@ -135,16 +149,31 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   renderBoard () {
-    const container = this.shadowRoot.querySelector('.memory-game')
-    container.innerHTML = ''
+    const board = this.shadowRoot.querySelector('.memory-game')
+    board.innerHTML = ''
+
+    // Tiles
     this.state.board.forEach(tile => {
       const tileEl = document.createElement('div')
       tileEl.classList.add('tile')
       tileEl.dataset.id = tile.id
-      tileEl.textContent = tile.matched ? tile.value : ''
+      tileEl.textContent = tile.matched || this.state.flipped.includes(tile) ? tile.value : ''
       tileEl.addEventListener('click', () => this.flipTile(tile, tileEl))
-      container.appendChild(tileEl)
+      board.appendChild(tileEl)
     })
+
+    this.updateStatus()
+  }
+
+  /**
+   * Updates the game status display.
+   *
+   * Shows current time, number of matches, and attempts.
+   *
+   * @returns {void}
+   */
+  updateStatus () {
+    this.statusEl.textContent = `Time: ${this.state.time}s | Matches: ${this.state.matches} | Attempts: ${this.state.attempts}`
   }
 
   /**
@@ -183,6 +212,11 @@ class MemoryApp extends HTMLElement {
       this.state.matches++
     }
     this.state.flipped = []
+
+    if (this.state.matches === this.state.board.length / 2) {
+      clearInterval(this.state.timerId)
+      this.state.timerId = null
+    }
   }
 }
 
