@@ -17,7 +17,6 @@ height: 60vh;
 }
 .memory-game {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     flex-wrap: wrap;
     gap: 1rem;
     margin: 1rem;
@@ -25,6 +24,18 @@ height: 60vh;
     align-items: center;
     font-family: sans-serif;
     font-size: 1.2rem;
+}
+
+.memory-game.level-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.memory-game.level-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.memory-game.level-6 {
+grid-template-columns: repeat(6, 1fr);
 }
 
 .status {
@@ -90,6 +101,15 @@ right: .5rem;
 <div class="status"></div>
 <div class="memory-game"></div>
 <div class="controls">
+<div class="level-select">
+<label for="level">Level:</label>
+<select id="level">
+<option value="" disabled selected>Select level</option>
+<option value="2">2x2</option>
+<option value="4">4x4</option>
+<option value="6">6x6</option>
+</select>
+</div>
 <button class="restart-btn">Restart</button>
 <button class="show-highscores">High Scores</button>
 <div class="message"></div>
@@ -135,7 +155,8 @@ class MemoryApp extends HTMLElement {
       attempts: 0,
       time: 0,
       timerId: null,
-      isBusy: false
+      isBusy: false,
+      level: 2
     }
   }
 
@@ -147,17 +168,23 @@ class MemoryApp extends HTMLElement {
    */
   connectedCallback () {
     this.nicknameForm = this.shadowRoot.querySelector('nickname-form')
+    this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
 
     this.statusEl = this.shadowRoot.querySelector('.status')
     this.boardEl = this.shadowRoot.querySelector('.memory-game')
     this.messageEl = this.shadowRoot.querySelector('.message')
     this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
+    this.restartBtn.addEventListener('click', () => this.initGame())
+
+    this.levelSelect = this.shadowRoot.querySelector('#level')
+    this.levelSelect.addEventListener('change', (e) => {
+      this.state.level = parseInt(e.target.value, 10)
+      this.boardEl.classList.add(`level-${this.state.level}`)
+      this.initGame()
+    })
 
     this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
     this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
-
-    this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
-    this.restartBtn.addEventListener('click', () => this.initGame())
     this.highScoreBtn.addEventListener('click', () => {
       this.highscoreEl.style.display = 'flex'
     })
@@ -187,7 +214,8 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   initGame (nickname) {
-    if (!nickname) return
+    if (nickname) this.nickname = nickname
+    if (!this.nickname) return
 
     this.state.board = this.createTiles()
     this.state.flipped = []
@@ -213,10 +241,12 @@ class MemoryApp extends HTMLElement {
    * @returns {Array<{id: number, value: string, matched: boolean}>} Array of tiles
    */
   createTiles () {
-    const values = ['🍎', '🍌', '🍒', '🍇', '🍉', '🥝', '🍑', '🍍']
-    const tiles = values.concat(values) // Duplicate
-      .map((val, i) => ({ id: i + 1, value: val, matched: false }))
-    return this.shuffleArray(tiles)
+    const values = ['🍎', '🍌', '🍒', '🍇', '🍉', '🥝', '🍑', '🍍', '🥭', '🍋', '🍊', '🍐', '🍓', '🥥', '🍈', '🍋‍🟩', '🫐', '🍏']
+    const needed = (this.state.level * this.state.level) / 2
+    const tiles = values.slice(0, needed).concat(values.slice(0, needed))
+    return this.shuffleArray(
+      tiles.map((val, i) => ({ id: i + 1, value: val, matched: false }))
+    )
   }
 
   /**
