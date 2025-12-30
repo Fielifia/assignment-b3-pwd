@@ -47,8 +47,22 @@ height: fit-content;
     background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
     transform: translateY(-1px) scale(1.01);
 }
+
+.tile.matched {
+opacity: 0.7;
+pointer-events: none;
+}
+.tile.matched:hover {
+transform: none;
+}
 </style>
-<div class="memory-game">
+<div class="memory-container">
+<div class="status"></div>
+<div class="memory-game"></div>
+<div class="controls">
+<button class="restart-btn">Restart</button>
+<div class="message"></div>
+</div>
 </div>
 `
 /**
@@ -75,6 +89,14 @@ class MemoryApp extends HTMLElement {
       time: 0,
       timerId: null
     }
+    this.isBusy = false
+
+    this.statusEl = this.shadowRoot.querySelector('.status')
+    this.boardEl = this.shadowRoot.querySelector('.memory-game')
+    this.messageEl = this.shadowRoot.querySelector('.message')
+    this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
+
+    this.restartBtn.addEventListener('click', () => this.initGame())
   }
 
   /**
@@ -95,24 +117,20 @@ class MemoryApp extends HTMLElement {
    */
   initGame () {
     this.state.board = this.createTiles()
+    this.state.flipped = []
     this.state.matches = 0
     this.state.attempts = 0
     this.state.time = 0
 
     if (this.state.timerId) clearInterval(this.state.timerId)
 
-    const container = document.querySelector('.content')
-    // Status bar
-    this.statusEl = document.createElement('div')
-    this.statusEl.classList.add('status')
-    container.appendChild(this.statusEl)
-
     this.state.timerId = setInterval(() => {
       this.state.time++
       this.updateStatus()
     }, 1000)
 
-    this.renderBoard()
+    this.messageEl.textContent = ''
+    this.render()
   }
 
   /**
@@ -148,20 +166,21 @@ class MemoryApp extends HTMLElement {
    *
    * @returns {void}
    */
-  renderBoard () {
-    const board = this.shadowRoot.querySelector('.memory-game')
-    board.innerHTML = ''
-
+  render () {
+    this.boardEl.innerHTML = ''
     // Tiles
     this.state.board.forEach(tile => {
       const tileEl = document.createElement('div')
       tileEl.classList.add('tile')
-      tileEl.dataset.id = tile.id
+
+      if (tile.matched) {
+        tileEl.classList.add('matched')
+      }
+
       tileEl.textContent = tile.matched || this.state.flipped.includes(tile) ? tile.value : ''
       tileEl.addEventListener('click', () => this.flipTile(tile, tileEl))
-      board.appendChild(tileEl)
+      this.boardEl.appendChild(tileEl)
     })
-
     this.updateStatus()
   }
 
@@ -185,15 +204,18 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   flipTile (tile, tileEl) {
+    if (this.isBusy) return
     if (tile.matched || this.state.flipped.includes(tile)) return
     tileEl.textContent = tile.value
     this.state.flipped.push(tile)
 
     if (this.state.flipped.length === 2) {
+      this.isBusy = true
       this.state.attempts++
       setTimeout(() => {
         this.checkMatch()
-        this.renderBoard()
+        this.isBusy = false
+        this.render()
       }, 800)
     }
   }
@@ -206,6 +228,8 @@ class MemoryApp extends HTMLElement {
    */
   checkMatch () {
     const [first, second] = this.state.flipped
+    if (!first || !second) return
+
     if (first.value === second.value) {
       first.matched = true
       second.matched = true
@@ -216,7 +240,20 @@ class MemoryApp extends HTMLElement {
     if (this.state.matches === this.state.board.length / 2) {
       clearInterval(this.state.timerId)
       this.state.timerId = null
+      this.showMessage(`🎉 You won in ${this.state.time}s with ${this.state.attempts} attempt!`)
     }
+  }
+
+  /**
+   * Displays a message to the player.
+   *
+   * Used to show game-related feedback such as win messages.
+   *
+   * @param {string} msg - The message text to display
+   * @returns {void}
+   */
+  showMessage (msg) {
+    this.messageEl.textContent = msg
   }
 }
 
