@@ -11,7 +11,7 @@ html, body {
     border-radius: 2px;
     display: inline-flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
     min-width: 200px;
     min-height: 150px;
     max-width: 90vw;
@@ -34,6 +34,7 @@ html, body {
     right: .5rem;
     top: .5rem;
     transition: .3s ease-in-out;
+    cursor: pointer;
 }
 
 .close-btn:hover {
@@ -41,12 +42,9 @@ html, body {
 }
 
 .content {
-    padding: 1rem;
     background: #eee;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
     overflow: auto;
     height: 100%;
 }

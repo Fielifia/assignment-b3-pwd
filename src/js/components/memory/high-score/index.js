@@ -2,7 +2,8 @@
  * The high-score web component.
  *
  * Displays a list of top scores and allows adding new scores.
- * Scores are stored in localStorage under the key 'highScores'.
+ * Scores are stored in localStorage per level under the key format:
+ * `memory_highscores_level{level}`.
  *
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  */
@@ -14,10 +15,12 @@ template.innerHTML = `
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 #highscore-container {
   background: #5692ceff;
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 2rem;
   color: #fff;
   margin: 1rem;
@@ -63,7 +66,7 @@ tr.latest {
   color: #fff;
   background: linear-gradient(90deg, #476088, #5692ce);
 }
-  td:hover {
+  tbody tr:hover {
   background: #47608880;
   }
 .noscores {
@@ -74,7 +77,7 @@ tr.latest {
 </style>
 <div id="highscore-container">
 <h2>High Scores</h2>
-<h3>Top 5</h3>
+<h3 id="top">Top 5 - </h3>
 
 <table>
 <thead>
@@ -96,13 +99,24 @@ tr.latest {
  */
 customElements.define('high-score',
   /**
-   * High-score component.
+   * Displays a top 5 high score list per game level.
+   * Scores are stored in localStogare using separate keys per level
+   * in the format `memory_highscore_level{level}`
+   *
+   * The component exposes a public API for:
+   * - setting the active level
+   * - adding new scores
+   * - clearing scores per level
+   *
+   * @author Sofia Andersson <sa226jf@student.lnu.se>
+   * @augments HTMLElement
    */
   class extends HTMLElement {
     /**
      * Creates an instance of the high-score component.
-     * Initializes scores from localStorage and renders the list.
      *
+     * Attaches a shadow DOM, initializes internal state,
+     * and sets up event listeners for user interactions.
      */
     constructor () {
       super()
@@ -111,25 +125,48 @@ customElements.define('high-score',
 
       this.tbody = this.shadowRoot.querySelector('#score-body')
       this.clearBtn = this.shadowRoot.querySelector('#clear-btn')
-      this.clearBtn.addEventListener('click', () => this.clearScores())
+      this.clearBtn.addEventListener('click', () => {
+        if (this.currentLevel !== null) this.clearScores(this.currentLevel)
+      })
 
-      this.storageKey = 'quiz_highscores'
       this.scores = []
+      this.currentLevel = null
 
-      this.loadScores()
+      this.levelMap = {
+        2: 1,
+        4: 2,
+        6: 3
+      }
+    }
+
+    /**
+     * Sets the active level for the high score list.
+     *
+     * Loads scores for the given level from localStorage
+     * and re-renders the component.
+     *
+     * @param {number} level - The selected game level.
+     * @returns {void}
+     */
+    setLevel (level) {
+      if (!level) return
+      this.loadScores(level)
       this.render()
     }
 
     /**
-     * Loads the high scores from localStorage
+     * Loads the high scores for a specific level from localStorage.
      *
-     * Attempts to parse the stored JSON under the key specified ny `this.storageKey`.
-     * If the data is missing or invalid, an empty array is returned.
-     * Updates the component's `scores` property with the loaded array.
+     * Updates the component's state amd returns the parsed score list.
+     * If no valid data exists, an empty array is used.
      *
-     * @returns {Array<object>} An array of score objects currently stored in localStorage.
+     * @param {number} level - The game level to load scores for.
+     * @returns {Array<object>} An array of stored high score entries.
      */
-    loadScores () {
+    loadScores (level) {
+      if (!level) return []
+      this.currentLevel = level
+      this.storageKey = `memory_highscores_level${level}`
       let stored = []
       try {
         stored = JSON.parse(localStorage.getItem(this.storageKey) || '[]')
@@ -142,19 +179,24 @@ customElements.define('high-score',
     }
 
     /**
-     * Adds a new score to the list and updates localStorage.
-     * Sorts the scores in ascending order before displaying.
-     * Automatically re-renders the updated list.
+     * Adds a new high score entry for a specific level.
      *
-     * @param {string} name - Player's name.
-     * @param {number} score - Time in seconds.
+     * The list i sorted by best (lowest) time and limited to the top 5 scores.
+     * Automatically persist the result to localStorage an re-renders the list.
+     *
+     * @param {string} name - Player's nickname.
+     * @param {number} score - Completion time in seconds.
+     * @param {number} level - The level the score was achieved on.
+     * @returns {void}
      */
-    addScore (name, score) {
-      let stored = this.loadScores()
-      const timestamp = Date.now()
+    addScore (name, score, level) {
+      if (!level) return
+      this.currentLevel = level
+      this.storageKey = `memory_highscores_level${level}`
+      let stored = this.loadScores(level)
 
-      const newScore = { name, score, timestamp }
-      stored.push(newScore)
+      const timestamp = Date.now()
+      stored.push({ name, score, timestamp, level })
 
       stored.sort((a, b) => a.score - b.score)
       stored = stored.slice(0, 5)
@@ -165,35 +207,36 @@ customElements.define('high-score',
     }
 
     /**
-     * Clears high scores entirely.
+     * Clears all stored high score for a specific level.
      *
-     * @public
-     * @function
+     * Removes the corresponding localStorage entry
+     * and resets the rendered llist.
+     *
+     * @param {number} level - The level to clear scores for.
+     * @returns {void}
      */
-    clearScores () {
+    clearScores (level) {
+      if (!level) return
+      this.storageKey = `memory_highscores_level${level}`
       localStorage.removeItem(this.storageKey)
       this.scores = []
       this.render()
     }
 
     /**
-     * Clears the "latest" marker from high score.
+     * Renders the high score table.
      *
-     * @public
-     * @returns {void}
-     */
-    clearLatestHighlight () {
-      const rows = this.shadowRoot.querySelectorAll('tr.latest')
-      rows.forEach(row => row.classList.remove('latest'))
-    }
-
-    /**
-     * Renders the score list inside the component.
+     * Updates the headin based o the active level,
+     * highlights the most recednt score entry,
+     * and displays a fallback message if no scores exists.
      *
      * @returns {void}
      */
     render () {
       this.tbody.innerHTML = ''
+      this.h3 = this.shadowRoot.querySelector('#top')
+      const displayLevel = this.levelMap[this.currentLevel] ?? this.currentLevel
+      this.h3.textContent = `Top 5 - Level ${displayLevel}`
 
       if (!this.scores.length) {
         const tr = document.createElement('tr')

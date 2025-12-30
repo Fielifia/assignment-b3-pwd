@@ -11,114 +11,145 @@ const template = document.createElement('template')
 template.innerHTML = `
 <style>
 .memory-container {
-position: relative;
-width: 100%;
-height: 60vh;
+  box-sizing: border-box;
+    font-family: 'Atma', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    display: none;
+    flex-direction: column;
 }
 .memory-game {
-    display: grid;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1rem;
-    justify-content: center;
-    align-items: center;
-    font-family: sans-serif;
-    font-size: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  font-size: 1.2rem;
+  padding: 1rem;
 }
 
 .memory-game.level-2 {
-    grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 1fr);
 }
-
 .memory-game.level-4 {
-    grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
-
 .memory-game.level-6 {
-grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, 1fr);  
 }
 
 .status {
-    font-weight: bold;
-    margin-bottom: 1rem;
+  background: grey;
+  padding: .5rem;
 }
 
 .tile {
-    width: 60px;
-    height: 60px;
-    border: 2px solid black;
-    border-radius: 6px;
-    background: linear-gradient(135deg, #8cadc2, #c8d7e4);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    cursor: pointer;
-    user-select: none;
-    transition: .3s ease-in-out;
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #8cadc2, #c8d7e4);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  cursor: pointer;
+  user-select: none;
+  transition: .3s ease-in-out;
+  margin: 0 auto;
 }
 
 .tile:hover {
-    background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
-    transform: translateY(-1px) scale(1.01);
+  background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
+  transform: translateY(-1px) scale(1.01);
 }
 
 .tile.matched {
-opacity: 0.7;
-pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
 }
 .tile.matched:hover {
-transform: none;
-}
-.highscore-modal {
-position: absolute;
-top: 60px;
-left: 0;
-width: 100%;
-height: 100%;
-background: #fff;
-justify-content: center;
-align-items: flex-start;
-display: none;
-overflow-y: auto;
-box-sizing: border-box;
+  transform: none;
 }
 
-.highscore-modal high-score {
-max-height: 100%;
-width: 100%;
+.controls {
+  display: flex;
+  width 100%;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.message {
+margin: 1rem auto;
+}
+
+button:not(.close-highscore), select {
+  padding: .5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background: #6c9edb;
+  color: #fff;
+  font-family: 'Atma', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: .2s ease;
+  cursor: pointer;
+}
+
+button:not(.close-highscore):hover, select:hover, option{
+  background: #5577aa;
+  cursor: pointer;
+}
+
+.highscore-modal {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  justify-content: center;
+  align-items: flex-start;
+  display: none;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .close-highscore {
-position: absolute;
-top: .5rem;
-right: .5rem;
+  position: absolute;
+  top: 2.6rem;
+  left: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1.8rem;
+  transition: .3s ease;
+}
+
+.close-highscore:hover {
+  transform: scale(1.1)
 }
 </style>
-<div class="memory-container">
 <nickname-form></nickname-form>
+<div class="memory-container">
 <div class="status"></div>
+<div class="message"></div>
 <div class="memory-game"></div>
+</div>
 <div class="controls">
 <div class="level-select">
-<label for="level">Level:</label>
 <select id="level">
-<option value="" disabled selected>Select level</option>
-<option value="2">2x2</option>
-<option value="4">4x4</option>
-<option value="6">6x6</option>
+<option value="2">Level 1: 2x2</option>
+<option value="4">Level 2: 4x4</option>
+<option value="6">Level 3: 6x6</option>
 </select>
 </div>
-<button class="restart-btn">Restart</button>
+<button class="restart-btn" style="display:none;">Restart</button>
 <button class="show-highscores">High Scores</button>
-<div class="message"></div>
 </div>
 </div>
 <div class="highscore-modal">
-<button class="close-highscore">Close</button>
+<button class="close-highscore">↩</button>
 <high-score></high-score>
-</div>
 `
 /**
  * Custom element <memory-app> representing a Memory Game.
@@ -170,19 +201,23 @@ class MemoryApp extends HTMLElement {
     this.nicknameForm = this.shadowRoot.querySelector('nickname-form')
     this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
 
+    this.container = this.shadowRoot.querySelector('.memory-container')
     this.statusEl = this.shadowRoot.querySelector('.status')
     this.boardEl = this.shadowRoot.querySelector('.memory-game')
     this.messageEl = this.shadowRoot.querySelector('.message')
-    this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
-    this.restartBtn.addEventListener('click', () => this.initGame())
 
     this.levelSelect = this.shadowRoot.querySelector('#level')
     this.levelSelect.addEventListener('change', (e) => {
       this.state.level = parseInt(e.target.value, 10)
       this.boardEl.classList.add(`level-${this.state.level}`)
+
+      if (this.highScoreComponent) {
+        this.highScoreComponent.setLevel(this.state.level)
+      }
       this.initGame()
     })
 
+    this.highScoreComponent = this.shadowRoot.querySelector('high-score')
     this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
     this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
     this.highScoreBtn.addEventListener('click', () => {
@@ -216,6 +251,8 @@ class MemoryApp extends HTMLElement {
   initGame (nickname) {
     if (nickname) this.nickname = nickname
     if (!this.nickname) return
+
+    this.container.style.display = 'flex'
 
     this.state.board = this.createTiles()
     this.state.flipped = []
@@ -275,6 +312,10 @@ class MemoryApp extends HTMLElement {
     this.state.board.forEach(tile => {
       const tileEl = document.createElement('div')
       tileEl.classList.add('tile')
+
+      this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
+      this.restartBtn.style.display = 'block'
+      this.restartBtn.addEventListener('click', () => this.initGame())
 
       if (tile.matched) {
         tileEl.classList.add('matched')
@@ -344,7 +385,7 @@ class MemoryApp extends HTMLElement {
       clearInterval(this.state.timerId)
       this.state.timerId = null
       this.showMessage(`🎉 ${this.nickname}, you won in ${this.state.time}s with ${this.state.attempts} attempt!`)
-      if (this.highScoreEl) this.highScoreEl.addScore(this.nickname, this.state.time)
+      if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
     }
   }
 

@@ -13,10 +13,16 @@ template.innerHTML = `
 #nickname-container {
   display: flex;
   font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
-  flex-direction: column;
+  flex-direction: column;  
+  padding: 1rem;
 }
-label, input, .error-msg, #submit {
-  margin: clamp(.5rem, 1vw, 1rem) auto 0;
+  .nickname-input {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  }
+label, .nickname-input, .error-msg {
+  margin: clamp(.5rem, 1vw, 1rem) auto;
 }
 label, #submit {
   padding: .5rem clamp(1.5rem, 2vw, 2.5rem);
@@ -24,6 +30,7 @@ label, #submit {
 }
 input {
   padding: .5rem;
+  width: 100%;
 }
 :focus {
   outline: 2px solid #abc9e7;
@@ -35,22 +42,28 @@ input {
 #submit {
   background: #5692ce;
   border-radius: 2rem;
-  font-family: 'Atma', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   color: #fff;
   font-weight: bold;
+  padding: .5rem 1rem;
+  border-radius: 6px;
   border: none;
+  background: #6c9edb;
+  color: #fff;
+  transition: .2s ease;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  font-family: 'Atma', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 #submit:hover {
-  transform: scale(1.03);
+  background: #5577aa;
 }
 </style>
 <div id="nickname-container">
 <label for="nickname">Enter your nickname:</label>
+<div class="nickname-input">
 <input type="text" id="nickname">
 <p id="error-msg" class="error-msg" style="display: none;">Enter a nickname!</p>
 <button id="submit">OK</button>
+</div>
 </div>
 `
 /**
