@@ -11,35 +11,42 @@
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
-:host {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
+* {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    }
 #highscore-container {
-  background: #5692ceff;
+  background: #dde7ef;
   padding: 1rem;
   border-radius: 2rem;
-  color: #fff;
+  color: #000;
   margin: 1rem;
 }
-button#clear-btn {
-  display: block;
-  background: #476088;
-  border-radius: 4rem;
-  margin: 2rem auto 0;
-  color: #fff;
+  
+.buttons {
+  display: flex;
+  width 100%;
+  gap: 1rem;
+  padding: 1rem;
+}
+  
+button {
+  padding: .5rem 1rem;
+  border-radius: 6px;
   border: none;
-  padding: .5rem 2rem;
+  background: #6f94ad;
+  color: #000;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition: .2s ease;
   cursor: pointer;
-  font-size: .8rem;
-  transition: transform .2s ease;
+  text-wrap: no-wrap;
 }
-button#clear-btn:hover {
-  transform: scale(1.03);
+
+button:hover{
+  background: #4d5f6a;
+  cursor: pointer;
 }
+
 h2, h3 {
   text-align: center;
   text-transform: uppercase;
@@ -59,15 +66,15 @@ table {
 th, td {
   padding: .5rem .2rem;
   text-align: left;
-  border-bottom: 1px  solid #ffffff40;
+  border-bottom: 1px  solid #4d5f6a;
 }
 tr.latest {
   font-weight: bold;
-  color: #fff;
-  background: linear-gradient(90deg, #476088, #5692ce);
-}
+  color: #000;
+  background: linear-gradient(90deg, #dde7ef78, #6f94ad78);
+  }
   tbody tr:hover {
-  background: #47608880;
+    background: linear-gradient(90deg, #6f94ad78, #dde7ef78);
   }
 .noscores {
   text-align: center;
@@ -89,8 +96,10 @@ tr.latest {
 </thead>
 <tbody id="score-body"></tbody>
 </table>
-
+<div class="buttons">
+<button class="close-highscore">Go back</button>
 <button id="clear-btn">Clear Highscores</button>
+</div>
 </div>
 `
 /**
@@ -137,6 +146,11 @@ customElements.define('high-score',
         4: 2,
         6: 3
       }
+
+      this.closeHighScoreBtn = this.shadowRoot.querySelector('.close-highscore')
+      this.closeHighScoreBtn.addEventListener('click', () => {
+        this.closeHighScore()
+      })
     }
 
     /**
@@ -257,5 +271,16 @@ customElements.define('high-score',
         tr.innerHTML = `<td>${i + 1}</td><td>${s.name}</td><td>${s.score}</td>`
         this.tbody.appendChild(tr)
       })
+    }
+
+    /**
+     * Dispatches a custom event to signal that the high score modal should be closed.
+     * This event bubbles up and can cross the shadow DOM boundary.
+     */
+    closeHighScore () {
+      this.dispatchEvent(new CustomEvent('highscore-back', {
+        bubbles: true,
+        composed: true
+      }))
     }
   })

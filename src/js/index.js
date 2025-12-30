@@ -228,5 +228,5 @@ class PwdShell {
   }
 }
 
-// Start the application
+/* eslint-disable-next-line no-new */
 new PwdShell()

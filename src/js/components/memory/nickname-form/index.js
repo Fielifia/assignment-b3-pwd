@@ -10,6 +10,9 @@
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
+* {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    }
 #nickname-container {
   display: flex;
   font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
@@ -33,37 +36,32 @@ input {
   width: 100%;
 }
 :focus {
-  outline: 2px solid #abc9e7;
-  outline-offset: 2px;
+  outline: 2px solid #4d5f6a;
 }
 .error-msg {
   color: #ff6b6b;
 }
 #submit {
-  background: #5692ce;
-  border-radius: 2rem;
-  color: #fff;
-  font-weight: bold;
+  background: #6f94ad;
+  color: #000;
+  font-weight: 500;
   padding: .5rem 1rem;
   border-radius: 6px;
   border: none;
-  background: #6c9edb;
-  color: #fff;
   transition: .2s ease;
   cursor: pointer;
-  font-family: 'Atma', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 #submit:hover {
-  background: #5577aa;
+  background: #4d5f6a;
 }
 </style>
 <div id="nickname-container">
 <label for="nickname">Enter your nickname:</label>
 <div class="nickname-input">
 <input type="text" id="nickname">
-<p id="error-msg" class="error-msg" style="display: none;">Enter a nickname!</p>
-<button id="submit">OK</button>
+<button id="submit">Play</button>
 </div>
+<p id="error-msg" class="error-msg" style="display: none;">Enter a nickname!</p>
 </div>
 `
 /**
