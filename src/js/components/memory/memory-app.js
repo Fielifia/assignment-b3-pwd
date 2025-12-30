@@ -4,11 +4,16 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @version 1.0.0
  */
+import './nickname-form/index.js'
+import './high-score/index.js'
+
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
-.content {
-height: fit-content;
+.memory-container {
+position: relative;
+width: 100%;
+height: 60vh;
 }
 .memory-game {
     display: grid;
@@ -55,14 +60,44 @@ pointer-events: none;
 .tile.matched:hover {
 transform: none;
 }
+.highscore-modal {
+position: absolute;
+top: 60px;
+left: 0;
+width: 100%;
+height: 100%;
+background: #fff;
+justify-content: center;
+align-items: flex-start;
+display: none;
+overflow-y: auto;
+box-sizing: border-box;
+}
+
+.highscore-modal high-score {
+max-height: 100%;
+width: 100%;
+}
+
+.close-highscore {
+position: absolute;
+top: .5rem;
+right: .5rem;
+}
 </style>
 <div class="memory-container">
+<nickname-form></nickname-form>
 <div class="status"></div>
 <div class="memory-game"></div>
 <div class="controls">
 <button class="restart-btn">Restart</button>
+<button class="show-highscores">High Scores</button>
 <div class="message"></div>
 </div>
+</div>
+<div class="highscore-modal">
+<button class="close-highscore">Close</button>
+<high-score></high-score>
 </div>
 `
 /**
@@ -72,6 +107,18 @@ transform: none;
  * @augments HTMLElement
  */
 class MemoryApp extends HTMLElement {
+  /**
+   * Handles nickname submission from the nickname-form.
+   *
+   * @param {CustomEvent} event - Contains the nickname inside event.detail.
+   * @returns {void}
+   */
+  #onNicknameSubmitted = (event) => {
+    this.nickname = event.detail
+    this.nicknameForm.style.display = 'none'
+    this.initGame()
+  }
+
   /**
    * Creates an instance of MemoryApp
    * Initializes shadow DOM and the initial game state.
@@ -87,16 +134,9 @@ class MemoryApp extends HTMLElement {
       matches: 0,
       attempts: 0,
       time: 0,
-      timerId: null
+      timerId: null,
+      isBusy: false
     }
-    this.isBusy = false
-
-    this.statusEl = this.shadowRoot.querySelector('.status')
-    this.boardEl = this.shadowRoot.querySelector('.memory-game')
-    this.messageEl = this.shadowRoot.querySelector('.message')
-    this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
-
-    this.restartBtn.addEventListener('click', () => this.initGame())
   }
 
   /**
@@ -106,16 +146,49 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   connectedCallback () {
-    this.initGame()
+    this.nicknameForm = this.shadowRoot.querySelector('nickname-form')
+
+    this.statusEl = this.shadowRoot.querySelector('.status')
+    this.boardEl = this.shadowRoot.querySelector('.memory-game')
+    this.messageEl = this.shadowRoot.querySelector('.message')
+    this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
+
+    this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
+    this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
+
+    this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
+    this.restartBtn.addEventListener('click', () => this.initGame())
+    this.highScoreBtn.addEventListener('click', () => {
+      this.highscoreEl.style.display = 'flex'
+    })
+    this.shadowRoot.querySelector('.close-highscore').addEventListener('click', () => {
+      this.highscoreEl.style.display = 'none'
+    })
+    if (this.highScoreEl) {
+      this.boardEl.style.display = 'none'
+    }
   }
 
   /**
-   * Initializes the memory game.
-   * Creates the board, shuffle tiles, and resets game state.
+   * Called when removed from the DOM.
+   * Cleans up listeners to prevent memory leaks.
    *
    * @returns {void}
    */
-  initGame () {
+  disconnectedCallback () {
+    this.nicknameForm?.removeEventListener('nickname-submitted', this.#onNicknameSubmitted)
+  }
+
+  /**
+   * Initializes the memory game after nickname submission.
+   * Creates the board, shuffle tiles, and resets game state.
+   *
+   * @param {string} nickname - The player's nickname
+   * @returns {void}
+   */
+  initGame (nickname) {
+    if (!nickname) return
+
     this.state.board = this.createTiles()
     this.state.flipped = []
     this.state.matches = 0
@@ -204,17 +277,17 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   flipTile (tile, tileEl) {
-    if (this.isBusy) return
+    if (this.state.isBusy) return
     if (tile.matched || this.state.flipped.includes(tile)) return
     tileEl.textContent = tile.value
     this.state.flipped.push(tile)
 
     if (this.state.flipped.length === 2) {
-      this.isBusy = true
+      this.state.isBusy = true
       this.state.attempts++
       setTimeout(() => {
         this.checkMatch()
-        this.isBusy = false
+        this.state.isBusy = false
         this.render()
       }, 800)
     }
@@ -240,7 +313,8 @@ class MemoryApp extends HTMLElement {
     if (this.state.matches === this.state.board.length / 2) {
       clearInterval(this.state.timerId)
       this.state.timerId = null
-      this.showMessage(`🎉 You won in ${this.state.time}s with ${this.state.attempts} attempt!`)
+      this.showMessage(`🎉 ${this.nickname}, you won in ${this.state.time}s with ${this.state.attempts} attempt!`)
+      if (this.highScoreEl) this.highScoreEl.addScore(this.nickname, this.state.time)
     }
   }
 
