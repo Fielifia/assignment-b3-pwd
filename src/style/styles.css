@@ -1,8 +1,11 @@
-html,
-body {
+* {
     margin: 0;
     padding: 0;
-    height: 100%;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
@@ -11,7 +14,7 @@ body {
     background: #fefefe;
     border: 2px solid black;
     border-radius: 2px;
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     overflow: auto;
     min-width: 200px;
@@ -32,9 +35,12 @@ body {
 .close-btn {
     border: none;
     border-radius: 50%;
-    position: absolute;
-    right: .5rem;
-    top: .5rem;
+    display: flex;
+    background: none;
+    color: #fff;
+    aspect-ratio: 1/1;
+    position: relative;
+    margin-left: auto;
     transition: .3s ease-in-out;
     cursor: pointer;
 }

@@ -19,10 +19,9 @@ template.innerHTML = `
 }
 .memory-game {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  font-size: 1.2rem;
+  gap: .5rem;
   padding: 1rem;
+  perspective: 1000px;
 }
 
 .memory-game.level-2 {
@@ -41,46 +40,69 @@ template.innerHTML = `
 }
 
 .tile {
-  width: 60px;
-  height: 60px;
-  border: 2px solid black;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #8cadc2, #c8d7e4);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  width: auto;
+  perspective: 1000px;
+  min-height: 60px;
+  height: auto;
+  aspect-ratio: 1/1;
+  
+  }
+  
+  .tile-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    opacity: 1;
+    transform: scale(1);
+    transition: transform 1s, opacity 3s;
+  }
+  
+  .tile.flip .tile-inner {
+  transform: rotateY(180deg);
+  }
+
+
+.front, .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 2rem;
-  cursor: pointer;
-  user-select: none;
-  transition: .3s ease-in-out;
-  transition: opacity 3s ease;
-  margin: 0 auto;
+  border-radius: 6px;
 }
 
-.tile:hover {
-  background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
-  transform: translateY(-1px) scale(1.01);
+.front {
+  background: linear-gradient(135deg, #c8d7e4, #8cadc2);
+  transform: rotateY(180deg);
+
 }
 
-:focus {
+.back {
+  background: linear-gradient(135deg, #8cadc2, #c8d7e4);
+  }
+
+:focus-visible {
   outline: 2px solid #4d5f6a;
 }
 
 .tile.matched {
-  background: transparent;
   pointer-events: none;
   border: 2px dotted #4d5f6a;
-  opacity: 1;
-  transition: opacity 3s ease-out, background 3s ease-out;
-}
-
+  border-radius: 6px;
+  }
+  
 .tile.matched:hover {
   transform: none;
 }
-
-.tile.matched.fade-out {
-opacity: 0;
+    
+.tile.matched .tile-inner {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: 3s ease;
 }
 
 .message {
@@ -89,7 +111,7 @@ opacity: 0;
   
 .controls {
   display: flex;
-  width 100%;
+  max-width: 100%;
   gap: 1rem;
   padding: 1rem;
 }
@@ -140,7 +162,7 @@ button:not(.close-highscore):hover, select:hover, option{
 
 .message {
   font-size: 1.4rem;
-  text-wrap: wrap;
+  overflow-wrap: break-word;
   padding: 1rem;
 
 }
@@ -383,9 +405,24 @@ class MemoryApp extends HTMLElement {
     this.state.board.forEach(tile => {
       const tileEl = document.createElement('div')
       tileEl.classList.add('tile')
+
       tileEl.setAttribute('tabindex', '0')
       tileEl.setAttribute('role', 'button')
       tileEl.setAttribute('aria-label', 'Memory tile')
+
+      const inner = document.createElement('div')
+      inner.classList.add('tile-inner')
+
+      const frontFace = document.createElement('div')
+      frontFace.classList.add('front')
+      frontFace.textContent = tile.value
+
+      const backFace = document.createElement('div')
+      backFace.classList.add('back')
+
+      inner.appendChild(frontFace)
+      inner.appendChild(backFace)
+      tileEl.appendChild(inner)
 
       tileEl.addEventListener('click', () => this.flipTile(tile, tileEl))
       this.boardEl.appendChild(tileEl)
@@ -426,16 +463,17 @@ class MemoryApp extends HTMLElement {
   flipTile (tile, tileEl) {
     if (this.state.isBusy) return
     if (tile.matched || this.state.flipped.includes(tile)) return
-    tileEl.textContent = tile.value
-    this.state.flipped.push(tile)
+
+    tileEl.classList.add('flip')
+    this.state.flipped.push({ tile, el: tileEl })
 
     if (this.state.flipped.length === 2) {
       this.state.isBusy = true
       this.state.attempts++
+
       setTimeout(() => {
         this.checkMatch()
         this.state.isBusy = false
-        this.render()
       }, 500)
     }
   }
@@ -450,14 +488,20 @@ class MemoryApp extends HTMLElement {
     const [first, second] = this.state.flipped
     if (!first || !second) return
 
-    if (first.value === second.value) {
-      first.matched = true
-      second.matched = true
-
+    if (first.tile.value === second.tile.value) {
+      first.tile.matched = true
+      second.tile.matched = true
       this.state.matches++
+
+      first.el.classList.add('matched')
+      second.el.classList.add('matched')
+    } else {
+      first.el.classList.remove('flip')
+      second.el.classList.remove('flip')
     }
 
     this.state.flipped = []
+    this.updateStatus()
 
     if (this.state.matches === this.state.board.length / 2) {
       clearInterval(this.state.timerId)

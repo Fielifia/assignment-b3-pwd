@@ -1,0 +1,146 @@
+
+* {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+.memory-container {
+    display: none;
+    flex-direction: column;
+}
+.memory-game {
+  display: grid;
+  gap: .5rem;
+  padding: 1rem;
+  perspective: 1000px;
+}
+
+.memory-game.level-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.memory-game.level-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.memory-game.level-6 {
+  grid-template-columns: repeat(6, 1fr);  
+}
+
+.status {
+  background: #8cadc2;
+  padding: .5rem;
+  color: green;
+}
+
+.tile {
+  width: auto;
+  min-height: 60px;
+  height: auto;
+  aspect-ratio: 1/1;
+  border: 2px solid black;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #8cadc2, #c8d7e4);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  cursor: pointer;
+  user-select: none;
+  transition: .3s ease-out;
+  transform-style: preserve-3d;
+}
+
+.tile:hover {
+  background: linear-gradient(135deg, #7fa3bb, #d5e2ec);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.front {
+}
+
+.back {
+}
+
+.flip {
+transform: rotateY(180deg)
+}
+
+:focus {
+  outline: 2px solid #4d5f6a;
+}
+
+.tile.matched {
+  background: transparent;
+  pointer-events: none;
+  border: 2px dotted #4d5f6a;
+  opacity: 1;
+  transition: opacity 3s ease-out, background 3s ease-out;
+}
+
+.tile.matched:hover {
+  transform: none;
+}
+
+.tile.matched.fade-out {
+opacity: 0;
+}
+
+.message {
+  margin: 1rem auto;
+  }
+  
+.controls {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  padding: 1rem;
+}
+  
+button:not(.close-highscore), select {
+  padding: .5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background: #6f94ad;
+  color: #000;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition: .2s ease;
+  cursor: pointer;
+}
+
+button:not(.close-highscore):hover, select:hover, option{
+  background: #4d5f6a;
+  cursor: pointer;
+}
+
+.highscore-modal {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  justify-content: center;
+  align-items: flex-start;
+  display: none;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.close-highscore {
+  position: absolute;
+  top: 2.6rem;
+  left: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1.8rem;
+  transition: .3s ease;
+}
+
+.close-highscore:hover {
+  transform: scale(1.1)
+}
+
+.message {
+  font-size: 1.4rem;
+  text-wrap: wrap;
+  padding: 1rem;
+
+}
