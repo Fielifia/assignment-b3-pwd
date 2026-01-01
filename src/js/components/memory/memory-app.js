@@ -7,6 +7,13 @@
 import './nickname-form/index.js'
 import './high-score/index.js'
 
+const VIEWS = {
+  START: 'start',
+  IN_GAME: 'inGame',
+  GAME_END: 'gameEnd',
+  HIGHSCORES: 'highscores'
+}
+
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
@@ -121,20 +128,20 @@ display: none;
 
 .message {
  text-align: center;
+ margin: 0 auto 1rem;
+ max-width: 300px;
   }
   
 .controls {
   display: flex;
-  flex-direction: row;
   max-width: 100%;
-  margin: 1rem;
+  margin: auto 1rem 1rem;
   padding: 0;
   gap: 1rem;
-  justify-content: flex-start;
+  align-content: end;
 }
 
-
-  
+ 
 button, select {
   padding: .5rem 1rem;
   border-radius: 6px;
@@ -145,6 +152,7 @@ button, select {
   font-weight: 500;
   transition: .2s ease;
   cursor: pointer;
+  margin: 0 auto;
 }
 
 button:hover, select:hover, option{
@@ -177,6 +185,7 @@ display: none;
 <div class="message"></div>
 <div class="memory-game"></div>
 </div>
+
 <div class="controls">
 <button class="go-back-btn" style="display:none;">Go back</button>
 <button class="restart-btn" style="display:none;">Restart</button>
@@ -190,10 +199,10 @@ display: none;
 </div>
 <button class="show-highscores" style="display:none;">High Scores</button>
 </div>
-
 <div class="highscore-modal">
 <high-score></high-score>
 </div>
+
 `
 /**
  * Custom element <memory-app> representing a Memory Game.
@@ -213,14 +222,10 @@ class MemoryApp extends HTMLElement {
 
     const level = parseInt(this.levelSelect.value, 10)
     if (!level) {
-      this.container.style.display = 'flex'
       this.showMessage('Select a level!', '1rem')
       return
     }
-
     this.state.level = level
-
-    this.nicknameForm.style.display = 'none'
     this.initGame()
   }
 
@@ -245,7 +250,68 @@ class MemoryApp extends HTMLElement {
       gameOver: false
     }
 
-    this.prevState = null // SAFE ZONE
+    this.views = {
+      start: {
+        container: 'none',
+        board: 'none',
+        status: 'none',
+        message: 'none',
+        nicknameForm: 'block',
+        controls: 'flex',
+        highScore: 'none',
+        toggleControls: {
+          levelSelect: true,
+          restart: false,
+          goBack: false,
+          highScore: true
+        }
+      },
+
+      inGame: {
+        container: 'flex',
+        board: 'grid',
+        status: 'flex',
+        message: 'none',
+        nicknameForm: 'none',
+        controls: 'flex',
+        highScore: 'none',
+        toggleControls: {
+          levelSelect: false,
+          restart: true,
+          goBack: true,
+          highScore: true
+        }
+      },
+
+      gameEnd: {
+        container: 'none',
+        board: 'none',
+        status: 'none',
+        message: 'block',
+        nicknameForm: 'none',
+        controls: 'flex',
+        highScore: 'flex',
+        toggleControls: {
+          levelSelect: false,
+          restart: true,
+          goBack: false,
+          highScore: false
+        }
+      },
+
+      highscores: {
+        container: 'none',
+        board: 'none',
+        status: 'none',
+        message: 'none',
+        nicknameForm: 'none',
+        controls: 'none',
+        highScore: 'flex'
+      }
+    }
+    this.currentView = null
+
+    this.prevView = null
   }
 
   /**
@@ -255,81 +321,73 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   connectedCallback () {
-    this.nicknameForm = this.shadowRoot.querySelector('nickname-form')
-    this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
-
     this.container = this.shadowRoot.querySelector('.memory-container')
-    this.statusEl = this.shadowRoot.querySelector('.status')
     this.boardEl = this.shadowRoot.querySelector('.memory-game')
+    this.statusEl = this.shadowRoot.querySelector('.status')
     this.messageEl = this.shadowRoot.querySelector('.message')
     this.controls = this.shadowRoot.querySelector('.controls')
-
+    this.nicknameForm = this.shadowRoot.querySelector('nickname-form')
     this.levelSelect = this.shadowRoot.querySelector('#level')
+    this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
+    this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
+    this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
+    this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
+    this.highScoreComponent = this.shadowRoot.querySelector('high-score')
+
+    this.uiElements = {
+      container: this.container,
+      board: this.boardEl,
+      status: this.statusEl,
+      message: this.messageEl,
+      controls: this.controls,
+      nicknameForm: this.nicknameForm,
+      highScore: this.highscoreEl
+    }
+
+    this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
+
     this.levelSelect.addEventListener('change', (e) => {
       this.state.level = parseInt(e.target.value, 10)
-
       this.boardEl.classList.add(`level-${this.state.level}`)
-      this.highScoreBtn.style.display = 'block'
-      this.container.style.display = 'none'
-      this.messageEl.style.display = 'none'
-
+      this.setView(VIEWS.START)
       if (this.highScoreComponent) {
         this.highScoreComponent.setLevel(this.state.level)
       }
     })
 
-    this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
     this.goBackBtn.addEventListener('click', () => {
+      console.log('Go back clicked')
       this.backToStart()
     })
 
-    this.highScoreComponent = this.shadowRoot.querySelector('high-score')
     this.highScoreComponent.addEventListener('highscore-back', () => {
-      this.highscoreEl.style.display = 'none'
-
-      this.messageEl.style.display = 'none'
-      this.messageEl.textContent = ''
-
-      if (this.prevState === 'start') {
-        this.resetUI()
-      } else if (this.prevState === 'game') {
-        this.container.style.display = 'flex'
-        this.controls.style.display = 'flex'
-        this.boardEl.style.display = 'grid'
-
-        if (!this.state.timerId) {
-          this.state.timerId = setInterval(() => {
-            this.state.time++
-            this.updateStatus()
-          }, 1000)
-        }
+      switch (this.prevView) {
+        case VIEWS.IN_GAME:
+          this.setView(VIEWS.IN_GAME)
+          this.startTimer()
+          break
+        case VIEWS.GAME_END:
+        case VIEWS.START:
+        default:
+          this.setView(VIEWS.START)
+          break
       }
-
-      this.prevState = null
+      this.prevView = null
     })
-    this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
-    this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
+
     this.highScoreBtn.addEventListener('click', () => {
       if (!this.state.gameOver && this.state.timerId) {
-        this.prevState = 'game'
-        clearInterval(this.state.timerId)
-        this.state.timerId = null
+        this.prevView = VIEWS.IN_GAME
+        this.stopTimer()
+      } else if (this.state.gameOver) {
+        this.prevView = VIEWS.GAME_END
       } else {
-        this.prevState = 'start'
+        this.prevView = VIEWS.START
       }
-
-      this.highscoreEl.style.display = 'flex'
-      this.nicknameForm.style.display = 'none'
-      this.controls.style.display = 'none'
-      this.boardEl.style.display = 'none'
+      this.setView(VIEWS.HIGHSCORES)
     })
 
-    this.restartBtn = this.shadowRoot.querySelector('.restart-btn')
     this.restartBtn.addEventListener('click', () => this.initGame())
-
-    if (this.highScoreEl) {
-      this.boardEl.style.display = 'none'
-    }
   }
 
   /**
@@ -353,19 +411,13 @@ class MemoryApp extends HTMLElement {
     if (nickname) this.nickname = nickname
     if (!this.nickname) return
 
-    this.container.style.display = 'flex'
-    this.toggleControls({ levelSelect: false, restart: true, goBack: true, highScore: true })
+    this.setView(VIEWS.IN_GAME)
 
-    this.statusEl.style.display = 'flex'
-
-    this.boardEl.style.display = 'grid'
     this.boardEl.className = 'memory-game'
     this.boardEl.classList.add(`level-${this.state.level}`)
-
-    this.messageEl.style.display = 'none'
     this.messageEl.textContent = ''
 
-    this.state.board = this.createTiles()
+    this.state.board = this.createTileValues()
     this.state.flipped = []
     this.state.matches = 0
     this.state.attempts = 0
@@ -384,13 +436,54 @@ class MemoryApp extends HTMLElement {
    *
    * @returns {Array<{id: number, value: string, matched: boolean}>} Array of tiles
    */
-  createTiles () {
+  createTileValues () {
     const values = ['🍎', '🍌', '🍒', '🍇', '🍉', '🥝', '🍑', '🍍', '🥭', '🍋', '🍊', '🍐', '🍓', '🥥', '🍈', '🍋‍🟩', '🫐', '🍏']
     const needed = (this.state.level * this.state.level) / 2
     const tiles = values.slice(0, needed).concat(values.slice(0, needed))
     return this.shuffleArray(
       tiles.map((val, i) => ({ id: i + 1, value: val, matched: false }))
     )
+  }
+
+  /**
+   * Creates a tile DOM element for the memory game.
+   *
+   * Adds front and back faces, accesibility attributes,
+   * and event listeners for click and keyboard interaction.
+   *
+   * @param {{id: number, value: string}} tile - Tile data object.
+   * @returns {HTMLElement} The tile element ready to be appended to the board.
+   */
+  createTileElement (tile) {
+    const tileEl = document.createElement('div')
+    tileEl.classList.add('tile')
+
+    tileEl.setAttribute('tabindex', '0')
+    tileEl.setAttribute('role', 'button')
+    tileEl.setAttribute('aria-label', 'Memory tile')
+
+    const inner = document.createElement('div')
+    inner.classList.add('tile-inner')
+
+    const frontFace = document.createElement('div')
+    frontFace.classList.add('front')
+    frontFace.textContent = tile.value
+
+    const backFace = document.createElement('div')
+    backFace.classList.add('back')
+
+    inner.append(frontFace, backFace)
+    tileEl.appendChild(inner)
+
+    tileEl.addEventListener('click', () => this.flipTile(tile, tileEl))
+    tileEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        this.flipTile(tile, tileEl)
+      }
+    })
+
+    return tileEl
   }
 
   /**
@@ -415,43 +508,7 @@ class MemoryApp extends HTMLElement {
    */
   render () {
     this.boardEl.innerHTML = ''
-    // Tiles
-    this.state.board.forEach(tile => {
-      const tileEl = document.createElement('div')
-      tileEl.classList.add('tile')
-
-      tileEl.setAttribute('tabindex', '0')
-      tileEl.setAttribute('role', 'button')
-      tileEl.setAttribute('aria-label', 'Memory tile')
-
-      const inner = document.createElement('div')
-      inner.classList.add('tile-inner')
-
-      const frontFace = document.createElement('div')
-      frontFace.classList.add('front')
-      frontFace.textContent = tile.value
-
-      const backFace = document.createElement('div')
-      backFace.classList.add('back')
-
-      inner.appendChild(frontFace)
-      inner.appendChild(backFace)
-      tileEl.appendChild(inner)
-
-      tileEl.addEventListener('click', () => this.flipTile(tile, tileEl))
-      this.boardEl.appendChild(tileEl)
-
-      tileEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          this.flipTile(tile, tileEl)
-        }
-      })
-
-      if (tile.matched) {
-        tileEl.classList.add('matched')
-      }
-    })
+    this.state.board.forEach(tile => this.boardEl.appendChild(this.createTileElement(tile)))
     this.updateStatus()
   }
 
@@ -536,9 +593,20 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   backToStart () {
-    if (this.state.timerId) {
-      clearInterval(this.state.timerId)
-    }
+    this.resetState()
+  }
+
+  /**
+   * Resets the internal game state to initial values.
+   *
+   * Stops the timer, clears the board, flipped tiles,
+   * matches, attempts, time, and gameOver flag.
+   *
+   * @returns  {void}
+   */
+  resetState () {
+    this.stopTimer()
+    this.resetUI()
 
     this.state.board = []
     this.state.flipped = []
@@ -548,8 +616,6 @@ class MemoryApp extends HTMLElement {
     this.state.timerId = null
     this.state.isBusy = false
     this.state.gameOver = false
-
-    this.resetUI()
   }
 
   /**
@@ -560,18 +626,9 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   resetUI () {
-    this.messageEl.textContent = ''
-    this.messageEl.style.display = 'none'
-
-    this.statusEl.textContent = ''
-    this.statusEl.style.display = 'none'
-
-    this.container.style.display = 'none'
-    this.boardEl.style.display = 'none'
+    this.setView(VIEWS.START)
     this.boardEl.innerHTML = ''
-    this.nicknameForm.style.display = 'block'
-    this.controls.style.display = 'flex'
-    this.toggleControls({ levelSelect: true, restart: false, goBack: false })
+    this.messageEl.textContent = ''
   }
 
   /**
@@ -583,15 +640,12 @@ class MemoryApp extends HTMLElement {
    */
   handleGameOver () {
     this.state.gameOver = true
-
+    this.prevView = VIEWS.GAME_END
+    this.setView(VIEWS.GAME_END)
     this.stopTimer()
-
-    this.boardEl.style.display = 'none'
-    this.statusEl.style.display = 'none'
-    this.showMessage(`${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`, '1.6rem')
+    this.showMessage(`<strong>${this.nickname}</strong>, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`)
     if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
     this.restartBtn.textContent = 'Play again!'
-    this.toggleControls({ highScore: true })
   }
 
   /**
@@ -601,8 +655,9 @@ class MemoryApp extends HTMLElement {
    * @param {string} size - Optional font size (default '1.4rem').
    */
   showMessage (text, size = '1.4rem') {
-    this.messageEl.textContent = text
+    this.container.style.display = 'flex'
     this.messageEl.style.display = 'block'
+    this.messageEl.innerHTML = text
     this.messageEl.style.fontSize = size
   }
 
@@ -614,12 +669,21 @@ class MemoryApp extends HTMLElement {
    * @param {boolean} [options.restart] - Show/hide the restart button
    * @param {boolean} [options.goBack] - Show/hide the go back button
    * @param {boolean} [options.highScore] - Show/hide the high score button
+   * @returns {void}
    */
-  toggleControls ({ levelSelect, restart, goBack, highScore }) {
-    if (levelSelect !== undefined) this.levelSelect.style.display = levelSelect ? 'block' : 'none'
-    if (restart !== undefined) this.restartBtn.style.display = restart ? 'block' : 'none'
-    if (goBack !== undefined) this.goBackBtn.style.display = goBack ? 'block' : 'none'
-    if (highScore !== undefined) this.highScoreBtn.style.display = highScore ? 'block' : 'none'
+  toggleControls (options = {}) {
+    const mapping = {
+      levelSelect: this.levelSelect,
+      restart: this.restartBtn,
+      goBack: this.goBackBtn,
+      highScore: this.highScoreBtn
+    }
+
+    for (const key in mapping) {
+      if (options[key] !== undefined) {
+        mapping[key].style.display = options[key] ? 'block' : 'none'
+      }
+    }
   }
 
   /**
@@ -638,7 +702,7 @@ class MemoryApp extends HTMLElement {
 
   /**
    * Stops the timer if running
-   * Clear the interval and sets ´state.timerId´ to null.
+   * Clears the interval and sets `state.timerId` to null.
    *
    * @returns {void}
    */
@@ -646,6 +710,32 @@ class MemoryApp extends HTMLElement {
     if (this.state.timerId) {
       clearInterval(this.state.timerId)
       this.state.timerId = null
+    }
+  }
+
+  /**
+   * Sets the current UI view based on the view name.
+   *
+   * Updates the visibility of container, board, status, message,
+   * nickname form, controls, and highscore modal according to
+   * the predefined views configuration.
+   *
+   * @param {string} viewName - One of VIEWS.START, VIEWS.IN_GAME, VIEWS.GAME_END, VIEWS.HIGHSCORES
+   * @returns {void}
+   */
+  setView (viewName) {
+    const view = this.views[viewName]
+    if (!view) return
+
+    this.currentView = viewName
+
+    for (const key in this.uiElements) {
+      if (view[key] !== undefined) {
+        this.uiElements[key].style.display = view[key]
+      }
+    }
+    if (view.toggleControls) {
+      this.toggleControls(view.toggleControls)
     }
   }
 }

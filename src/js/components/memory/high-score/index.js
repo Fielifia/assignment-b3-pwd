@@ -39,7 +39,6 @@ button {
   font-weight: 500;
   transition: .2s ease;
   cursor: pointer;
-  text-wrap: no-wrap;
 }
 
 button:hover{

@@ -14,7 +14,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     resize: both;
-    background: #fefefe;
+    background: #fff;
     border: 2px solid black;
     border-radius: 2px;
     display: flex;
@@ -54,7 +54,6 @@ body {
 }
 
 .content {
-    background: #eee;
     display: block;
     flex: 1;
     overflow: auto;
