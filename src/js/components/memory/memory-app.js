@@ -23,7 +23,7 @@ template.innerHTML = `
     flex: 1;
 }
 .memory-game {
-  display: grid;
+  display: none;
   gap: .5rem;
   padding: 1rem;
   min-height: 0;
@@ -32,16 +32,20 @@ template.innerHTML = `
 }
 
 .memory-game.level-2 {
+display: grid;
   grid-template-columns: repeat(2, minmax(40px, 1fr));
 }
 .memory-game.level-4 {
+display: grid;
   grid-template-columns: repeat(4, minmax(40px, 1fr));
 }
 .memory-game.level-6 {
+display: grid;
   grid-template-columns: repeat(6, minmax(40px, 1fr));  
 }
 
 .status {
+display: none;
   background: #8cadc2;
   padding: .5rem;
 }
@@ -116,7 +120,7 @@ template.innerHTML = `
 }
 
 .message {
-  margin: 1rem auto;
+ text-align: center;
   }
   
 .controls {
@@ -131,7 +135,7 @@ template.innerHTML = `
 
 
   
-button:not(.close-highscore), select {
+button, select {
   padding: .5rem 1rem;
   border-radius: 6px;
   border: none;
@@ -143,7 +147,7 @@ button:not(.close-highscore), select {
   cursor: pointer;
 }
 
-button:not(.close-highscore):hover, select:hover, option{
+button:hover, select:hover, option{
   background: #4d5f6a;
   cursor: pointer;
 }
@@ -159,21 +163,6 @@ button:not(.close-highscore):hover, select:hover, option{
   box-sizing: border-box;
 }
 
-.close-highscore {
-  position: absolute;
-  top: 2.6rem;
-  left: 2rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #fff;
-  font-size: 1.8rem;
-  transition: .3s ease;
-}
-
-.close-highscore:hover {
-  transform: scale(1.1)
-}
 
 .message {
 display: none;
@@ -193,7 +182,7 @@ display: none;
 <button class="restart-btn" style="display:none;">Restart</button>
 <div class="level-select">
 <select id="level">
-<option value="" selected disabled>Choose level</option>
+<option value="" selected disabled>Select level</option>
 <option value="2">Level 1: 2x2</option>
 <option value="4">Level 2: 4x4</option>
 <option value="6">Level 3: 6x6</option>
@@ -221,6 +210,18 @@ class MemoryApp extends HTMLElement {
    */
   #onNicknameSubmitted = (event) => {
     this.nickname = event.detail
+
+    const level = parseInt(this.levelSelect.value, 10)
+    if (!level) {
+      this.container.style.display = 'flex'
+      this.messageEl.style.display = 'block'
+      this.messageEl.style.fontSize = '1rem'
+      this.messageEl.textContent = ('Select a level!')
+      return
+    }
+
+    this.state.level = level
+
     this.nicknameForm.style.display = 'none'
     this.initGame()
   }
@@ -271,6 +272,8 @@ class MemoryApp extends HTMLElement {
 
       this.boardEl.classList.add(`level-${this.state.level}`)
       this.highScoreBtn.style.display = 'block'
+      this.container.style.display = 'none'
+      this.messageEl.style.display = 'none'
 
       if (this.highScoreComponent) {
         this.highScoreComponent.setLevel(this.state.level)
@@ -286,11 +289,11 @@ class MemoryApp extends HTMLElement {
     this.highScoreComponent.addEventListener('highscore-back', () => {
       this.highscoreEl.style.display = 'none'
 
+      this.messageEl.style.display = 'none'
+      this.messageEl.textContent = ''
+
       if (this.prevState === 'start') {
-        this.nicknameForm.style.display = 'block'
-        this.controls.style.display = 'flex'
-      } else if (this.gameOver) {
-        this.goBackToStart()
+        this.resetUI()
       } else if (this.prevState === 'game') {
         this.container.style.display = 'flex'
         this.controls.style.display = 'flex'
@@ -309,7 +312,7 @@ class MemoryApp extends HTMLElement {
     this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
     this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
     this.highScoreBtn.addEventListener('click', () => {
-      if (!this.state.gameOver) {
+      if (!this.state.gameOver && this.state.timerId) {
         this.prevState = 'game'
         clearInterval(this.state.timerId)
         this.state.timerId = null
@@ -356,6 +359,9 @@ class MemoryApp extends HTMLElement {
     this.levelSelect.style.display = 'none'
     this.goBackBtn.style.display = 'block'
     this.restartBtn.style.display = 'block'
+    this.highScoreBtn.style.display = 'block'
+
+    this.statusEl.style.display = 'flex'
 
     this.boardEl.style.display = 'grid'
     this.boardEl.className = 'memory-game'
@@ -527,16 +533,8 @@ class MemoryApp extends HTMLElement {
     this.updateStatus()
 
     if (this.state.matches === this.state.board.length / 2) {
-      this.state.gameOver = true
-      clearInterval(this.state.timerId)
-      this.state.timerId = null
-
       setTimeout(() => {
-        this.boardEl.style.display = 'none'
-        this.messageEl.style.display = 'block'
-        this.messageEl.textContent = `${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`
-        if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
-        this.restartBtn.textContent = 'Play again!'
+        this.handleGameOver()
       }, 1000)
     }
   }
@@ -559,22 +557,57 @@ class MemoryApp extends HTMLElement {
     this.state.time = 0
     this.state.timerId = null
     this.state.isBusy = false
-    this.gameOver = false
+    this.state.gameOver = false
 
+    this.resetUI()
+  }
+
+  /**
+   * Resets the UI to the initial start state.
+   * Shows nickname form and level selection.
+   * Hides the game board, status, message, and irrelevant buttons.
+   *
+   * @returns {void}
+   */
+  resetUI () {
     this.messageEl.textContent = ''
     this.messageEl.style.display = 'none'
 
     this.statusEl.textContent = ''
     this.statusEl.style.display = 'none'
 
-    // this.nickname = null
-    this.nicknameForm.style.display = 'block'
     this.container.style.display = 'none'
-    this.levelSelect.style.display = 'block'
+    this.boardEl.style.display = 'none'
     this.boardEl.innerHTML = ''
+    this.nicknameForm.style.display = 'block'
+    this.controls.style.display = 'flex'
+    this.levelSelect.style.display = 'block'
 
     this.goBackBtn.style.display = 'none'
     this.restartBtn.style.display = 'none'
+  }
+
+  /**
+   * Handles the end of the game.
+   * Stops the timer, hides the board and status,
+   * shows a completion message and updates high scores.
+   *
+   * @returns {void}
+   */
+  handleGameOver () {
+    this.state.gameOver = true
+
+    clearInterval(this.state.timerId)
+    this.state.timerId = null
+
+    this.boardEl.style.display = 'none'
+    this.statusEl.style.display = 'none'
+    this.messageEl.style.display = 'block'
+    this.messageEl.style.fontSize = '1.6rem'
+    this.messageEl.textContent = `${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`
+    if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
+    this.restartBtn.textContent = 'Play again!'
+    this.highScoreBtn.style.display = 'block'
   }
 }
 
