@@ -214,9 +214,7 @@ class MemoryApp extends HTMLElement {
     const level = parseInt(this.levelSelect.value, 10)
     if (!level) {
       this.container.style.display = 'flex'
-      this.messageEl.style.display = 'block'
-      this.messageEl.style.fontSize = '1rem'
-      this.messageEl.textContent = ('Select a level!')
+      this.showMessage('Select a level!', '1rem')
       return
     }
 
@@ -356,10 +354,7 @@ class MemoryApp extends HTMLElement {
     if (!this.nickname) return
 
     this.container.style.display = 'flex'
-    this.levelSelect.style.display = 'none'
-    this.goBackBtn.style.display = 'block'
-    this.restartBtn.style.display = 'block'
-    this.highScoreBtn.style.display = 'block'
+    this.toggleControls({ levelSelect: false, restart: true, goBack: true, highScore: true })
 
     this.statusEl.style.display = 'flex'
 
@@ -378,12 +373,7 @@ class MemoryApp extends HTMLElement {
     this.state.isBusy = false
     this.state.gameOver = false
 
-    if (this.state.timerId) clearInterval(this.state.timerId)
-    this.state.timerId = setInterval(() => {
-      this.state.time++
-      this.updateStatus()
-    }, 1000)
-
+    this.startTimer()
     this.render()
     this.restartBtn.textContent = 'Restart'
   }
@@ -581,10 +571,7 @@ class MemoryApp extends HTMLElement {
     this.boardEl.innerHTML = ''
     this.nicknameForm.style.display = 'block'
     this.controls.style.display = 'flex'
-    this.levelSelect.style.display = 'block'
-
-    this.goBackBtn.style.display = 'none'
-    this.restartBtn.style.display = 'none'
+    this.toggleControls({ levelSelect: true, restart: false, goBack: false })
   }
 
   /**
@@ -597,17 +584,69 @@ class MemoryApp extends HTMLElement {
   handleGameOver () {
     this.state.gameOver = true
 
-    clearInterval(this.state.timerId)
-    this.state.timerId = null
+    this.stopTimer()
 
     this.boardEl.style.display = 'none'
     this.statusEl.style.display = 'none'
-    this.messageEl.style.display = 'block'
-    this.messageEl.style.fontSize = '1.6rem'
-    this.messageEl.textContent = `${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`
+    this.showMessage(`${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`, '1.6rem')
     if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
     this.restartBtn.textContent = 'Play again!'
-    this.highScoreBtn.style.display = 'block'
+    this.toggleControls({ highScore: true })
+  }
+
+  /**
+   * Shows a message to the player.
+   *
+   * @param {string} text - The message text to display.
+   * @param {string} size - Optional font size (default '1.4rem').
+   */
+  showMessage (text, size = '1.4rem') {
+    this.messageEl.textContent = text
+    this.messageEl.style.display = 'block'
+    this.messageEl.style.fontSize = size
+  }
+
+  /**
+   * Toggles visibility of control buttons.
+   *
+   * @param {object} options - Show/hide specific controls.
+   * @param {boolean} [options.levelSelect] - Show/hide the level select dropdown
+   * @param {boolean} [options.restart] - Show/hide the restart button
+   * @param {boolean} [options.goBack] - Show/hide the go back button
+   * @param {boolean} [options.highScore] - Show/hide the high score button
+   */
+  toggleControls ({ levelSelect, restart, goBack, highScore }) {
+    if (levelSelect !== undefined) this.levelSelect.style.display = levelSelect ? 'block' : 'none'
+    if (restart !== undefined) this.restartBtn.style.display = restart ? 'block' : 'none'
+    if (goBack !== undefined) this.goBackBtn.style.display = goBack ? 'block' : 'none'
+    if (highScore !== undefined) this.highScoreBtn.style.display = highScore ? 'block' : 'none'
+  }
+
+  /**
+   * Starts the game timer.
+   * Updates `state.time` every second and refreshes the status display.
+   *
+   * @returns {void}
+   */
+  startTimer () {
+    if (this.state.timerId) clearInterval(this.state.timerId)
+    this.state.timerId = setInterval(() => {
+      this.state.time++
+      this.updateStatus()
+    }, 1000)
+  }
+
+  /**
+   * Stops the timer if running
+   * Clear the interval and sets ´state.timerId´ to null.
+   *
+   * @returns {void}
+   */
+  stopTimer () {
+    if (this.state.timerId) {
+      clearInterval(this.state.timerId)
+      this.state.timerId = null
+    }
   }
 }
 
