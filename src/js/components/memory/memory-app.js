@@ -12,26 +12,33 @@ template.innerHTML = `
 <style>
 * {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  max-width: 100%;
+  max-height: 100%;
 }
 .memory-container {
     display: none;
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    flex: 1;
 }
 .memory-game {
   display: grid;
   gap: .5rem;
   padding: 1rem;
-  perspective: 1000px;
+  min-height: 0;
+  overflow: auto;
+  padding: 1rem;
 }
 
 .memory-game.level-2 {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(40px, 1fr));
 }
 .memory-game.level-4 {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(40px, 1fr));
 }
 .memory-game.level-6 {
-  grid-template-columns: repeat(6, 1fr);  
+  grid-template-columns: repeat(6, minmax(40px, 1fr));  
 }
 
 .status {
@@ -40,10 +47,9 @@ template.innerHTML = `
 }
 
 .tile {
-  width: auto;
+  width: 100%;
   perspective: 1000px;
-  min-height: 60px;
-  height: auto;
+  min-height: 50px;
   aspect-ratio: 1/1;
   
   }
@@ -93,6 +99,9 @@ template.innerHTML = `
   pointer-events: none;
   border: 2px dotted #4d5f6a;
   border-radius: 6px;
+    transform: scale(0.8);
+    opacity: 0;
+  transition: .6s ease;
   }
   
 .tile.matched:hover {
@@ -100,9 +109,10 @@ template.innerHTML = `
 }
     
 .tile.matched .tile-inner {
-  opacity: 0;
-  transform: scale(0.8);
-  transition: 3s ease;
+  opacity: 1;
+
+  transform: rotateY(180deg);
+
 }
 
 .message {
@@ -111,10 +121,15 @@ template.innerHTML = `
   
 .controls {
   display: flex;
+  flex-direction: row;
   max-width: 100%;
+  margin: 1rem;
+  padding: 0;
   gap: 1rem;
-  padding: 1rem;
+  justify-content: flex-start;
 }
+
+
   
 button:not(.close-highscore), select {
   padding: .5rem 1rem;
@@ -161,10 +176,10 @@ button:not(.close-highscore):hover, select:hover, option{
 }
 
 .message {
+display: none;
   font-size: 1.4rem;
   overflow-wrap: break-word;
   padding: 1rem;
-
 }
 </style>
 <nickname-form></nickname-form>
@@ -174,6 +189,8 @@ button:not(.close-highscore):hover, select:hover, option{
 <div class="memory-game"></div>
 </div>
 <div class="controls">
+<button class="go-back-btn" style="display:none;">Go back</button>
+<button class="restart-btn" style="display:none;">Restart</button>
 <div class="level-select">
 <select id="level">
 <option value="" selected disabled>Choose level</option>
@@ -182,10 +199,7 @@ button:not(.close-highscore):hover, select:hover, option{
 <option value="6">Level 3: 6x6</option>
 </select>
 </div>
-<button class="go-back-btn" style="display:none;">Go back</button>
-<button class="restart-btn" style="display:none;">Restart</button>
 <button class="show-highscores" style="display:none;">High Scores</button>
-
 </div>
 
 <div class="highscore-modal">
@@ -228,7 +242,8 @@ class MemoryApp extends HTMLElement {
       time: 0,
       timerId: null,
       isBusy: false,
-      level: 2
+      level: 2,
+      gameOver: false
     }
 
     this.prevState = null // SAFE ZONE
@@ -254,7 +269,6 @@ class MemoryApp extends HTMLElement {
     this.levelSelect.addEventListener('change', (e) => {
       this.state.level = parseInt(e.target.value, 10)
 
-      this.boardEl.className = 'memory-game'
       this.boardEl.classList.add(`level-${this.state.level}`)
       this.highScoreBtn.style.display = 'block'
 
@@ -275,6 +289,8 @@ class MemoryApp extends HTMLElement {
       if (this.prevState === 'start') {
         this.nicknameForm.style.display = 'block'
         this.controls.style.display = 'flex'
+      } else if (this.gameOver) {
+        this.goBackToStart()
       } else if (this.prevState === 'game') {
         this.container.style.display = 'flex'
         this.controls.style.display = 'flex'
@@ -293,7 +309,7 @@ class MemoryApp extends HTMLElement {
     this.highscoreEl = this.shadowRoot.querySelector('.highscore-modal')
     this.highScoreBtn = this.shadowRoot.querySelector('.show-highscores')
     this.highScoreBtn.addEventListener('click', () => {
-      if (this.container.style.display === 'flex') {
+      if (!this.state.gameOver) {
         this.prevState = 'game'
         clearInterval(this.state.timerId)
         this.state.timerId = null
@@ -345,6 +361,7 @@ class MemoryApp extends HTMLElement {
     this.boardEl.className = 'memory-game'
     this.boardEl.classList.add(`level-${this.state.level}`)
 
+    this.messageEl.style.display = 'none'
     this.messageEl.textContent = ''
 
     this.state.board = this.createTiles()
@@ -353,6 +370,7 @@ class MemoryApp extends HTMLElement {
     this.state.attempts = 0
     this.state.time = 0
     this.state.isBusy = false
+    this.state.gameOver = false
 
     if (this.state.timerId) clearInterval(this.state.timerId)
     this.state.timerId = setInterval(() => {
@@ -462,7 +480,7 @@ class MemoryApp extends HTMLElement {
    */
   flipTile (tile, tileEl) {
     if (this.state.isBusy) return
-    if (tile.matched || this.state.flipped.includes(tile)) return
+    if (tile.matched || this.state.flipped.some(f => f.tile === tile)) return
 
     tileEl.classList.add('flip')
     this.state.flipped.push({ tile, el: tileEl })
@@ -493,8 +511,13 @@ class MemoryApp extends HTMLElement {
       second.tile.matched = true
       this.state.matches++
 
-      first.el.classList.add('matched')
-      second.el.classList.add('matched')
+      const firstEl = first.el
+      const secondEl = second.el
+
+      setTimeout(() => {
+        firstEl.classList.add('matched')
+        secondEl.classList.add('matched')
+      }, 500)
     } else {
       first.el.classList.remove('flip')
       second.el.classList.remove('flip')
@@ -504,28 +527,18 @@ class MemoryApp extends HTMLElement {
     this.updateStatus()
 
     if (this.state.matches === this.state.board.length / 2) {
+      this.state.gameOver = true
       clearInterval(this.state.timerId)
       this.state.timerId = null
 
       setTimeout(() => {
         this.boardEl.style.display = 'none'
-        this.showMessage(`🎉 ${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts!`)
+        this.messageEl.style.display = 'block'
+        this.messageEl.textContent = `${this.nickname}, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`
         if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
         this.restartBtn.textContent = 'Play again!'
       }, 1000)
     }
-  }
-
-  /**
-   * Displays a message to the player.
-   *
-   * Used to show game-related feedback such as win messages.
-   *
-   * @param {string} msg - The message text to display
-   * @returns {void}
-   */
-  showMessage (msg) {
-    this.messageEl.textContent = msg
   }
 
   /**
@@ -546,12 +559,18 @@ class MemoryApp extends HTMLElement {
     this.state.time = 0
     this.state.timerId = null
     this.state.isBusy = false
+    this.gameOver = false
+
+    this.messageEl.textContent = ''
+    this.messageEl.style.display = 'none'
+
+    this.statusEl.textContent = ''
+    this.statusEl.style.display = 'none'
 
     // this.nickname = null
     this.nicknameForm.style.display = 'block'
     this.container.style.display = 'none'
     this.levelSelect.style.display = 'block'
-    this.messageEl.textContent = ''
     this.boardEl.innerHTML = ''
 
     this.goBackBtn.style.display = 'none'
