@@ -12,44 +12,41 @@ import '../memory/nickname-form/index.js'
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
-:host {
-display: block;
-height: 100%;
-width: 100%;
+* {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
-
 .container {
-display: flex;
-flex-direction: column;
-height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    padding: 1rem;
 }
 
-.chat-thread {
+.messages-list  {
     flex: 1;
     overflow-y: auto;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
-.chat-thread li {
-display: flex;
-justify-content: space-between;
-gap: .5rem;
+    min-height: 0;
+    padding: 1rem 0;
 }
 
 .send-msg {
+    margin-top: auto;
+}
+
+button {
+    cursor: pointer;
+}
+
+.message {
     display: flex;
-    gap: .2rem;
+    justify-content: space-between;
+    gap: .5rem;
 }
 
-.send-msg input {
-    flex: 1;
-}
-
-.send-msg button {
-    flex-shrink: 0;
+.delete-btn {
+    background: none;
+    border: none;
 }
 
 </style>
@@ -57,7 +54,7 @@ gap: .5rem;
 <nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
 <div class="messages-list"></div>
 <div class="send-msg">
-<textarea placeholder="Write a message"></textarea>
+<textarea id="chat-msg" placeholder="Write a message"></textarea>
 <button class="send-btn">Send</button>
 </div>
 </div>
@@ -131,18 +128,43 @@ export class MessagesApp extends HTMLElement {
   }
 
   /**
+   * Removes a message from the message list.
+   *
+   * @param {number} index - Index of the message to remove.
+   * @returns {void}
+   */
+  removeMessage (index) {
+    this.messages.splice(index, 1)
+    this.renderMessages()
+  }
+
+  /**
    * Renders all messages in the messages list container.
    * Scrolls to the bottom automatically.
    */
   renderMessages () {
     this.messagesList.innerHTML = ''
-    this.messages.forEach(m => {
-      const div = document.createElement('div')
-      div.textContent = `${m.username}: ${m.text}`
-      this.messagesList.appendChild(div)
+
+    this.messages.forEach((m, index) => {
+      const msgEl = document.createElement('div')
+      msgEl.classList.add('message')
+
+      const textEl = document.createElement('span')
+      textEl.textContent = `${m.username}: ${m.text}`
+
+      const deleteBtn = document.createElement('button')
+      deleteBtn.classList.add('delete-btn')
+      deleteBtn.textContent = '🗑️'
+      deleteBtn.title = 'Delete message'
+
+      deleteBtn.addEventListener('click', () => {
+        this.removeMessage(index)
+      })
+      msgEl.appendChild(textEl)
+      if (m.username === this.username) msgEl.appendChild(deleteBtn)
+      this.messagesList.appendChild(msgEl)
     })
     this.messagesList.scrollTop = this.messagesList.scrollHeight
   }
 }
-
 customElements.define('messages-app', MessagesApp)

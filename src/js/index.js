@@ -178,7 +178,9 @@ class PwdShell {
       custom: 'custom-app'
     }
     const tag = appMap[appType]
-    content.appendChild(tag ? document.createElement(tag) : document.createElement('div'))
+    const appEl = tag ? document.createElement(tag) : document.createElement('div')
+
+    content.appendChild(appEl)
 
     return win
   }
