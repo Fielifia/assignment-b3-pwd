@@ -102,6 +102,14 @@ customElements.define('nickname-form',
      */
     connectedCallback () {
       this.inputEl.focus()
+
+      if (this.hasAttribute('label-text')) {
+        this.shadowRoot.querySelector('label').textContent = this.getAttribute('label-text')
+      }
+
+      if (this.hasAttribute('button-text')) {
+        this.shadowRoot.querySelector('#submit').textContent = this.getAttribute('button-text')
+      }
     }
 
     /**

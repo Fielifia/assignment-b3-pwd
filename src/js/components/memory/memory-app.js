@@ -179,7 +179,7 @@ display: none;
   padding: 1rem;
 }
 </style>
-<nickname-form></nickname-form>
+<nickname-form label-text="Enter you nickname:"></nickname-form>
 <div class="memory-container">
 <div class="status"></div>
 <div class="message"></div>

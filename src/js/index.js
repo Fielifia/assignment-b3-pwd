@@ -1,4 +1,5 @@
 import './components/memory/memory-app.js'
+import './components/messages/messages-app.js'
 /**
  * Entry point for the Progresive Web Desktop application.
  *
