@@ -23,11 +23,11 @@ template.innerHTML = `
   max-height: 100%;
 }
 .memory-container {
-    display: none;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-    flex: 1;
+  display: none;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1;
 }
 .memory-game {
   display: none;
@@ -39,20 +39,20 @@ template.innerHTML = `
 }
 
 .memory-game.level-2 {
-display: grid;
+  display: grid;
   grid-template-columns: repeat(2, minmax(40px, 1fr));
 }
 .memory-game.level-4 {
-display: grid;
+  display: grid;
   grid-template-columns: repeat(4, minmax(40px, 1fr));
 }
 .memory-game.level-6 {
-display: grid;
+  display: grid;
   grid-template-columns: repeat(6, minmax(40px, 1fr));  
 }
 
 .status {
-display: none;
+  display: none;
   background: #8cadc2;
   padding: .5rem;
 }
@@ -62,22 +62,21 @@ display: none;
   perspective: 1000px;
   min-height: 50px;
   aspect-ratio: 1/1;
-  
-  }
+}
   
   .tile-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    opacity: 1;
-    transform: scale(1);
-    transition: transform 1s, opacity 3s;
-  }
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  opacity: 1;
+  transform: scale(1);
+  transition: transform 1s, opacity 3s;
+}
   
-  .tile.flip .tile-inner {
+.tile.flip .tile-inner {
   transform: rotateY(180deg);
-  }
+}
 
 
 .front, .back {
@@ -108,28 +107,20 @@ display: none;
 
 .tile.matched {
   pointer-events: none;
-  border: 2px dotted #4d5f6a;
-  border-radius: 6px;
-    transform: scale(0.8);
-    opacity: 0;
+  transform: scale(0.8);
+  opacity: 0;
   transition: .6s ease;
   }
-  
-.tile.matched:hover {
-  transform: none;
-}
     
 .tile.matched .tile-inner {
   opacity: 1;
-
   transform: rotateY(180deg);
-
 }
 
 .message {
- text-align: center;
- margin: 0 auto 1rem;
- max-width: 300px;
+  text-align: center;
+  margin: 0 auto 1rem;
+  max-width: 300px;
   }
   
 .controls {
@@ -141,7 +132,6 @@ display: none;
   align-content: end;
 }
 
- 
 button, select {
   padding: .5rem 1rem;
   border-radius: 6px;
@@ -170,7 +160,6 @@ button:hover, select:hover, option{
   overflow-y: auto;
   box-sizing: border-box;
 }
-
 
 .message {
 display: none;
@@ -218,7 +207,8 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   #onNicknameSubmitted = (event) => {
-    this.nickname = event.detail
+    const nickname = typeof event.detail === 'string' ? event.detail : event.detail.nickname
+    this.nickname = nickname
 
     const level = parseInt(this.levelSelect.value, 10)
     if (!level) {
@@ -246,7 +236,7 @@ class MemoryApp extends HTMLElement {
       time: 0,
       timerId: null,
       isBusy: false,
-      level: 2,
+      level: null,
       gameOver: false
     }
 

@@ -22,7 +22,7 @@ body {
     min-height: 250px;
     max-width: 90vw;
     max-height: 80vh;
-    height: 100%;
+    height: fit-content;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     resize: both;
 }
