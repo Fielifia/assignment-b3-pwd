@@ -130,12 +130,8 @@ customElements.define('nickname-form',
 
       errorEl.style.display = 'none'
 
-      const avatar = null
       this.dispatchEvent(new CustomEvent('nickname-submitted', {
-        detail: {
-          nickname,
-          avatar: avatar || null
-        },
+        detail: nickname,
         bubbles: true,
         composed: true
       }))

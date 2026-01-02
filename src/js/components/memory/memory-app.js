@@ -4,7 +4,7 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @version 1.0.0
  */
-import './nickname-form/index.js'
+import '../nickname-form/index.js'
 import './high-score/index.js'
 
 const VIEWS = {
@@ -168,7 +168,7 @@ display: none;
   padding: 1rem;
 }
 </style>
-<nickname-form label-text="Enter you nickname:"></nickname-form>
+<nickname-form label-text="Enter a nickname:"></nickname-form>
 <div class="memory-container">
 <div class="status"></div>
 <div class="message"></div>
