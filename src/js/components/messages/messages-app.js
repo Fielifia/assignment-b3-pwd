@@ -11,7 +11,8 @@
  */
 
 import '../nickname-form/index.js'
-import './avatar.js'
+import './AvatarPicker.js'
+import './DateTimeDisplay.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
@@ -24,20 +25,36 @@ template.innerHTML = `
     flex-direction: column;
     min-height: 0;
     flex: 1;
-    padding: 1rem;
+    padding: 1rem 1rem 0;
 }
 
 .messages-list  {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     overflow-y: auto;
     min-height: 0;
     padding: 1rem 0;
-    }
+ }
     
-    .send-msg {
-    margin-top: auto;
+.send-msg {
+    align-items: center;
+    display: flex;
+    gap: .2rem;
+    border-top: 2px solid #00000033;
 }
 
+#chat-msg {
+  resize: none;
+  flex: 1;
+  font-size: .9rem;
+  border: none;
+  min-width: 0;
+}
+
+#chat-msg:focus {
+outline: none;
+}
 button {
   cursor: pointer;
 }
@@ -49,36 +66,46 @@ button {
     box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
     padding: .5rem;
     margin-bottom: .5rem;
-    align-items: center;
+    gap: .2rem;
 }
-
-.message me {
+div.message.me {
     align-self: flex-end;
     background: #d1f0ff;
 }
 
-.message them {
+div.message.them {
     align-self: flex-start;
     background: #f0f0f0;
+}
+
+.send-btn {
+background: none;
+border: none;
+font-size: 1rem;
+padding: .5rem;
 }
 
 .delete-btn {
     background: none;
     border: none;
+    margin-left: 1rem;
 }
 
-.avatar-el {
+.avatar-el, .text-el {
     display: flex;
-    font-size: 1.4rem;
+    font-size: .9rem;
+    align-items: center;
 }
 .text-el {
-    display: flex;
     flex: 1;
     word-break: break-word;
 }
     
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
 <div class="container">
+<date-time-display datetime="" format="datetime"></date-time-display>
 <avatar-picker></avatar-picker>
 <nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
 
@@ -86,7 +113,7 @@ button {
 
 <div class="send-msg">
 <textarea id="chat-msg" placeholder="Write a message"></textarea>
-<button class="send-btn">Send</button>
+<button class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
 </div>
 </div>
 `
@@ -225,7 +252,7 @@ export class MessagesApp extends HTMLElement {
 
       const textEl = document.createElement('span')
       textEl.classList.add('text-el')
-      textEl.textContent = `${m.username}: ${m.text}`
+      textEl.innerHTML = `<strong>${m.username}:</strong>&nbsp;${m.text}`
 
       msgEl.appendChild(avatarEl)
       msgEl.appendChild(textEl)

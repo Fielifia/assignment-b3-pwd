@@ -7,8 +7,8 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @augments HTMLElement
  */
-const avatarTemplate = document.createElement('template')
-avatarTemplate.innerHTML = `
+const template = document.createElement('template')
+template.innerHTML = `
 <style>
 * {
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
@@ -67,7 +67,7 @@ export class AvatarPicker extends HTMLElement {
   constructor () {
     super()
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.appendChild(avatarTemplate.content.cloneNode(true))
+    this.shadowRoot.appendChild(template.content.cloneNode(true))
 
     this.avatars = this.getAttribute('avatars')
       ? this.getAttribute('avatars').split(',')
