@@ -206,16 +206,12 @@ customElements.define('high-score',
       if (!level) return
       this.currentLevel = level
       this.storageKey = `memory_highscores_level${level}`
-      let stored = this.loadScores(level)
+      const stored = this.loadScores(level)
 
-      const timestamp = Date.now()
-      stored.push({ name, score, timestamp, level })
+      stored.push({ name, score, timestamp: Date.now() })
 
-      stored.sort((a, b) => a.score - b.score)
-      stored = stored.slice(0, 5)
-
-      localStorage.setItem(this.storageKey, JSON.stringify(stored))
-      this.scores = stored
+      this.scores = stored.sort((a, b) => a.score - b.score)
+      localStorage.setItem(this.storageKey, JSON.stringify(this.scores))
       this.render()
     }
 
@@ -264,7 +260,8 @@ customElements.define('high-score',
 
       const latestTimestamp = Math.max(...this.scores.map(s => s.timestamp || 0))
 
-      this.scores.forEach((s, i) => {
+      const topScores = this.scores.slice(0, 5)
+      topScores.forEach((s, i) => {
         const tr = document.createElement('tr')
         if (s.timestamp === latestTimestamp) tr.classList.add('latest')
         tr.innerHTML = `<td>${i + 1}</td><td>${s.name}</td><td>${s.score}</td>`

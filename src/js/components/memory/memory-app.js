@@ -207,7 +207,8 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   #onNicknameSubmitted = (event) => {
-    const nickname = typeof event.detail === 'string' ? event.detail : event.detail.nickname
+    const nickname =
+      typeof event.detail === 'string' ? event.detail : event.detail.nickname
     this.nickname = nickname
 
     const level = parseInt(this.levelSelect.value, 10)
@@ -334,7 +335,10 @@ class MemoryApp extends HTMLElement {
       highScore: this.highscoreEl
     }
 
-    this.nicknameForm.addEventListener('nickname-submitted', this.#onNicknameSubmitted)
+    this.nicknameForm.addEventListener(
+      'nickname-submitted',
+      this.#onNicknameSubmitted
+    )
 
     this.levelSelect.addEventListener('change', (e) => {
       this.state.level = parseInt(e.target.value, 10)
@@ -387,7 +391,10 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   disconnectedCallback () {
-    this.nicknameForm?.removeEventListener('nickname-submitted', this.#onNicknameSubmitted)
+    this.nicknameForm?.removeEventListener(
+      'nickname-submitted',
+      this.#onNicknameSubmitted
+    )
   }
 
   /**
@@ -427,12 +434,36 @@ class MemoryApp extends HTMLElement {
    * @returns {Array<{id: number, value: string, matched: boolean}>} Array of tiles
    */
   createTileValues () {
-    const values = ['🍎', '🍌', '🍒', '🍇', '🍉', '🥝', '🍑', '🍍', '🥭', '🍋', '🍊', '🍐', '🍓', '🥥', '🍈', '🍋‍🟩', '🫐', '🍏']
-    const needed = (this.state.level * this.state.level) / 2
-    const tiles = values.slice(0, needed).concat(values.slice(0, needed))
-    return this.shuffleArray(
-      tiles.map((val, i) => ({ id: i + 1, value: val, matched: false }))
-    )
+    const TILE_VALUES = [
+      '🍎',
+      '🍌',
+      '🍒',
+      '🍇',
+      '🍉',
+      '🥝',
+      '🍑',
+      '🍍',
+      '🥭',
+      '🍋',
+      '🍊',
+      '🍐',
+      '🍓',
+      '🥥',
+      '🍈',
+      '🍋‍🟩',
+      '🫐',
+      '🍏'
+    ]
+    const needed = this.state.level ** 2 / 2
+
+    const tiles = [
+      ...TILE_VALUES.slice(0, needed).concat(TILE_VALUES.slice(0, needed))
+    ].map((val, i) => ({
+      id: i + 1,
+      value: val,
+      matched: false
+    }))
+    return this.shuffleArray(tiles)
   }
 
   /**
@@ -485,8 +516,8 @@ class MemoryApp extends HTMLElement {
   shuffleArray (arr) {
     const a = arr.slice()
     for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]]
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[a[i], a[j]] = [a[j], a[i]]
     }
     return a
   }
@@ -498,7 +529,9 @@ class MemoryApp extends HTMLElement {
    */
   render () {
     this.boardEl.innerHTML = ''
-    this.state.board.forEach(tile => this.boardEl.appendChild(this.createTileElement(tile)))
+    this.state.board.forEach((tile) =>
+      this.boardEl.appendChild(this.createTileElement(tile))
+    )
     this.updateStatus()
   }
 
@@ -510,7 +543,8 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   updateStatus () {
-    this.statusEl.textContent = `Time: ${this.state.time}s | Matches: ${this.state.matches} | Attempts: ${this.state.attempts}`
+    const { time, matches, attempts } = this.state
+    this.statusEl.textContent = `Time: ${time}s | Matches: ${matches} | Attempts: ${attempts}`
   }
 
   /**
@@ -522,8 +556,13 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   flipTile (tile, tileEl) {
-    if (this.state.isBusy) return
-    if (tile.matched || this.state.flipped.some(f => f.tile === tile)) return
+    if (
+      this.state.isBusy ||
+      tile.matched ||
+      this.state.flipped.some((f) => f.tile === tile)
+    ) {
+      return
+    }
 
     tileEl.classList.add('flip')
     this.state.flipped.push({ tile, el: tileEl })
@@ -554,12 +593,9 @@ class MemoryApp extends HTMLElement {
       second.tile.matched = true
       this.state.matches++
 
-      const firstEl = first.el
-      const secondEl = second.el
-
       setTimeout(() => {
-        firstEl.classList.add('matched')
-        secondEl.classList.add('matched')
+        first.el.classList.add('matched')
+        second.el.classList.add('matched')
       }, 500)
     } else {
       first.el.classList.remove('flip')
@@ -570,9 +606,7 @@ class MemoryApp extends HTMLElement {
     this.updateStatus()
 
     if (this.state.matches === this.state.board.length / 2) {
-      setTimeout(() => {
-        this.handleGameOver()
-      }, 1000)
+      setTimeout(() => this.handleGameOver(), 1000)
     }
   }
 
@@ -630,11 +664,19 @@ class MemoryApp extends HTMLElement {
    */
   handleGameOver () {
     this.state.gameOver = true
+    this.stopTimer()
     this.prevView = VIEWS.GAME_END
     this.setView(VIEWS.GAME_END)
-    this.stopTimer()
-    this.showMessage(`<strong>${this.nickname}</strong>, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`)
-    if (this.highScoreComponent) this.highScoreComponent.addScore(this.nickname, this.state.time, this.state.level)
+    this.showMessage(
+      `<strong>${this.nickname}</strong>, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`
+    )
+    if (this.highScoreComponent) {
+      this.highScoreComponent.addScore(
+        this.nickname,
+        this.state.time,
+        this.state.level
+      )
+    }
     this.restartBtn.textContent = 'Play again!'
   }
 
@@ -669,11 +711,9 @@ class MemoryApp extends HTMLElement {
       highScore: this.highScoreBtn
     }
 
-    for (const key in mapping) {
-      if (options[key] !== undefined) {
-        mapping[key].style.display = options[key] ? 'block' : 'none'
-      }
-    }
+    Object.entries(mapping).forEach(([key, el]) => {
+      if (options[key] !== undefined) { el.style.display = options[key] ? 'block' : 'none' }
+    })
   }
 
   /**
@@ -683,7 +723,7 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   startTimer () {
-    if (this.state.timerId) clearInterval(this.state.timerId)
+    this.stopTimer()
     this.state.timerId = setInterval(() => {
       this.state.time++
       this.updateStatus()
@@ -697,10 +737,9 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   stopTimer () {
-    if (this.state.timerId) {
-      clearInterval(this.state.timerId)
-      this.state.timerId = null
-    }
+    if (!this.state.timerId) return
+    clearInterval(this.state.timerId)
+    this.state.timerId = null
   }
 
   /**
@@ -719,14 +758,11 @@ class MemoryApp extends HTMLElement {
 
     this.currentView = viewName
 
-    for (const key in this.uiElements) {
-      if (view[key] !== undefined) {
-        this.uiElements[key].style.display = view[key]
-      }
-    }
-    if (view.toggleControls) {
-      this.toggleControls(view.toggleControls)
-    }
+    Object.entries(this.uiElements).forEach(([key, el]) => {
+      if (view[key] !== undefined) el.style.display = view[key]
+    })
+
+    if (view.toggleControls) this.toggleControls(view.toggleControls)
   }
 }
 
