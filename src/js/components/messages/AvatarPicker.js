@@ -10,31 +10,35 @@
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
-* {
-    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-
 .avatar-container {
     display: flex;
     flex-direction: column;
+    padding: 1rem;
+    font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
     gap: .5rem;
     justify-content: center;
     align-items: center;
-    margin: 1rem 0;
-    background: #f0f0f0;
-    padding: 1rem;
+    margin-top: 0;
+    padding: 0;
     border-radius: 6px;
+    text-transform: uppercase;
+}
+:focus {
+  outline: 2px solid #4d5f6a;
+}
+.error-msg {
+  color: #ff6b6b;
 }
 
 #avatar-list {
     display: flex;
     gap: .5rem;
+    width: 100%;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: .5rem;
+    margin: clamp(.5rem, 1vw, 1rem) auto;
 }
 #avatar-list span {
-    font-size: 1rem;
     cursor: pointer;
     transition: transform .1s ease;
 }
@@ -42,9 +46,11 @@ template.innerHTML = `
     transform: scale(1.2);
 }
 
+#avatar-list span.selected {
+    transform: scale(2);
+}
+
 .selected-avatar {
-    font-weight: 500;
-    font-size: 2rem;
     margin-bottom: .5rem;
 }
 </style>
@@ -101,13 +107,13 @@ export class AvatarPicker extends HTMLElement {
 
       span.addEventListener('click', () => {
         this.selectedAvatar = a
-        this.selectedEl.textContent = `Selected avatar: ${a}`
         this.errorEl.style.display = 'none'
 
-        this.avatarList.querySelectorAll('span').forEach(s => {
-          s.style.outline = '2px solid #6f94ad'
-          s.style.borderRadius = '6px'
+        this.avatarList.querySelectorAll('span').forEach(s => s.classList.remove('selected'))
 
+        span.classList.add('selected')
+
+        this.avatarList.querySelectorAll('span').forEach(s => {
           this.dispatchEvent(new CustomEvent('avatar-selected', {
             detail: { avatar: a },
             bubbles: true,

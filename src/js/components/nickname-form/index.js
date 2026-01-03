@@ -19,11 +19,11 @@ template.innerHTML = `
   flex-direction: column;  
   padding: 1rem;
 }
-  .nickname-input {
+.nickname-input {
   display: flex;
   gap: 1rem;
   width: 100%;
-  }
+}
 label, .nickname-input, .error-msg {
   margin: clamp(.5rem, 1vw, 1rem) auto;
 }

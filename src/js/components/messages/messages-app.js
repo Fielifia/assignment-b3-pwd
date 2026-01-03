@@ -28,6 +28,20 @@ template.innerHTML = `
     padding: 1rem 1rem 0;
 }
 
+avatar-picker {
+    margin-top: 1rem;
+}
+
+nickname-form {
+    margin-bottom: 1rem;
+}
+
+.chat-container {
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    }
+
 .messages-list  {
     display: flex;
     flex-direction: column;
@@ -45,18 +59,18 @@ template.innerHTML = `
 }
 
 #chat-msg {
-  resize: none;
-  flex: 1;
-  font-size: .9rem;
-  border: none;
-  min-width: 0;
+    resize: none;
+    flex: 1;
+    font-size: .9rem;
+    border: none;
+    min-width: 0;
 }
 
 #chat-msg:focus {
-outline: none;
+    outline: none;
 }
 button {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .message {
@@ -79,10 +93,10 @@ div.message.them {
 }
 
 .send-btn {
-background: none;
-border: none;
-font-size: 1rem;
-padding: .5rem;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    padding: .5rem;
 }
 
 .delete-btn {
@@ -100,6 +114,13 @@ padding: .5rem;
     flex: 1;
     word-break: break-word;
 }
+
+date-time-display {
+    display: block;
+    width: 100%;
+    font-size: 1.2rem;
+    text-align: right;
+}
     
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -108,12 +129,13 @@ padding: .5rem;
 <date-time-display datetime="" format="datetime"></date-time-display>
 <avatar-picker></avatar-picker>
 <nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
-
+<div class="chat-container" style="display:none;">
 <div class="messages-list"></div>
 
 <div class="send-msg">
 <textarea id="chat-msg" placeholder="Write a message"></textarea>
 <button class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+</div>
 </div>
 </div>
 `
@@ -143,6 +165,7 @@ export class MessagesApp extends HTMLElement {
 
     this.messages = []
 
+    this.chatContainer = this.shadowRoot.querySelector('.chat-container')
     this.messagesList = this.shadowRoot.querySelector('.messages-list')
     this.textarea = this.shadowRoot.querySelector('textarea')
     this.sendBtn = this.shadowRoot.querySelector('.send-btn')
@@ -174,11 +197,13 @@ export class MessagesApp extends HTMLElement {
       localStorage.setItem('messagesUsername', this.state.username)
       this.usernameForm.remove()
       this.avatarPicker.remove()
+      this.chatContainer.style.display = 'flex'
     })
 
     if (this.state.username) {
       this.usernameForm.remove()
       this.avatarPicker.remove()
+      this.chatContainer.style.display = 'flex'
     }
 
     this.sendBtn.addEventListener('click', () => this.addMessage())
