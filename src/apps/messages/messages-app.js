@@ -9,10 +9,9 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @augments HTMLElement
  */
-
-import '../nickname-form/index.js'
-import './AvatarPicker.js'
-import './DateTimeDisplay.js'
+import '../../components/nickname-form.js'
+import './components/avatar-picker.js'
+import './components/dateTime-display.js'
 
 const template = document.createElement('template')
 template.innerHTML = `

@@ -1,4 +1,4 @@
-import { makeDraggable } from './makeDraggable.js'
+import { makeDraggable } from './make-draggable.js'
 const desktop = document.querySelector('.desktop')
 let topZ = 1
 let instanceCount = 0

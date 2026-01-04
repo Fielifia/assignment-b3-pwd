@@ -1,5 +1,6 @@
-import './components/memory/memory-app.js'
-import './components/messages/messages-app.js'
+import './apps/memory/memory-app.js'
+import './apps/messages/messages-app.js'
+import './apps/mood-tracker/mood-tracker-app.js'
 /**
  * Entry point for the Progressive Web Desktop application.
  *
@@ -63,7 +64,7 @@ class PwdShell {
     const apps = [
       { title: 'Chat', iconText: '💬', type: 'chat' },
       { title: 'Memory', iconText: '🧠', type: 'memory' },
-      { title: 'Custom', iconText: '💫', type: 'custom' }
+      { title: 'Mood Tracker', iconText: '💫', type: 'moodTracker' }
     ]
 
     apps.forEach(app => {
@@ -175,7 +176,7 @@ class PwdShell {
     const appMap = {
       chat: 'messages-app',
       memory: 'memory-app',
-      custom: 'custom-app'
+      moodTracker: 'mood-tracker-app'
     }
     const tag = appMap[appType]
     const appEl = tag ? document.createElement(tag) : document.createElement('div')

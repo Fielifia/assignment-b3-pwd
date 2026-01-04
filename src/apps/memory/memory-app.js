@@ -4,8 +4,8 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @version 1.0.0
  */
-import '../nickname-form/index.js'
-import './high-score/index.js'
+import '../../components/high-score.js'
+import '../../components/nickname-form.js'
 
 const VIEWS = {
   START: 'start',
@@ -712,7 +712,9 @@ class MemoryApp extends HTMLElement {
     }
 
     Object.entries(mapping).forEach(([key, el]) => {
-      if (options[key] !== undefined) { el.style.display = options[key] ? 'block' : 'none' }
+      if (options[key] !== undefined) {
+        el.style.display = options[key] ? 'block' : 'none'
+      }
     })
   }
 
