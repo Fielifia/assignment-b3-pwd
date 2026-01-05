@@ -14,8 +14,8 @@ template.innerHTML = `
 * {
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
     }
-#highscore-container {
-  background: #dde7ef;
+    :host{
+  background: linear-gradient(180deg,  #8fb3cc, #5f86a1);
   padding: 1rem;
   border-radius: 2rem;
   color: #000;
@@ -33,7 +33,7 @@ button {
   padding: .5rem 1rem;
   border-radius: 6px;
   border: none;
-  background: #6f94ad;
+  background: #8fb3cc;
   color: #000;
   text-transform: uppercase;
   font-weight: 500;
@@ -42,7 +42,8 @@ button {
 }
 
 button:hover{
-  background: #4d5f6a;
+  background: #5f86a1;
+  transform: scale(1.05);
   cursor: pointer;
 }
 
@@ -70,10 +71,12 @@ th, td {
 tr.latest {
   font-weight: bold;
   color: #000;
-  background: linear-gradient(90deg, #dde7ef78, #6f94ad78);
+  background: linear-gradient(90deg,  #8fb3cc, #5f86a1);
+
   }
   tbody tr:hover {
-    background: linear-gradient(90deg, #6f94ad78, #dde7ef78);
+  background: linear-gradient(90deg, #5f86a1, #8fb3cc);
+
   }
 .noscores {
   text-align: center;

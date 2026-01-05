@@ -13,6 +13,10 @@ template.innerHTML = `
 * {
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
     }
+      :host {
+    background: #f4f7fa;
+    color: #000;
+  }
 #nickname-container {
   display: flex;
   font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
@@ -35,24 +39,28 @@ input {
   padding: .5rem;
   width: 100%;
 }
-:focus {
-  outline: 2px solid #4d5f6a;
+:focus-visible {
+  outline: 2px solid #5f86a1;
 }
 .error-msg {
   color: #ff6b6b;
 }
-#submit {
-  background: #6f94ad;
-  color: #000;
-  font-weight: 500;
+button {
   padding: .5rem 1rem;
   border-radius: 6px;
   border: none;
+  background: #8fb3cc;
+  color: #000;
+  text-transform: uppercase;
+  font-weight: 500;
   transition: .2s ease;
   cursor: pointer;
 }
-#submit:hover {
-  background: #4d5f6a;
+
+button:hover{
+  background: #5f86a1;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 </style>
 <div id="nickname-container">
@@ -68,7 +76,8 @@ input {
  * @class
  * @augments HTMLElement
  */
-customElements.define('nickname-form',
+customElements.define(
+  'nickname-form',
   /**
    * Nickname form component.
    */
@@ -104,11 +113,13 @@ customElements.define('nickname-form',
       this.inputEl.focus()
 
       if (this.hasAttribute('label-text')) {
-        this.shadowRoot.querySelector('label').textContent = this.getAttribute('label-text')
+        this.shadowRoot.querySelector('label').textContent =
+          this.getAttribute('label-text')
       }
 
       if (this.hasAttribute('button-text')) {
-        this.shadowRoot.querySelector('#submit').textContent = this.getAttribute('button-text')
+        this.shadowRoot.querySelector('#submit').textContent =
+          this.getAttribute('button-text')
       }
     }
 
@@ -130,11 +141,13 @@ customElements.define('nickname-form',
 
       errorEl.style.display = 'none'
 
-      this.dispatchEvent(new CustomEvent('nickname-submitted', {
-        detail: nickname,
-        bubbles: true,
-        composed: true
-      }))
+      this.dispatchEvent(
+        new CustomEvent('nickname-submitted', {
+          detail: nickname,
+          bubbles: true,
+          composed: true
+        })
+      )
     }
   }
 )

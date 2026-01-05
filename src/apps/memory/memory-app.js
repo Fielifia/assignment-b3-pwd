@@ -19,9 +19,12 @@ template.innerHTML = `
 <style>
 * {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  max-width: 100%;
-  max-height: 100%;
+  box-sizing: border-box;
 }
+  :host {
+    background: #f4f7fa;
+    color: #000;
+  }
 .memory-container {
   display: none;
   flex-direction: column;
@@ -31,7 +34,7 @@ template.innerHTML = `
 }
 .memory-game {
   display: none;
-  gap: .5rem;
+  gap: .6rem;
   padding: 1rem;
   min-height: 0;
   overflow: auto;
@@ -53,7 +56,7 @@ template.innerHTML = `
 
 .status {
   display: none;
-  background: #8cadc2;
+  background: linear-gradient(145deg, #3f5f73, #5f86a1);
   padding: .5rem;
 }
 
@@ -62,12 +65,14 @@ template.innerHTML = `
   perspective: 1000px;
   min-height: 50px;
   aspect-ratio: 1/1;
+  border-radius: 6px;
 }
   
   .tile-inner {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 95%;
+  height: 95%;
+  inset:0;
   transform-style: preserve-3d;
   opacity: 1;
   transform: scale(1);
@@ -78,11 +83,16 @@ template.innerHTML = `
   transform: rotateY(180deg);
 }
 
+.tile.flip {
+transform: scale(1.05);
+box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45),
+}
 
 .front, .back {
   position: absolute;
   width: 100%;
   height: 100%;
+  inset: 0;
   backface-visibility: hidden;
   display: flex;
   justify-content: center;
@@ -92,13 +102,12 @@ template.innerHTML = `
 }
 
 .front {
-  background: linear-gradient(135deg, #c8d7e4, #8cadc2);
+  background: linear-gradient(135deg, #5f86a1, #8fb3cc);
   transform: rotateY(180deg);
-
 }
 
 .back {
-  background: linear-gradient(135deg, #8cadc2, #c8d7e4);
+  background: linear-gradient(145deg, #5f86a1, #3f5f73);
   }
 
 :focus-visible {
@@ -136,24 +145,23 @@ button, select {
   padding: .5rem 1rem;
   border-radius: 6px;
   border: none;
-  background: #6f94ad;
-  color: #000;
+  background: #8fb3cc;
   text-transform: uppercase;
   font-weight: 500;
   transition: .2s ease;
   cursor: pointer;
-  margin: 0 auto;
 }
 
+
 button:hover, select:hover, option{
-  background: #4d5f6a;
+  background: #5f86a1;
+  transform: scale(1.05);
   cursor: pointer;
 }
 
 .highscore-modal {
   width: 100%;
   height: 100%;
-  background: #fff;
   justify-content: center;
   align-items: flex-start;
   display: none;
@@ -162,7 +170,7 @@ button:hover, select:hover, option{
 }
 
 .message {
-display: none;
+  display: none;
   font-size: 1.4rem;
   overflow-wrap: break-word;
   padding: 1rem;

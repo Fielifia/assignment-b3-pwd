@@ -1,3 +1,4 @@
+import './components/mood-entry.js'
 /**
  * Mood Tracker Web Component
  *
@@ -22,46 +23,19 @@ template.innerHTML = `
     border-radius: 6px;
     text-transform: uppercase;
 }
-:focus {
+:focus-visible {
   outline: 2px solid #4d5f6a;
 }
 .error-msg {
   color: #ff6b6b;
 }
 
-.mood-buttons {
-    display: flex;
-    gap: .5rem;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: clamp(.5rem, 1vw, 1rem) auto;
-}
-.mood-buttons span {
-    cursor: pointer;
-    transition: transform .1s ease;
-}
-.mood-buttons span:hover {
-    transform: scale(1.2);
-}
-
-.mood-buttons span.selected {
-    transform: scale(2);
-}
-
-.selected-mood {
-    margin-bottom: .5rem;
-}
 </style>
 
 <div class="mood-tracker-container">
 <h2>Mood Tracker</h2>
-<p class="selected-mood">Select mood:</p>
-
-<div class="mood-buttons"></div>
-<div class="energy-buttons"></div>
-<div class="notes">
-<textarea></textarea>
+<mood-entry></mood-entry>
+<mood-history></mood-history>
 </div>
 `
 
@@ -83,105 +57,46 @@ export class MoodTrackerApp extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-    this.state = {
-      today: '',
-      moods: [],
-      energy: [],
-      notes: ''
-    }
-
-    this.moodValues = this.getAttribute('moods')
-      ? this.getAttribute('moods').split(',')
-      : [
-          '😁',
-          '☺️',
-          '🫤',
-          '😒',
-          '😡',
-          '😢',
-          '😭',
-          '🥱',
-          '😞',
-          '😖',
-          '😰',
-          '😉',
-          '😜'
-        ]
-
-    this.moodButtons = this.shadowRoot.querySelector('.mood-buttons')
-    this.selectedEl = this.shadowRoot.querySelector('.selected-mood')
-    this.textarea = this.shadowRoot.querySelector('textarea')
-    this.selectedMood = null
+    this.state = { entries: [] }
   }
 
   /**
    * Called when the component is added to the DOM.
    * Initializes state, renders mood buttons, and history.
    */
-  // TODO: add energy buttons, calendar and notes
   connectedCallback () {
     this.loadState()
-    this.renderMoodButtons()
+
+    const entryComponent = this.shadowRoot.querySelector('mood-entry')
+    entryComponent.addEventListener('entry-submit', (e) => {
+      this.state.entries.push(e.detail)
+      localStorage.setItem('mood-tracker-entries',
+        JSON.stringify(this.state.entries)
+      )
+      this.renderHistory()
+    })
     this.renderHistory()
-    this.handleMoodSelection()
   }
 
   /**
    * Loads saved state from localStorage.
    */
-  // TODO: implement actual logic
-  loadState () {}
-
-  /**
-   * Saves current state to localStorage.
-   */
-  // TODO: implement actual logic
-  saveState () {}
-
-  /**
-   * Renders the mood buttons in the UI.
-   * Creates one <span> per mood emoji and adds click events.
-   */
-  renderMoodButtons () {
-    this.moodButtons.innerHTML = ''
-    this.moodValues.forEach((m) => {
-      const span = document.createElement('span')
-      span.textContent = m
-
-      span.addEventListener('click', () => {
-        this.selectedMood = m
-
-        this.moodButtons
-          .querySelectorAll('span')
-          .forEach((s) => s.classList.remove('selected'))
-
-        span.classList.add('selected')
-
-        this.moodButtons.querySelectorAll('span').forEach((s) => {
-          this.dispatchEvent(
-            new CustomEvent('mood-selected', {
-              detail: { mood: m },
-              bubbles: true,
-              composed: true
-            })
-          )
-        })
-      })
-      this.moodButtons.appendChild(span)
-    })
+  loadState () {
+    try {
+      this.state.entries =
+        JSON.parse(localStorage.getItem('mood-tracker-entries')) || []
+    } catch {
+      this.state.entries = []
+    }
   }
-
-  /**
-   * Handles additional logic when a mood is selected.
-   */
-  // TODO: implement if needed
-  handleMoodSelection () {}
 
   /**
    * Renders the history of previous days.
    */
   // TODO: implement actual logic
-  renderHistory () {}
+  renderHistory () {
+
+  }
 
   /**
    * Returns today's date in YYY-MM-DD format.
@@ -189,8 +104,7 @@ export class MoodTrackerApp extends HTMLElement {
    * @returns {string} Today's date
    */
   getToday () {
-    this.today = Date.now().toISOString().slice(0, 10)
-    return this.today
+    return new Date().toISOString().slice(0, 10)
   }
 }
 
