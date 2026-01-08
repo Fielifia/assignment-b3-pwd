@@ -12,11 +12,12 @@ template.innerHTML = `
 <style>
 * {
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-    }
-      :host {
-    background: #f4f7fa;
+}
+
+:host {
+    background: #none;
     color: #000;
-  }
+}
 #nickname-container {
   display: flex;
   font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);

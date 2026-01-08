@@ -7,7 +7,7 @@ template.innerHTML = `
     font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
     gap: 1rem;
     margin-top: 0;
-    padding: 0;
+    padding: 1rem;
     border-radius: 6px;
     text-transform: uppercase;
     min-width: 320px;

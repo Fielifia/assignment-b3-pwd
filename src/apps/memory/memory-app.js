@@ -22,14 +22,11 @@ template.innerHTML = `
   box-sizing: border-box;
 }
   :host {
-    background: #f4f7fa;
     color: #000;
   }
 .memory-container {
   display: none;
   flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
   flex: 1;
 }
 .memory-game {
@@ -135,7 +132,7 @@ box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45),
 .controls {
   display: flex;
   max-width: 100%;
-  margin: auto 1rem 1rem;
+  margin: 1rem 1rem;
   padding: 0;
   gap: 1rem;
   align-content: end;
@@ -157,6 +154,11 @@ button:hover, select:hover, option{
   background: #5f86a1;
   transform: scale(1.05);
   cursor: pointer;
+}
+
+.restart-btn {
+margin-left: auto;
+margin-right: auto;
 }
 
 .highscore-modal {
@@ -283,7 +285,7 @@ class MemoryApp extends HTMLElement {
       },
 
       gameEnd: {
-        container: 'none',
+        container: 'flex',
         board: 'none',
         status: 'none',
         message: 'block',
@@ -299,7 +301,7 @@ class MemoryApp extends HTMLElement {
       },
 
       highscores: {
-        container: 'none',
+        container: 'flex',
         board: 'none',
         status: 'none',
         message: 'none',

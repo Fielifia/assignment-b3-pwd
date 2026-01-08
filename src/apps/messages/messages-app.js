@@ -116,16 +116,18 @@ div.message.them {
 
 date-time-display {
     display: block;
-    width: 100%;
-    font-size: 1.2rem;
+    padding: .5rem;
+    background: linear-gradient(145deg, #3f5f73, #5f86a1);
+    color: #000;
     text-align: right;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
 }
     
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-<div class="container">
 <date-time-display datetime="" format="datetime"></date-time-display>
+<div class="container">
 <avatar-picker></avatar-picker>
 <nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
 <div class="chat-container" style="display:none;">
