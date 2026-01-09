@@ -154,14 +154,33 @@ export class MessagesApp extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
+    this.socket = new WebSocket('wss://courselab.lnu.se/message-app/socket')
+
+    this.socket.addEventListener('open', () => {
+      console.log('Connected to chat server')
+    })
+
+    this.socket.addEventListener('message', (event) => {
+      const msg = JSON.parse(event.data)
+
+      if (msg.username !== this.state.username && msg.data?.trim()) {
+        this.messages.push({
+          from: 'them',
+          username: msg.username,
+          avatar: '👤',
+          text: msg.data
+        })
+        this.renderMessages()
+      }
+    })
+
+    this.socket.addEventListener('close', () => {
+      console.log('Disconnected from chat server')
+    })
+
     this.state = {
       username: localStorage.getItem('messagesUsername') || '',
       avatar: localStorage.getItem('messagesAvatar') || ''
-    }
-
-    this.otherUser = {
-      username: 'ChatBot',
-      avatar: '🤖'
     }
 
     this.messages = []
@@ -199,12 +218,14 @@ export class MessagesApp extends HTMLElement {
       this.usernameForm.remove()
       this.avatarPicker.remove()
       this.chatContainer.style.display = 'flex'
+      this.textarea.focus()
     })
 
     if (this.state.username) {
       this.usernameForm.remove()
       this.avatarPicker.remove()
       this.chatContainer.style.display = 'flex'
+      this.textarea.focus()
     }
 
     this.sendBtn.addEventListener('click', () => this.addMessage())
@@ -235,26 +256,15 @@ export class MessagesApp extends HTMLElement {
     this.renderMessages()
     this.textarea.value = ''
 
-    this.fakeReply(text)
-  }
-
-  /**
-   * Simulates a reply from the other user after a short delay.
-   *
-   * @param {string} text - The message.
-   * @returns {void}
-   */
-  fakeReply (text) {
-    setTimeout(() => {
-      this.messages.push({
-        from: 'them',
-        username: this.otherUser.username,
-        avatar: this.otherUser.avatar,
-        text: `You said: ${text}`
-      })
-
-      this.renderMessages()
-    }, 800)
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({
+        type: 'message',
+        data: text,
+        username: this.state.username,
+        channel: 'myChannel',
+        key: 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd'
+      }))
+    }
   }
 
   /**
@@ -294,7 +304,9 @@ export class MessagesApp extends HTMLElement {
 
       this.messagesList.appendChild(msgEl)
     })
-    this.messagesList.scrollTop = this.messagesList.scrollHeight
+    setTimeout(() => {
+      this.messagesList.scrollTop = this.messagesList.scrollHeight
+    }, 50)
   }
 
   /**

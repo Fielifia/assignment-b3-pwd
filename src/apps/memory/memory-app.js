@@ -6,6 +6,9 @@
  */
 import '../../components/high-score.js'
 import '../../components/nickname-form.js'
+import { createInitialState, resetState } from './components/game-state.js'
+import { createTileValues } from './components/board-utils.js'
+import { startTimer, stopTimer } from './components/timer.js'
 
 const VIEWS = {
   START: 'start',
@@ -238,18 +241,8 @@ class MemoryApp extends HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
-
-    this.state = {
-      board: [],
-      flipped: [],
-      matches: 0,
-      attempts: 0,
-      time: 0,
-      timerId: null,
-      isBusy: false,
-      level: null,
-      gameOver: false
-    }
+    /// //SAFE
+    this.state = createInitialState()
 
     this.views = {
       start: {
@@ -368,7 +361,7 @@ class MemoryApp extends HTMLElement {
       switch (this.prevView) {
         case VIEWS.IN_GAME:
           this.setView(VIEWS.IN_GAME)
-          this.startTimer()
+          startTimer()
           break
         case VIEWS.GAME_END:
         case VIEWS.START:
@@ -382,7 +375,7 @@ class MemoryApp extends HTMLElement {
     this.highScoreBtn.addEventListener('click', () => {
       if (!this.state.gameOver && this.state.timerId) {
         this.prevView = VIEWS.IN_GAME
-        this.stopTimer()
+        stopTimer()
       } else if (this.state.gameOver) {
         this.prevView = VIEWS.GAME_END
       } else {
@@ -424,7 +417,7 @@ class MemoryApp extends HTMLElement {
     this.boardEl.classList.add(`level-${this.state.level}`)
     this.messageEl.textContent = ''
 
-    this.state.board = this.createTileValues()
+    this.state.board = createTileValues()
     this.state.flipped = []
     this.state.matches = 0
     this.state.attempts = 0
@@ -432,48 +425,9 @@ class MemoryApp extends HTMLElement {
     this.state.isBusy = false
     this.state.gameOver = false
 
-    this.startTimer()
+    startTimer()
     this.render()
     this.restartBtn.textContent = 'Restart'
-  }
-
-  /**
-   * Creates an array of tile objects for the game.
-   * Each tile has an id, value and mathed state.
-   *
-   * @returns {Array<{id: number, value: string, matched: boolean}>} Array of tiles
-   */
-  createTileValues () {
-    const TILE_VALUES = [
-      '🍎',
-      '🍌',
-      '🍒',
-      '🍇',
-      '🍉',
-      '🥝',
-      '🍑',
-      '🍍',
-      '🥭',
-      '🍋',
-      '🍊',
-      '🍐',
-      '🍓',
-      '🥥',
-      '🍈',
-      '🍋‍🟩',
-      '🫐',
-      '🍏'
-    ]
-    const needed = this.state.level ** 2 / 2
-
-    const tiles = [
-      ...TILE_VALUES.slice(0, needed).concat(TILE_VALUES.slice(0, needed))
-    ].map((val, i) => ({
-      id: i + 1,
-      value: val,
-      matched: false
-    }))
-    return this.shuffleArray(tiles)
   }
 
   /**
@@ -515,21 +469,6 @@ class MemoryApp extends HTMLElement {
     })
 
     return tileEl
-  }
-
-  /**
-   * Shuffles an array using Fisher-Yates algorithm.
-   *
-   * @param {Array} arr - The array to shuffle
-   * @returns {Array} Shuffled array
-   */
-  shuffleArray (arr) {
-    const a = arr.slice()
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[a[i], a[j]] = [a[j], a[i]]
-    }
-    return a
   }
 
   /**
@@ -627,29 +566,7 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   backToStart () {
-    this.resetState()
-  }
-
-  /**
-   * Resets the internal game state to initial values.
-   *
-   * Stops the timer, clears the board, flipped tiles,
-   * matches, attempts, time, and gameOver flag.
-   *
-   * @returns  {void}
-   */
-  resetState () {
-    this.stopTimer()
-    this.resetUI()
-
-    this.state.board = []
-    this.state.flipped = []
-    this.state.matches = 0
-    this.state.attempts = 0
-    this.state.time = 0
-    this.state.timerId = null
-    this.state.isBusy = false
-    this.state.gameOver = false
+    resetState()
   }
 
   /**
@@ -674,7 +591,7 @@ class MemoryApp extends HTMLElement {
    */
   handleGameOver () {
     this.state.gameOver = true
-    this.stopTimer()
+    stopTimer()
     this.prevView = VIEWS.GAME_END
     this.setView(VIEWS.GAME_END)
     this.showMessage(
@@ -726,32 +643,6 @@ class MemoryApp extends HTMLElement {
         el.style.display = options[key] ? 'block' : 'none'
       }
     })
-  }
-
-  /**
-   * Starts the game timer.
-   * Updates `state.time` every second and refreshes the status display.
-   *
-   * @returns {void}
-   */
-  startTimer () {
-    this.stopTimer()
-    this.state.timerId = setInterval(() => {
-      this.state.time++
-      this.updateStatus()
-    }, 1000)
-  }
-
-  /**
-   * Stops the timer if running
-   * Clears the interval and sets `state.timerId` to null.
-   *
-   * @returns {void}
-   */
-  stopTimer () {
-    if (!this.state.timerId) return
-    clearInterval(this.state.timerId)
-    this.state.timerId = null
   }
 
   /**
