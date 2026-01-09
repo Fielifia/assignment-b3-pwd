@@ -9,11 +9,13 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @augments HTMLElement
  */
+import template from './components/messages-template.js'
 import '../../components/nickname-form.js'
 import './components/avatar-picker.js'
 import '../../components/dateTime-display.js'
-import template from './components/messages-template.js'
-import { renderMessages } from './components/messages-renderer.js'
+import { renderMessages, addMessage, removeMessage } from './components/messages-handler.js'
+import { initSocket } from './components/socket-init.js'
+import { initUI } from './components/ui-init.js'
 
 /**
  * MessagesApp class for the chat component.
@@ -50,108 +52,30 @@ export class MessagesApp extends HTMLElement {
    * Initializes UI logic and event listeners.
    */
   connectedCallback () {
-    this.initUI()
-    this.socket.addEventListener('message', (event) => {
-      const msg = JSON.parse(event.data)
-
-      if (msg.username !== this.state.username && msg.data?.trim()) {
-        this.messages.push({
-          from: 'them',
-          username: msg.username,
-          avatar: '👤',
-          text: msg.data,
-          timestamp: new Date().toISOString()
-        })
-        renderMessages(this.messagesList, this.messages, this.removeMessage.bind(this))
-      }
+    initUI({
+      avatarPicker: this.avatarPicker,
+      usernameForm: this.usernameForm,
+      chatContainer: this.chatContainer,
+      textarea: this.textarea,
+      sendBtn: this.sendBtn
+    }, this.state, () => {
+      addMessage(
+        this.textarea.value,
+        this.messages,
+        this.messagesList,
+        this.state,
+        this.socket)
+      this.textarea.value = ''
+      requestAnimationFrame(() => this.textarea.focus())
     })
 
-    this.socket.addEventListener('open', () => console.log('Connected'))
-    this.socket.addEventListener('close', () => console.log('Disconnected'))
+    initSocket(this.socket, this.state, this.messages, () => renderMessages(this.messagesList, this.messages, removeMessage.bind(initSocket, this.messages, this.messagesList)))
 
     document.addEventListener('click', (e) => {
       this.shadowRoot.querySelectorAll('.delete-btn').forEach(btn => {
         if (!btn.parentElement.contains(e.target)) btn.style.display = 'none'
       })
     })
-  }
-
-  /**
-   * Sets up event listeners and handles initial state.
-   *
-   * @returns {void}
-   */
-  initUI () {
-    this.avatarPicker.addEventListener('avatar-selected', (e) => {
-      this.state.avatar = e.detail.avatar
-      localStorage.setItem('messagesAvatar', this.state.avatar)
-    })
-
-    this.usernameForm.addEventListener('nickname-submitted', (e) => {
-      this.state.username = e.detail
-      localStorage.setItem('messagesUsername', this.state.username)
-      this.usernameForm.remove()
-      this.avatarPicker.remove()
-      this.chatContainer.style.display = 'flex'
-      this.textarea.focus()
-    })
-
-    if (this.state.username) {
-      this.usernameForm.remove()
-      this.avatarPicker.remove()
-      this.chatContainer.style.display = 'flex'
-      this.textarea.focus()
-    }
-
-    this.sendBtn.addEventListener('click', () => this.addMessage())
-    this.textarea.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        this.addMessage()
-      }
-    })
-  }
-
-  /**
-   * Adds a message from the current user.
-   *
-   * @returns {void}
-   */
-  addMessage () {
-    const text = this.textarea.value.trim()
-    if (!text) return
-
-    this.messages.push({
-      from: 'me',
-      username: this.state.username,
-      avatar: this.state.avatar,
-      text,
-      timestamp: new Date().toISOString()
-    })
-
-    renderMessages(this.messagesList, this.messages, this.removeMessage.bind(this))
-    this.textarea.value = ''
-
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({
-        type: 'message',
-        data: text,
-        username: this.state.username,
-        channel: 'myChannel',
-        key: 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd'
-      }))
-    }
-  }
-
-  /**
-   * Removes a message a the given index.
-   *
-   * @param {number} index - Index of the message to remove.
-   * @returns {void}
-   */
-  removeMessage (index) {
-    this.messages.splice(index, 1)
-    renderMessages(this.messagesList, this.messages, this.removeMessage.bind(this))
   }
 }
 customElements.define('messages-app', MessagesApp)

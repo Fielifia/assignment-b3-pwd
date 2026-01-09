@@ -2,8 +2,9 @@ const template = document.createElement('template')
 template.innerHTML = `
 <style>
 * {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
+
 .container {
     display: flex;
     flex-direction: column;
@@ -16,16 +17,16 @@ template.innerHTML = `
 avatar-picker {
     margin-top: 1rem;
 }
-
 nickname-form {
     margin-bottom: 1rem;
 }
 
 .chat-container {
+    display: none;
     flex-direction: column;
-    min-height: 0;
     flex: 1;
-    }
+    min-height: 0;
+}
 
 .messages-list  {
     display: flex;
@@ -34,22 +35,22 @@ nickname-form {
     overflow-y: auto;
     min-height: 0;
     padding: 1rem 0;
- }
+}
     
 .send-msg {
-    align-items: center;
     display: flex;
+    align-items: center;
     gap: .2rem;
     border-top: 2px solid #00000033;
 }
 
 #chat-msg {
+    flex: 1;
+    min-width: 0;
     background: none;
     resize: none;
-    flex: 1;
     font-size: .9rem;
     border: none;
-    min-width: 0;
 }
 
 #chat-msg:focus {
@@ -60,88 +61,83 @@ button {
 }
 
 .message {
-  display: flex;
-  flex-direction: column;
-}
-
-.message.me {
-align-items: flex-end;
+    display: flex;
+    flex-direction: column;
 }
 
 .message-content {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: .5rem;
-  width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: .5rem;
+    width: 100%;
 }
 
 .message-body {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex: 1 1 auto;
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.message.me .message-body {
+    align-items: flex-end;
 }
 
 .message.me .message-content {
-  flex-direction: row-reverse;
-}
-
-.message.me .message-text-container {
-  margin-left: auto;
-  background: #8fb3cc2a;
-}
-
-.message.them .message-text-container {
-  margin-right: auto;
-  background; #f0f0f0;
+    flex-direction: row-reverse;
 }
 
 .message-text-container {
-  position: relative;
-  border: 1px solid #00000073;
-  border-radius: 1rem 1rem 1rem .2rem;
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
-  padding: .2rem .5rem;
-  max-width: 80%;
+    position: relative;
+    border: 1px solid #00000033;
+    border-radius: 1rem 1rem 1rem .2rem;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+    padding: .2rem .5rem;
+    max-width: 80%;
 }
 
 .message.me .message-text-container {
-  border-radius: 1rem 1rem .2rem 1rem;
+    margin-left: auto;
+    background: #5f86a12a;
+    border-radius: 1rem 1rem .2rem 1rem;
+}
+
+.message.them .message-text-container {
+    margin-right: auto;
+    background: #8fb3cc2a;
 }
 
 .avatar-el {
-  flex-shrink: 0;
-  font-size: 1rem;
-  align-self: flex-end;
+    flex-shrink: 0;
+    font-size: 1rem;
+    align-self: flex-end;
 }
 
 .username-el {
-  font-size: .8rem;
-  color: #555;
-  white-space: nowrap;
+    display: flex;
+    font-size: .7rem;
+    color: #555;
+    white-space: nowrap;
+    margin: 2px .5rem;
 }
 
 .message.me .username-el {
-  display: none;
+    text-align: right;
 }
 
 .text-el {
-  word-break: break-word;
-  margin-top: 2px;
-  align-content: center;
+    word-break: break-word;
+    margin-top: 2px;
 }
 
 .message-time {
-  display: block;
-  font-size: .6rem;
-  margin-top: 2px;
-  margin-bottom: 1rem;
-  color: #555;
-  justify-content: center;
-  width: 100%;
-  text-align: center;
+    display: block;
+    font-size: .6rem;
+    margin: 2px 0 1rem 0;
+    color: #555;
+    width: 100%;
+    text-align: center;
 }
 
 .send-btn {
@@ -153,12 +149,12 @@ align-items: flex-end;
 
 .delete-btn {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    bottom: -1.5rem;
+    right: -.5rem;
     display: none;
     background: none;
     border: none;
-    font-size: .6rem;
+    font-size: .8rem;
     cursor: pointer;
     z-index: 10;
 }
@@ -179,7 +175,7 @@ align-items: flex-end;
 <div class="container">
 <avatar-picker></avatar-picker>
 <nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
-<div class="chat-container" style="display:none;">
+<div class="chat-container">
 <div class="messages-list"></div>
 
 <div class="send-msg">

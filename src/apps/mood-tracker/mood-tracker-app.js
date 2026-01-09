@@ -1,52 +1,21 @@
-import './components/mood-entry.js'
 /**
  * Mood Tracker Web Component
  *
  * Simple version inspired by 'Daylio'.
  * Select mood, energy and add notes every day,
  * save to localStorage and show history.
+ *
+ * @author Sofia Andersson <sa226jf@student.lnu.se>
+ * @augments HTMLElement
  */
-
-const template = document.createElement('template')
-template.innerHTML = `
-<style>
-.mood-tracker-container {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
-    gap: .5rem;
-    justify-content: center;
-    align-items: center;
-    margin-top: 0;
-    padding: 0;
-    border-radius: 6px;
-    text-transform: uppercase;
-}
-:focus-visible {
-  outline: 2px solid #4d5f6a;
-}
-.error-msg {
-  color: #ff6b6b;
-}
-
-</style>
-
-<div class="mood-tracker-container">
-<h2>Mood Tracker</h2>
-<mood-entry></mood-entry>
-<mood-history></mood-history>
-</div>
-`
-
+import template from './components/mood-tracker-template.js'
+import './components/mood-entry.js'
 /**
  * Mood Tracker App
  *
  * Web component that allows a user to select their mood and energy,
  * add notes, save them (to localStorage), and view history.
  * Inpired by Daylio.
- *
- * @augments HTMLElement
  */
 export class MoodTrackerApp extends HTMLElement {
   /**

@@ -3,13 +3,8 @@
  * Scrolls to the latest message automatically.
  *
  * @param {HTMLElement} messagesList - The container element where messages will be rendered.
- * @param {Array<object>} messages - Array of messages objects to render.
- * @param {('me' | 'them')[][]} messages[].from - Who sent the message: 'me' or 'them'.
- * @param {string} messages[].username - The username of the sender.
- * @param {string} messages[].avatar - Tha avatar of the sender (emoji or character).
- * @param {string} messages[].text - The message text.
- * @param {string} messages[].timestampe - ISO string timestampe of when the message was sent.
- * @param {function(number): void} removeCallback - Callback function to remove a message by index.
+ * @param {Array<object>} messages - Array of messages object to render.
+ * @param {Function} removeCallback - Callback function to remove message by index.
  * @returns {void}
  */
 export function renderMessages (messagesList, messages, removeCallback) {
@@ -71,4 +66,52 @@ export function renderMessages (messagesList, messages, removeCallback) {
   setTimeout(() => {
     messagesList.scrollTop = messagesList.scrollHeight
   }, 50)
+}
+
+/**
+ * Adds a message and re-renders.
+ *
+ * @param {string} text - The message text to add.
+ * @param {Array<object>} messages - The array of messages to update.
+ * @param {HTMLElement} messagesList - The container element to render messages in.
+ * @param {object} state - The current state object containing username and avatar.
+ * @param {WebSocket} socket - WebSocket instance to send the message
+ * @returns {void}
+ */
+export function addMessage (text, messages, messagesList, state, socket) {
+  const trimmed = text.trim()
+  if (!trimmed) return
+
+  messages.push({
+    from: 'me',
+    username: state.username,
+    avatar: state.avatar,
+    text: trimmed,
+    timestamp: new Date().toISOString()
+  })
+
+  renderMessages(messagesList, messages, (index) => removeMessage(index, messages, messagesList))
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({
+      type: 'message',
+      data: trimmed,
+      username: state.username,
+      channel: 'myChannel',
+      key: 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd'
+    }))
+  }
+}
+
+/**
+ * Removes a message at the given index and re-renders.
+ *
+ * @param {number} index - Index of the message to remove.
+ * @param {Array<object>} messages - The array of messages to update.
+ * @param {HTMLElement} messagesList - The container element to render messages in.
+ * @returns {void}
+ */
+export function removeMessage (index, messages, messagesList) {
+  messages.splice(index, 1)
+  renderMessages(messagesList, messages, (i) => removeMessage(i, messages, messagesList))
 }
