@@ -44,7 +44,7 @@ input {
   outline: 2px solid #5f86a1;
 }
 .error-msg {
-  color: #ff6b6b;
+  margin: 1rem auto;
 }
 button {
   padding: .5rem 1rem;

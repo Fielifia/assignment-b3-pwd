@@ -6,16 +6,11 @@
  */
 import '../../components/high-score.js'
 import '../../components/nickname-form.js'
-import { createInitialState, resetState } from './components/game-state.js'
-import { createTileValues } from './components/board-utils.js'
+import { createInitialState, initGameState, resetState } from './components/game-state.js'
 import { startTimer, stopTimer } from './components/timer.js'
-
-const VIEWS = {
-  START: 'start',
-  IN_GAME: 'inGame',
-  GAME_END: 'gameEnd',
-  HIGHSCORES: 'highscores'
-}
+import { renderBoard } from './components/board-renderer.js'
+import { flipTile, checkMatch } from './components/game-logic.js'
+import { VIEWS, viewConfig } from './components/views.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
@@ -26,6 +21,9 @@ template.innerHTML = `
 }
   :host {
     color: #000;
+    display: block;
+    max-height: 100vh;
+    overflow-y: auto;
   }
 .memory-container {
   display: none;
@@ -170,7 +168,6 @@ margin-right: auto;
   justify-content: center;
   align-items: flex-start;
   display: none;
-  overflow-y: auto;
   box-sizing: border-box;
 }
 
@@ -244,65 +241,6 @@ class MemoryApp extends HTMLElement {
     /// //SAFE
     this.state = createInitialState()
 
-    this.views = {
-      start: {
-        container: 'none',
-        board: 'none',
-        status: 'none',
-        message: 'none',
-        nicknameForm: 'block',
-        controls: 'flex',
-        highScore: 'none',
-        toggleControls: {
-          levelSelect: true,
-          restart: false,
-          goBack: false,
-          highScore: true
-        }
-      },
-
-      inGame: {
-        container: 'flex',
-        board: 'grid',
-        status: 'flex',
-        message: 'none',
-        nicknameForm: 'none',
-        controls: 'flex',
-        highScore: 'none',
-        toggleControls: {
-          levelSelect: false,
-          restart: true,
-          goBack: true,
-          highScore: true
-        }
-      },
-
-      gameEnd: {
-        container: 'flex',
-        board: 'none',
-        status: 'none',
-        message: 'block',
-        nicknameForm: 'none',
-        controls: 'flex',
-        highScore: 'flex',
-        toggleControls: {
-          levelSelect: false,
-          restart: true,
-          goBack: false,
-          highScore: false
-        }
-      },
-
-      highscores: {
-        container: 'flex',
-        board: 'none',
-        status: 'none',
-        message: 'none',
-        nicknameForm: 'none',
-        controls: 'none',
-        highScore: 'flex'
-      }
-    }
     this.currentView = null
 
     this.prevView = null
@@ -413,75 +351,20 @@ class MemoryApp extends HTMLElement {
 
     this.setView(VIEWS.IN_GAME)
 
+    initGameState(this.state, this.state.level)
+
+    this.updateStatus()
+
+    requestAnimationFrame(() => {
+      startTimer(this.state, () => this.updateStatus())
+    })
+
     this.boardEl.className = 'memory-game'
     this.boardEl.classList.add(`level-${this.state.level}`)
     this.messageEl.textContent = ''
 
-    this.state.board = createTileValues()
-    this.state.flipped = []
-    this.state.matches = 0
-    this.state.attempts = 0
-    this.state.time = 0
-    this.state.isBusy = false
-    this.state.gameOver = false
-
-    startTimer()
-    this.render()
+    renderBoard(this.boardEl, this.state.board, (tile, tileEl) => flipTile(this.state, tile, tileEl, (state) => checkMatch(state, () => this.handleGameOver())))
     this.restartBtn.textContent = 'Restart'
-  }
-
-  /**
-   * Creates a tile DOM element for the memory game.
-   *
-   * Adds front and back faces, accesibility attributes,
-   * and event listeners for click and keyboard interaction.
-   *
-   * @param {{id: number, value: string}} tile - Tile data object.
-   * @returns {HTMLElement} The tile element ready to be appended to the board.
-   */
-  createTileElement (tile) {
-    const tileEl = document.createElement('div')
-    tileEl.classList.add('tile')
-
-    tileEl.setAttribute('tabindex', '0')
-    tileEl.setAttribute('role', 'button')
-    tileEl.setAttribute('aria-label', 'Memory tile')
-
-    const inner = document.createElement('div')
-    inner.classList.add('tile-inner')
-
-    const frontFace = document.createElement('div')
-    frontFace.classList.add('front')
-    frontFace.textContent = tile.value
-
-    const backFace = document.createElement('div')
-    backFace.classList.add('back')
-
-    inner.append(frontFace, backFace)
-    tileEl.appendChild(inner)
-
-    tileEl.addEventListener('click', () => this.flipTile(tile, tileEl))
-    tileEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        this.flipTile(tile, tileEl)
-      }
-    })
-
-    return tileEl
-  }
-
-  /**
-   * Renders the board inside the component.
-   *
-   * @returns {void}
-   */
-  render () {
-    this.boardEl.innerHTML = ''
-    this.state.board.forEach((tile) =>
-      this.boardEl.appendChild(this.createTileElement(tile))
-    )
-    this.updateStatus()
   }
 
   /**
@@ -492,71 +375,10 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   updateStatus () {
+    if (!this.statusEl || this.currentView !== VIEWS.IN_GAME) return
+
     const { time, matches, attempts } = this.state
     this.statusEl.textContent = `Time: ${time}s | Matches: ${matches} | Attempts: ${attempts}`
-  }
-
-  /**
-   * Handles a tile flip.
-   * Flips the tile, checks for matches and updates state.
-   *
-   * @param {{id: number, value: string, matched: boolean}} tile - The tile object
-   * @param {HTMLElement} tileEl - The tile DOM element
-   * @returns {void}
-   */
-  flipTile (tile, tileEl) {
-    if (
-      this.state.isBusy ||
-      tile.matched ||
-      this.state.flipped.some((f) => f.tile === tile)
-    ) {
-      return
-    }
-
-    tileEl.classList.add('flip')
-    this.state.flipped.push({ tile, el: tileEl })
-
-    if (this.state.flipped.length === 2) {
-      this.state.isBusy = true
-      this.state.attempts++
-
-      setTimeout(() => {
-        this.checkMatch()
-        this.state.isBusy = false
-      }, 500)
-    }
-  }
-
-  /**
-   * Checks if the two flipped tiles match.
-   * Updates matches state and clears flipped array.
-   *
-   * @returns {void}
-   */
-  checkMatch () {
-    const [first, second] = this.state.flipped
-    if (!first || !second) return
-
-    if (first.tile.value === second.tile.value) {
-      first.tile.matched = true
-      second.tile.matched = true
-      this.state.matches++
-
-      setTimeout(() => {
-        first.el.classList.add('matched')
-        second.el.classList.add('matched')
-      }, 500)
-    } else {
-      first.el.classList.remove('flip')
-      second.el.classList.remove('flip')
-    }
-
-    this.state.flipped = []
-    this.updateStatus()
-
-    if (this.state.matches === this.state.board.length / 2) {
-      setTimeout(() => this.handleGameOver(), 1000)
-    }
   }
 
   /**
@@ -566,7 +388,9 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   backToStart () {
-    resetState()
+    resetState(this.state)
+    stopTimer(this.state)
+    this.resetUI()
   }
 
   /**
@@ -591,7 +415,7 @@ class MemoryApp extends HTMLElement {
    */
   handleGameOver () {
     this.state.gameOver = true
-    stopTimer()
+    stopTimer(this.state)
     this.prevView = VIEWS.GAME_END
     this.setView(VIEWS.GAME_END)
     this.showMessage(
@@ -656,7 +480,7 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   setView (viewName) {
-    const view = this.views[viewName]
+    const view = viewConfig[viewName]
     if (!view) return
 
     this.currentView = viewName

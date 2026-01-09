@@ -2,7 +2,7 @@
  * Shuffles an array using Fisher-Yates algorithm.
  *
  * @param {Array} arr - The array to shuffle
- * @returns {Array} Shuffled array
+ * @returns {Array} A new shuffled array
  */
 export function shuffleArray (arr) {
   const a = arr.slice()
@@ -17,9 +17,10 @@ export function shuffleArray (arr) {
  * Creates an array of tile objects for the game.
  * Each tile has an id, value and mathed state.
  *
+ * @param {number} level - Board size.
  * @returns {Array<{id: number, value: string, matched: boolean}>} Array of tiles
  */
-export function createTileValues () {
+export function createTileValues (level) {
   const TILE_VALUES = [
     '🍎',
     '🍌',
@@ -40,7 +41,8 @@ export function createTileValues () {
     '🫐',
     '🍏'
   ]
-  const needed = this.state.level ** 2 / 2
+
+  const needed = (level ** 2) / 2
 
   const tiles = [
     ...TILE_VALUES.slice(0, needed).concat(TILE_VALUES.slice(0, needed))
