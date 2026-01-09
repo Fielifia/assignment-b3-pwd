@@ -25,11 +25,17 @@ template.innerHTML = `
     max-height: 100vh;
     overflow-y: auto;
   }
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    background: #8fb3cc2a;
+}
 .memory-container {
   display: none;
   flex-direction: column;
   flex: 1;
-  min-height: 0;
 }
 .memory-game {
   display: none;
@@ -181,6 +187,7 @@ margin-right: auto;
   padding: 1rem;
 }
 </style>
+<div class="container">
 <nickname-form label-text="Enter a nickname:"></nickname-form>
 <div class="memory-container">
 <div class="status"></div>
@@ -203,6 +210,7 @@ margin-right: auto;
 </div>
 <div class="highscore-modal">
 <high-score></high-score>
+</div>
 </div>
 
 `

@@ -23,9 +23,6 @@ template.innerHTML = `
 * {
 box-sizing: border-box;
 }
-span {
-display: block;
-}
 </style>
 <span></span>
 `

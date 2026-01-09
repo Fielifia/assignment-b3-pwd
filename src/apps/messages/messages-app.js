@@ -12,134 +12,8 @@
 import '../../components/nickname-form.js'
 import './components/avatar-picker.js'
 import '../../components/dateTime-display.js'
-
-const template = document.createElement('template')
-template.innerHTML = `
-<style>
-* {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-.container {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    flex: 1;
-    padding: 1rem 1rem 0;
-}
-
-avatar-picker {
-    margin-top: 1rem;
-}
-
-nickname-form {
-    margin-bottom: 1rem;
-}
-
-.chat-container {
-    flex-direction: column;
-    min-height: 0;
-    flex: 1;
-    }
-
-.messages-list  {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-    padding: 1rem 0;
- }
-    
-.send-msg {
-    align-items: center;
-    display: flex;
-    gap: .2rem;
-    border-top: 2px solid #00000033;
-}
-
-#chat-msg {
-    resize: none;
-    flex: 1;
-    font-size: .9rem;
-    border: none;
-    min-width: 0;
-}
-
-#chat-msg:focus {
-    outline: none;
-}
-button {
-    cursor: pointer;
-}
-
-.message {
-    display: flex;
-    border: 2px solid #00000073;
-    border-radius: 12px;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
-    padding: .5rem;
-    margin-bottom: .5rem;
-    gap: .2rem;
-}
-div.message.me {
-    align-self: flex-end;
-    background: #d1f0ff;
-}
-
-div.message.them {
-    align-self: flex-start;
-    background: #f0f0f0;
-}
-
-.send-btn {
-    background: none;
-    border: none;
-    font-size: 1rem;
-    padding: .5rem;
-}
-
-.delete-btn {
-    background: none;
-    border: none;
-    margin-left: 1rem;
-}
-
-.avatar-el, .text-el {
-    display: flex;
-    font-size: .9rem;
-    align-items: center;
-}
-.text-el {
-    flex: 1;
-    word-break: break-word;
-}
-
-date-time-display {
-    display: block;
-    padding: .5rem;
-    background: linear-gradient(145deg, #3f5f73, #5f86a1);
-    color: #000;
-    text-align: right;
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
-}
-    
-</style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-
-<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
-<div class="container">
-<avatar-picker></avatar-picker>
-<nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
-<div class="chat-container" style="display:none;">
-<div class="messages-list"></div>
-
-<div class="send-msg">
-<textarea id="chat-msg" placeholder="Write a message"></textarea>
-<button class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
-</div>
-</div>
-</div>
-`
+import template from './components/messages-template.js'
+import { renderMessages } from './components/messages-renderer.js'
 
 /**
  * MessagesApp class for the chat component.
@@ -155,37 +29,14 @@ export class MessagesApp extends HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
     this.socket = new WebSocket('wss://courselab.lnu.se/message-app/socket')
-
-    this.socket.addEventListener('open', () => {
-      console.log('Connected to chat server')
-    })
-
-    this.socket.addEventListener('message', (event) => {
-      const msg = JSON.parse(event.data)
-
-      if (msg.username !== this.state.username && msg.data?.trim()) {
-        this.messages.push({
-          from: 'them',
-          username: msg.username,
-          avatar: '👤',
-          text: msg.data
-        })
-        this.renderMessages()
-      }
-    })
-
-    this.socket.addEventListener('close', () => {
-      console.log('Disconnected from chat server')
-    })
-
     this.state = {
       username: localStorage.getItem('messagesUsername') || '',
       avatar: localStorage.getItem('messagesAvatar') || ''
     }
-
     this.messages = []
 
     this.dateDisplay = this.shadowRoot.querySelector('date-time-display')
+    this.dateDisplay.classList.add('time-display')
     this.chatContainer = this.shadowRoot.querySelector('.chat-container')
     this.messagesList = this.shadowRoot.querySelector('.messages-list')
     this.textarea = this.shadowRoot.querySelector('textarea')
@@ -200,6 +51,29 @@ export class MessagesApp extends HTMLElement {
    */
   connectedCallback () {
     this.initUI()
+    this.socket.addEventListener('message', (event) => {
+      const msg = JSON.parse(event.data)
+
+      if (msg.username !== this.state.username && msg.data?.trim()) {
+        this.messages.push({
+          from: 'them',
+          username: msg.username,
+          avatar: '👤',
+          text: msg.data,
+          timestamp: new Date().toISOString()
+        })
+        renderMessages(this.messagesList, this.messages, this.removeMessage.bind(this))
+      }
+    })
+
+    this.socket.addEventListener('open', () => console.log('Connected'))
+    this.socket.addEventListener('close', () => console.log('Disconnected'))
+
+    document.addEventListener('click', (e) => {
+      this.shadowRoot.querySelectorAll('.delete-btn').forEach(btn => {
+        if (!btn.parentElement.contains(e.target)) btn.style.display = 'none'
+      })
+    })
   }
 
   /**
@@ -251,10 +125,11 @@ export class MessagesApp extends HTMLElement {
       from: 'me',
       username: this.state.username,
       avatar: this.state.avatar,
-      text
+      text,
+      timestamp: new Date().toISOString()
     })
 
-    this.renderMessages()
+    renderMessages(this.messagesList, this.messages, this.removeMessage.bind(this))
     this.textarea.value = ''
 
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -269,48 +144,6 @@ export class MessagesApp extends HTMLElement {
   }
 
   /**
-   * Renders all messages in the message list.
-   * Scrolls to the latest message automatically.
-   *
-   * @returns {void}
-   */
-  renderMessages () {
-    this.messagesList.innerHTML = ''
-
-    this.messages.forEach((m, index) => {
-      const msgEl = document.createElement('div')
-      msgEl.classList.add('message')
-
-      msgEl.classList.add(m.from)
-
-      const avatarEl = document.createElement('span')
-      avatarEl.classList.add('avatar-el')
-      avatarEl.textContent = m.avatar
-
-      const textEl = document.createElement('span')
-      textEl.classList.add('text-el')
-      textEl.innerHTML = `<strong>${m.username}:</strong>&nbsp;${m.text}`
-
-      msgEl.appendChild(avatarEl)
-      msgEl.appendChild(textEl)
-
-      if (m.from === 'me') {
-        const deleteBtn = document.createElement('button')
-        deleteBtn.classList.add('delete-btn')
-        deleteBtn.textContent = '🗑️'
-        deleteBtn.title = 'Delete message'
-        deleteBtn.addEventListener('click', () => this.removeMessage(index))
-        msgEl.appendChild(deleteBtn)
-      }
-
-      this.messagesList.appendChild(msgEl)
-    })
-    setTimeout(() => {
-      this.messagesList.scrollTop = this.messagesList.scrollHeight
-    }, 50)
-  }
-
-  /**
    * Removes a message a the given index.
    *
    * @param {number} index - Index of the message to remove.
@@ -318,7 +151,7 @@ export class MessagesApp extends HTMLElement {
    */
   removeMessage (index) {
     this.messages.splice(index, 1)
-    this.renderMessages()
+    renderMessages(this.messagesList, this.messages, this.removeMessage.bind(this))
   }
 }
 customElements.define('messages-app', MessagesApp)

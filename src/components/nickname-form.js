@@ -15,7 +15,7 @@ template.innerHTML = `
 }
 
 :host {
-    background: #none;
+    background: none;
     color: #000;
 }
 #nickname-container {
