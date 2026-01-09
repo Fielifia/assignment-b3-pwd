@@ -29,9 +29,11 @@ template.innerHTML = `
   display: none;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
 }
 .memory-game {
   display: none;
+  flex: 1;
   gap: .6rem;
   padding: 1rem;
   min-height: 0;
@@ -60,8 +62,9 @@ template.innerHTML = `
 
 .tile {
   width: 100%;
+  flex: 1 1 auto;
   perspective: 1000px;
-  min-height: 50px;
+  min-height: 30px;
   aspect-ratio: 1/1;
   border-radius: 6px;
 }

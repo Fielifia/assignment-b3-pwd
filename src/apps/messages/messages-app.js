@@ -11,7 +11,7 @@
  */
 import '../../components/nickname-form.js'
 import './components/avatar-picker.js'
-import './components/dateTime-display.js'
+import '../../components/dateTime-display.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
@@ -126,7 +126,7 @@ date-time-display {
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-<date-time-display datetime="" format="datetime"></date-time-display>
+<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
 <div class="container">
 <avatar-picker></avatar-picker>
 <nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
@@ -185,6 +185,7 @@ export class MessagesApp extends HTMLElement {
 
     this.messages = []
 
+    this.dateDisplay = this.shadowRoot.querySelector('date-time-display')
     this.chatContainer = this.shadowRoot.querySelector('.chat-container')
     this.messagesList = this.shadowRoot.querySelector('.messages-list')
     this.textarea = this.shadowRoot.querySelector('textarea')
