@@ -199,7 +199,6 @@ margin-right: auto;
 <button class="restart-btn" style="display:none;">Restart</button>
 <div class="level-select">
 <select id="level">
-<option value="" selected disabled>Select level</option>
 <option value="2">Level 1: 2x2</option>
 <option value="4">Level 2: 4x4</option>
 <option value="6">Level 3: 6x6</option>

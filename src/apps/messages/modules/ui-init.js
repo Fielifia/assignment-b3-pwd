@@ -8,10 +8,13 @@
  * @param {HTMLTextAreaElement} refs.textarea - Textarea for messge input.
  * @param {HTMLElement} refs.sendBtn - Send button element.
  * @param {object} state - State object with username/avatar.
- * @param {Function} addMessage - Callback to sen a new message.
+ * @param {string} [state.username] - The currently selected username.
+ * @param {string} [state.avatar] - The currently selected avatar.
+ * @param {string} [state.channel] - The currently selected channel.
+ * @param {() => void} sendCallback - Callback function to send a new message.
  * @returns {void}
  */
-export function initUI ({ avatarPicker, usernameForm, chatContainer, textarea, sendBtn }, state, addMessage) {
+export function initUI ({ avatarPicker, usernameForm, chatContainer, textarea, sendBtn }, state, sendCallback) {
   avatarPicker.addEventListener('avatar-selected', (e) => {
     state.avatar = e.detail.avatar
     localStorage.setItem('messagesAvatar', state.avatar)
@@ -33,11 +36,11 @@ export function initUI ({ avatarPicker, usernameForm, chatContainer, textarea, s
     requestAnimationFrame(() => textarea.focus())
   }
 
-  sendBtn.addEventListener('click', () => addMessage())
+  sendBtn.addEventListener('click', () => sendCallback())
   textarea.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      addMessage()
+      sendCallback()
     }
   })
 }
