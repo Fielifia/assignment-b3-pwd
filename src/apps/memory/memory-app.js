@@ -248,11 +248,9 @@ class MemoryApp extends HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
-    /// //SAFE
+
     this.state = createInitialState()
-
     this.currentView = null
-
     this.prevView = null
   }
 

@@ -1,21 +1,24 @@
 /**
  * Messages application web component.
  *
- * Provides a simple chat intereface with:
+ * Provides a real-time chat interface connected to a server with:
  * - Username selection
  * - Avatar selection
- * - Simulated two-way conversation
+ * - Channel selection
+ * - Reply functionality
+ *
+ * Handles sending, receiving, and replying to messages.
  *
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @augments HTMLElement
  */
+import '../../components/dateTime-display.js'
 import '../../components/nickname-form.js'
 import './components/avatar-picker.js'
-import '../../components/dateTime-display.js'
-import { renderMessages, addMessage, removeMessage } from './modules/messages-handler.js'
-import { initSocket } from './modules/socket-init.js'
+import './components/channel-picker.js'
+import { addMessage, removeMessage, renderMessages } from './modules/messages-manager.js'
+import { initSocket } from './modules/socket-service.js'
 import { initUI } from './modules/ui-init.js'
-import './modules/channel-picker.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
@@ -73,7 +76,6 @@ nickname-form {
 
 button {
     cursor: pointer;
-
 }
 
 .message {
@@ -246,7 +248,7 @@ textarea:focus {
 <div class="chat-container">
 <div class="messages-list"></div>
 
-<div class="reply-preview" style="display: none;">
+<div class="reply-preview">
 <span class="reply-text"></span>
 <span class="cancel-reply-btn">✖</span>
 </div>
@@ -261,8 +263,14 @@ textarea:focus {
 `
 /**
  * MessagesApp class for the chat component.
+ *
+ * @class
  */
 export class MessagesApp extends HTMLElement {
+  /** @private */ #messages = []
+  /** @private */ #replyTo = null
+  /** @private */ #socket = null
+
   /**
    * Creates the MessagesApp component.
    * Initializes state, DOM references, (and message storage).
@@ -272,14 +280,14 @@ export class MessagesApp extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
+    /** @type {{username: string, avatar: string, channel: string}} */
     this.state = {
       username: localStorage.getItem('messagesUsername') || '',
       avatar: localStorage.getItem('messagesAvatar') || '',
       channel: 'default'
     }
-    this.messages = []
-    this.replyTo = null
 
+    // DOM references
     this.dateDisplay = this.shadowRoot.querySelector('date-time-display')
     this.dateDisplay.classList.add('time-display')
     this.chatContainer = this.shadowRoot.querySelector('.chat-container')
@@ -288,29 +296,52 @@ export class MessagesApp extends HTMLElement {
     this.sendBtn = this.shadowRoot.querySelector('.send-btn')
     this.usernameForm = this.shadowRoot.querySelector('nickname-form')
     this.avatarPicker = this.shadowRoot.querySelector('avatar-picker')
-
-    this.picker = this.shadowRoot.querySelector('channel-picker')
-    this.picker.addEventListener('channel-change', e => {
-      this.state.channel = e.detail
-      renderMessages(
-        this.messagesList,
-        this.messages.filter(m => m.channel === this.state.channel),
-        (index) => removeMessage(index, this.messages, this.messagesList),
-        (msg) => this.setReply(msg)
-      )
-    })
-  }
-
-  /**
-   * Lifecycle callback.
-   * Initializes UI logic and event listeners.
-   */
-  connectedCallback () {
     this.replyPreview = this.shadowRoot.querySelector('.reply-preview')
     this.replyText = this.shadowRoot.querySelector('.reply-text')
     this.cancelReplyBtn = this.shadowRoot.querySelector('.cancel-reply-btn')
-    this.cancelReplyBtn.addEventListener('click', () => this.clearReply())
+    this.picker = this.shadowRoot.querySelector('channel-picker')
 
+    this.#handleCancelReply = this.#handleCancelReply.bind(this)
+    this.#handleChannelChange = this.#handleChannelChange.bind(this)
+    this.#bindEvents()
+  }
+
+  /**
+   * Handles click on cancel reply button.
+   *
+   * @private
+   */
+  #handleCancelReply = () => {
+    this.clearReply()
+  }
+
+  /**
+   * Handles channel-picker change event.
+   *
+   * @param {CustomEvent<string>} e - Event containing selected channel in e-detail.
+   */
+  #handleChannelChange = (e) => {
+    this.state.channel = e.detail
+    renderMessages(
+      this.messagesList,
+      this.#messages.filter(m => m.channel === this.state.channel),
+      (index) => removeMessage(index, this.#messages, this.messagesList),
+      (msg) => this.setReply(msg)
+    )
+  }
+
+  /**
+   * Binds event listeners for reply and channel picker.
+   */
+  #bindEvents () {
+    this.cancelReplyBtn.addEventListener('click', this.#handleCancelReply)
+    this.picker.addEventListener('channel-change', this.#handleChannelChange)
+  }
+
+  /**
+   * Lifecycle callback when connected to DOM.
+   * */
+  connectedCallback () {
     initUI({
       avatarPicker: this.avatarPicker,
       usernameForm: this.usernameForm,
@@ -320,31 +351,38 @@ export class MessagesApp extends HTMLElement {
     }, this.state, () => {
       addMessage(
         this.textarea.value,
-        this.messages,
+        this.#messages,
         this.messagesList,
         this.state,
-        this.socket,
-        this.replyTo
+        this.#socket,
+        this.#replyTo,
+        (msg) => this.setReply(msg)
       )
       this.clearReply()
       this.textarea.value = ''
-      requestAnimationFrame(() => this.textarea.focus())
     })
 
-    this.socket = initSocket(this.state, this.messages, () => renderMessages(this.messagesList, this.messages, (index) => removeMessage(index, this.messages, this.messagesList), (msg) => this.setReply(msg)))
+    this.#socket = initSocket(this.state, this.#messages, () => renderMessages(this.messagesList, this.#messages, (index) => removeMessage(index, this.#messages, this.messagesList), (msg) => this.setReply(msg)))
+  }
+
+  /**
+   * Lifecycle callback when disconnected.
+   * */
+  disconnectedCallback () {
+    this.cancelReplyBtn.removeEventListener('click', this.#handleCancelReply)
+    this.picker.removeEventListener('channel-change', this.#handleChannelChange)
   }
 
   /**
    * Sets replyTo and shows preview.
    *
-   * @param {object} message  - Message to answer.
+   * @param {object} message  - Message object to reply to.
    */
   setReply (message) {
-    this.replyTo = message
+    this.#replyTo = message
     this.replyText.innerHTML = `<strong>Replying ${message.username}</strong><br> ${message.text}`
     this.replyPreview.style.display = 'flex'
     this.textarea.setAttribute('aria-describedby', 'reply-preview')
-
     requestAnimationFrame(() => {
       this.textarea.focus()
     })
@@ -354,9 +392,12 @@ export class MessagesApp extends HTMLElement {
    * Clears replyTo and hides preview.
    */
   clearReply () {
-    this.replyTo = null
+    this.#replyTo = null
     this.replyPreview.style.display = 'none'
     this.replyText.innerHTML = ''
+    requestAnimationFrame(() => {
+      this.textarea.focus()
+    })
   }
 }
 customElements.define('messages-app', MessagesApp)

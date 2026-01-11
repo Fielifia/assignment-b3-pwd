@@ -1,24 +1,4 @@
 /**
- * Renders all messages in the message list.
- * Scrolls to the latest message automatically.
- *
- * @param {HTMLElement} messagesList - The container element where messages will be rendered.
- * @param {Array<object>} messages - Array of messages object to render.
- * @param {Function} onDelete - Callback function to remove message by index.
- * @param {Function} [onReply] - Callback function when replying to a them-message.
- * @returns {void}
- */
-export function renderMessages (messagesList, messages, onDelete, onReply) {
-  messagesList.innerHTML = ''
-  messages.forEach((m, index) => {
-    const msgEl = createMessageElement(m, index, onDelete, onReply)
-    messagesList.appendChild(msgEl)
-  })
-  setTimeout(() => {
-    messagesList.scrollTop = messagesList.scrollHeight
-  }, 50)
-}
-/**
  * Creates a message element DOM structure.
  *
  * @param {{from: string, username: string, avatar: string, text: string, timestamp: string, replyTo?: object, channel: string}} m - Message object.
@@ -27,7 +7,7 @@ export function renderMessages (messagesList, messages, onDelete, onReply) {
  * @param {(message: object) => void} [onReply] - Optional callback function for replying to a message.
  * @returns {HTMLElement} The DOM element representing the message.
  */
-function createMessageElement (m, index, onDelete, onReply) {
+export function createMessageElement (m, index, onDelete, onReply) {
   const msgEl = document.createElement('div')
   msgEl.classList.add('message', m.from)
 
@@ -45,20 +25,7 @@ function createMessageElement (m, index, onDelete, onReply) {
 }
 
 /**
- * Creates an avatar DOM element.
- *
- * @param {string} avatar - The avatar emoji.
- * @returns {HTMLElement} The span element representing the avatar.
- */
-function createAvatarEl (avatar) {
-  const avatarEl = document.createElement('span')
-  avatarEl.classList.add('avatar-el')
-  avatarEl.textContent = avatar
-  return avatarEl
-}
-
-/**
- * Creates the body part of a messsage element, including username, text, reply overlay and delete button.
+ * Creates the body part of a message element, including username, text, reply overlay and delete button.
  *
  * @param {{from: string, username: string, avatar: string, text: string, timestamp: string, replyTo?: object, channel: string}} m - Message object.
  * @param {number} index - Index of the message.
@@ -118,6 +85,33 @@ function createBodyEl (m, index, onDelete, onReply) {
 }
 
 /**
+ * Creates an avatar DOM element.
+ *
+ * @param {string} avatar - The avatar emoji.
+ * @returns {HTMLElement} The span element representing the avatar.
+ */
+function createAvatarEl (avatar) {
+  const avatarEl = document.createElement('span')
+  avatarEl.classList.add('avatar-el')
+  avatarEl.textContent = avatar
+  return avatarEl
+}
+
+/**
+ * Creates a time display element for a message.
+ *
+ * @param {string} timestamp - ISO string of the message tinmestamp.
+ * @returns {HTMLElement} The custom date-time-display element for the message.
+ */
+function createTimeEl (timestamp) {
+  const timeEl = document.createElement('date-time-display')
+  timeEl.classList.add('message-time')
+  timeEl.setAttribute('datetime', timestamp)
+  timeEl.setAttribute('format', 'time')
+  return timeEl
+}
+
+/**
  * Attaches a delete button to a message text container.
  *
  * @param {HTMLElement} textContainer - The container for the text message.
@@ -153,69 +147,4 @@ function attachDeleteBtn (textContainer, index, onDelete) {
   textContainer.addEventListener('mouseleave', () => {
     deleteBtn.style.display = 'none'
   })
-}
-
-/**
- * Creates a time display element for a message.
- *
- * @param {string} timestamp - ISO string of the message tinmestamp.
- * @returns {HTMLElement} The custom date-time-display element for the message.
- */
-function createTimeEl (timestamp) {
-  const timeEl = document.createElement('date-time-display')
-  timeEl.classList.add('message-time')
-  timeEl.setAttribute('datetime', timestamp)
-  timeEl.setAttribute('format', 'time')
-  return timeEl
-}
-
-/**
- * Adds a message and re-renders.
- *
- * @param {string} text - The message text to add.
- * @param {Array<object>} messages - The array of messages to update.
- * @param {HTMLElement} messagesList - The container element to render messages in.
- * @param {object} state - The current state object containing username and avatar.
- * @param {WebSocket} socket - WebSocket instance to send the message.
- * @param {object|null} [replyTo=null] - Optional message object that this message is replying to.
- * @returns {void}
- */
-export function addMessage (text, messages, messagesList, state, socket, replyTo = null) {
-  const trimmed = text.trim()
-  if (!trimmed) return
-
-  messages.push({
-    from: 'me',
-    username: state.username,
-    avatar: state.avatar,
-    text: trimmed,
-    timestamp: new Date().toISOString(),
-    replyTo,
-    channel: state.channel
-  })
-
-  renderMessages(messagesList, messages, (index) => removeMessage(index, messages, messagesList))
-
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({
-      type: 'message',
-      data: trimmed,
-      username: state.username,
-      channel: state.channel,
-      key: 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd'
-    }))
-  }
-}
-
-/**
- * Removes a message at the given index and re-renders.
- *
- * @param {number} index - Index of the message to remove.
- * @param {Array<object>} messages - The array of messages to update.
- * @param {HTMLElement} messagesList - The container element to render messages in.
- * @returns {void}
- */
-export function removeMessage (index, messages, messagesList) {
-  messages.splice(index, 1)
-  renderMessages(messagesList, messages, (i) => removeMessage(i, messages, messagesList))
 }
