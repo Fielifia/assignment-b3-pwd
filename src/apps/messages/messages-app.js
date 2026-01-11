@@ -15,6 +15,7 @@ import '../../components/dateTime-display.js'
 import { renderMessages, addMessage, removeMessage } from './modules/messages-handler.js'
 import { initSocket } from './modules/socket-init.js'
 import { initUI } from './modules/ui-init.js'
+import './modules/channel-picker.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
@@ -255,14 +256,7 @@ textarea:focus {
 <button class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
 </div>
 </div>
-<div class="channel-select">
-<select id="channel">
-<option value="" selected disabled>Select channel</option>
-<option value="general">General</option>
-<option value="myChannel">My Channel</option>
-<option value="random">Random</option>
-</select>
-</div>
+<channel-picker></channel-picker>
 </div>
 `
 /**
@@ -281,7 +275,7 @@ export class MessagesApp extends HTMLElement {
     this.state = {
       username: localStorage.getItem('messagesUsername') || '',
       avatar: localStorage.getItem('messagesAvatar') || '',
-      channel: 'general'
+      channel: 'default'
     }
     this.messages = []
     this.replyTo = null
@@ -294,9 +288,17 @@ export class MessagesApp extends HTMLElement {
     this.sendBtn = this.shadowRoot.querySelector('.send-btn')
     this.usernameForm = this.shadowRoot.querySelector('nickname-form')
     this.avatarPicker = this.shadowRoot.querySelector('avatar-picker')
-    this.channelSelect = this.shadowRoot.querySelector('#channel')
 
-    this.channelSelect.value = this.state.channel
+    this.picker = this.shadowRoot.querySelector('channel-picker')
+    this.picker.addEventListener('channel-change', e => {
+      this.state.channel = e.detail
+      renderMessages(
+        this.messagesList,
+        this.messages.filter(m => m.channel === this.state.channel),
+        (index) => removeMessage(index, this.messages, this.messagesList),
+        (msg) => this.setReply(msg)
+      )
+    })
   }
 
   /**
@@ -304,18 +306,9 @@ export class MessagesApp extends HTMLElement {
    * Initializes UI logic and event listeners.
    */
   connectedCallback () {
-    this.channelSelect.addEventListener('change', (e) => {
-      this.state.channel = e.target.value
-      console.log('Channel changed to: ', this.state.channel)
-      this.clearReply()
-      renderMessages(
-        this.messagesList, this.messages.filter(m => m.channel === this.state.channel), (index) => removeMessage(index, this.messages, this.messagesList), (msg) => this.setReply(msg)
-      )
-    })
     this.replyPreview = this.shadowRoot.querySelector('.reply-preview')
     this.replyText = this.shadowRoot.querySelector('.reply-text')
     this.cancelReplyBtn = this.shadowRoot.querySelector('.cancel-reply-btn')
-
     this.cancelReplyBtn.addEventListener('click', () => this.clearReply())
 
     initUI({
@@ -335,11 +328,6 @@ export class MessagesApp extends HTMLElement {
       )
       this.clearReply()
       this.textarea.value = ''
-
-      renderMessages(
-        this.messagesList, this.messages.filter(m => m.channel === this.state.channel), (index) => removeMessage(index, this.messages, this.messagesList), (msg) => this.setReply(msg)
-      )
-
       requestAnimationFrame(() => this.textarea.focus())
     })
 

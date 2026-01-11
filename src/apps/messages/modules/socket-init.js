@@ -14,10 +14,9 @@ export function initSocket (state, messages, onMessage) {
 
   socket.addEventListener('message', (event) => {
     const msg = JSON.parse(event.data)
-
     if (msg.type === 'heartbeat') return
 
-    if (msg.channel === state.channel && msg.username !== state.username && msg.data?.trim()) {
+    if (msg.username !== state.username && msg.data?.trim()) {
       messages.push({
         from: 'them',
         username: msg.username,
@@ -29,7 +28,6 @@ export function initSocket (state, messages, onMessage) {
       onMessage()
     }
   })
-
   return socket
 }
 
