@@ -32,6 +32,7 @@ export class Dock {
       icon.title = app.title
       icon.setAttribute('tabindex', '0')
       icon.setAttribute('role', 'button')
+      icon.setAttribute('data-app-type', app.type)
 
       addActivateListener(icon, () => {
         const win = this.windowManager.createWindow(app.title, app.type)

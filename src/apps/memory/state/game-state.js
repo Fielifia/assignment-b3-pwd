@@ -1,4 +1,4 @@
-import { createTileValues } from './board-utils.js'
+import { createTileValues } from '../utils/board-utils.js'
 /**
  *@typedef {object} GameState
  * @property {Array<{id:number, value:string, matched:boolean}>} board - The array representing the game board tiles

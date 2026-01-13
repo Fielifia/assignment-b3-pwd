@@ -9,6 +9,8 @@
  * @augments HTMLElement
  */
 import './modules/mood-entry.js'
+import { MoodManager } from './modules/mood-manager.js'
+import { template } from './mood-tracker.template.js'
 /**
  * Mood Tracker App
  *
@@ -16,37 +18,7 @@ import './modules/mood-entry.js'
  * add notes, save them (to localStorage), and view history.
  * Inpired by Daylio.
  */
-const template = document.createElement('template')
-template.innerHTML = `
-<style>
-.mood-tracker-container {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
-    gap: .5rem;
-    justify-content: center;
-    align-items: center;
-    margin-top: 0;
-    padding: 0;
-    border-radius: 6px;
-    text-transform: uppercase;
-}
-:focus-visible {
-  outline: 2px solid #4d5f6a;
-}
-.error-msg {
-  color: #ff6b6b;
-}
 
-</style>
-
-<div class="mood-tracker-container">
-<h2>Mood Tracker</h2>
-<mood-entry></mood-entry>
-<mood-history></mood-history>
-</div>
-`
 /**
  *
  */
@@ -70,14 +42,19 @@ export class MoodTrackerApp extends HTMLElement {
     this.loadState()
 
     const entryComponent = this.shadowRoot.querySelector('mood-entry')
+    const historyComponent = this.shadowRoot.querySelector('mood-history')
+
     entryComponent.addEventListener('entry-submit', (e) => {
-      this.state.entries.push(e.detail)
-      localStorage.setItem('mood-tracker-entries',
-        JSON.stringify(this.state.entries)
-      )
-      this.renderHistory()
+      this.state.entries = MoodManager.addEntry(e.detail)
+      historyComponent.enries = this.state.entries
     })
-    this.renderHistory()
+
+    historyComponent.addEventListener('delete-entry', (e) => {
+      this.state.entries = MoodManager.deleteEntry(e.detail)
+      historyComponent.entries = this.state.entries
+    })
+
+    historyComponent.entries = this.state.entries
   }
 
   /**
@@ -90,14 +67,6 @@ export class MoodTrackerApp extends HTMLElement {
     } catch {
       this.state.entries = []
     }
-  }
-
-  /**
-   * Renders the history of previous days.
-   */
-  // TODO: implement actual logic
-  renderHistory () {
-
   }
 
   /**

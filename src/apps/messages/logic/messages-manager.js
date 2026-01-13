@@ -1,26 +1,5 @@
-import { sendMessage } from './socket-service.js'
-import { createMessageElement } from './messages-renderer.js'
-/**
- * Renders all messages in the message list.
- * Scrolls to the latest message automatically.
- *
- * @param {HTMLElement} messagesList - The container element where messages will be rendered.
- * @param {Array<object>} messages - Array of messages object to render.
- * @param {Function} onDelete - Callback function to remove message by index.
- * @param {Function} [onReply] - Callback function when replying to a them-message.
- * @returns {void}
- */
-export function renderMessages (messagesList, messages, onDelete, onReply) {
-  messagesList.innerHTML = ''
-  messages.forEach((m, index) => {
-    const msgEl = createMessageElement(m, index, onDelete, onReply)
-    messagesList.appendChild(msgEl)
-  })
-  setTimeout(() => {
-    messagesList.scrollTop = messagesList.scrollHeight
-  }, 50)
-}
-
+import { sendMessage } from '../services/socket.js'
+import { renderMessages } from './messages-renderer.js'
 /**
  * Adds a message and re-renders.
  *
@@ -33,7 +12,15 @@ export function renderMessages (messagesList, messages, onDelete, onReply) {
  * @param {(message: object) => void} onReply - Callback invoked when replying to a message.
  * @returns {void}
  */
-export function addMessage (text, messages, messagesList, state, socket, replyTo = null, onReply) {
+export function addMessage (
+  text,
+  messages,
+  messagesList,
+  state,
+  socket,
+  replyTo,
+  onReply
+) {
   const trimmed = text.trim()
   if (!trimmed) return
 
@@ -47,7 +34,7 @@ export function addMessage (text, messages, messagesList, state, socket, replyTo
     channel: state.channel
   })
 
-  renderMessages(messagesList, messages, (index) => removeMessage(index, messages, messagesList, onReply))
+  renderMessages(messagesList, messages, () => { }, onReply)
   sendMessage(socket, trimmed, state)
 }
 
@@ -61,5 +48,5 @@ export function addMessage (text, messages, messagesList, state, socket, replyTo
  */
 export function removeMessage (index, messages, messagesList) {
   messages.splice(index, 1)
-  renderMessages(messagesList, messages, (i) => removeMessage(i, messages, messagesList))
+  renderMessages(messagesList, messages, () => { })
 }

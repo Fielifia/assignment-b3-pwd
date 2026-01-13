@@ -6,10 +6,9 @@ template.innerHTML = `
     flex-direction: column;
     font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
     gap: 1rem;
-    margin-top: 0;
+    margin: 0;
     padding: 1rem;
     border-radius: 6px;
-    text-transform: uppercase;
     min-width: 320px;
 }
 
@@ -46,7 +45,7 @@ template.innerHTML = `
     z-index: 10;
     border: 1px solid #4d5f6a;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    white-spae: nowrap;
+    white-space: nowrap;
     min-width: fit-content;
     max-width: 50vw;
 }
@@ -65,7 +64,6 @@ template.innerHTML = `
 .mood-buttons span:hover {
     transform: scale(1.2);
 }
-
 .mood-buttons span.selected {
     transform: scale(2);
 }
@@ -75,13 +73,33 @@ template.innerHTML = `
 }
 
 textarea {
-    width: 100%;
     min-height: 50px;
 }
 
-.save-btn {
-    margin.top: .5rem;
+.save-btn, select {
+  border-radius: 10px;
+  border: none;
+  background: #8fb3cc;
+  color: #000;
+  transition: .2s ease;
+  cursor: pointer;
+  }
+  
+  .save-btn {
     padding: .5rem 1rem;
+    text-transform: uppercase;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  select {
+    padding: .25rem .5rem;
+  }
+
+.save-btn:hover{
+  background: #5f86a1;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 button, span, select, input {

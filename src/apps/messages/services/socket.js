@@ -12,8 +12,8 @@ export function initSocket (state, messages, onMessage) {
   socket.addEventListener('open', () => console.log('Connected'))
   socket.addEventListener('close', () => console.log('Disconnected'))
 
-  socket.addEventListener('message', (event) => {
-    const msg = JSON.parse(event.data)
+  socket.addEventListener('message', (e) => {
+    const msg = JSON.parse(e.data)
     if (msg.type === 'heartbeat') return
 
     if (msg.username !== state.username && msg.data?.trim()) {

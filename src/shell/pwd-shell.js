@@ -17,7 +17,7 @@ export class PwdShell {
 
     this.createLayout()
 
-    this.windowManager = new WindowManager(this.windowContainer)
+    this.windowManager = new WindowManager(this.windowContainer, this.dockContainer)
 
     this.dock = new Dock(this.dockContainer, this.windowManager)
     this.dock.init()

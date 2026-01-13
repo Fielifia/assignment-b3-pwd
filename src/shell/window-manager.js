@@ -1,57 +1,65 @@
 import { makeDraggable } from '../ui/draggable.js'
 import { APP_TAGS, WINDOW_OFFSET, INITIAL_Z_INDEX } from './constants.js'
+import { updateDock } from '../ui/updateDock.js'
+const template = document.createElement('template')
+template.innerHTML = `
+<style>
+</style>
+    <div class="window" tabindex="0">
+    <div class="title-bar" tabindex="0">
+    <span class="title-bar-title"></span>
+    <div class="title-bar-buttons">
+    <button class="minimize-btn" aria-label="Minimize window">🗕</button>
+    <button class="close-btn" aria-label="Close window">✖</button>
+    </div>
+    </div>
+    <div class="content"></div>
+    </div>
+`
 
 /**
- * Manages windows: creatin, focus, and closing.
+ * Manages creation, focus, minimize, and closing of application windows.
  */
 export class WindowManager {
   /**
    * Initializes a WindowManager instance.
    *
    * @param {HTMLElement} container - The container for all windows.
+   * @param {HTMLElement} dockContainer - The container for dock icons.
    */
-  constructor (container) {
+  constructor (container, dockContainer) {
     this.container = container
+    this.dockContainer = dockContainer
     this.windows = []
+    this.minimized = {}
     this.topZ = INITIAL_Z_INDEX
     this.nextId = 1
   }
 
   /**
-   * Creates a new windos with title and app type.
+   * Creates a new window with the specified title and app type.
    *
    * @param {string} title - The window title.
    * @param {string} appType - The application type key.
-   * @returns {HTMLElement} The creates window element.
+   * @returns {HTMLElement} The created window element.
    */
   createWindow (title, appType) {
-    const win = document.createElement('div')
-    win.classList.add('window')
+    const win = template.content.cloneNode(true).querySelector('.window')
     win.dataset.windowId = this.nextId
+    win.dataset.appType = appType
 
-    win.style.position = 'absolute'
     win.style.top = `${30 + this.nextId * WINDOW_OFFSET}px`
     win.style.left = `${30 + this.nextId * WINDOW_OFFSET}px`
     win.style.zIndex = this.topZ
-    win.setAttribute('tabindex', '0')
 
-    const titleBar = document.createElement('div')
-    titleBar.classList.add('title-bar')
-    titleBar.textContent = title
-    titleBar.setAttribute('tabindex', '0')
+    const titleBar = win.querySelector('.title-bar')
+    const titleBarTitle = win.querySelector('.title-bar-title')
+    titleBarTitle.textContent = title
 
-    const closeBtn = document.createElement('button')
-    closeBtn.classList.add('close-btn')
-    closeBtn.textContent = '✖'
-    titleBar.appendChild(closeBtn)
+    const minimizeBtn = win.querySelector('.minimize-btn')
+    const closeBtn = win.querySelector('.close-btn')
 
-    titleBar.appendChild(closeBtn)
-    win.appendChild(titleBar)
-
-    const content = document.createElement('div')
-    content.classList.add('content')
-    win.appendChild(content)
-
+    const content = win.querySelector('.content')
     const tag = APP_TAGS[appType]
     const appEl = tag ? document.createElement(tag) : document.createElement('div')
     content.appendChild(appEl)
@@ -59,6 +67,7 @@ export class WindowManager {
     makeDraggable(win, titleBar)
 
     win.addEventListener('mousedown', () => this.focusWindow(win))
+    minimizeBtn.addEventListener('click', () => this.mimimizeWindow(win))
     closeBtn.addEventListener('click', () => this.closeWindow(win))
 
     this.container.appendChild(win)
@@ -87,5 +96,24 @@ export class WindowManager {
   closeWindow (win) {
     win.remove()
     this.windows = this.windows.filter(w => w !== win)
+    const appType = win.dataset.appType
+    if (this.minimized[appType]) {
+      this.minimized[appType] = this.minimized[appType].filter(w => w !== win)
+      updateDock.call(this, appType)
+    }
+  }
+
+  /**
+   * Minimizes the given window and updates the dock.
+   *
+   * @param {HTMLElement} win - The window to minimize.
+   */
+  mimimizeWindow (win) {
+    const appType = win.dataset.appType
+    win.style.display = 'none'
+    if (!this.minimized[appType]) this.minimized[appType] = []
+    this.minimized[appType].push(win)
+
+    updateDock.call(this, appType)
   }
 }
