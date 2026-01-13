@@ -20,9 +20,10 @@ A web component for entering daily mood, energy, sleep, and notes.
     sleep: {hours: 8, quality: "Good"},
     notes: "Felt productive today!"
 }
+```
 
 ```html
-<mood entry moods="😁-Happy,☺️-Content,😐-Neutral"></mood-entry>
+<mood-entry moods="😁-Happy,☺️-Content,😐-Neutral"></mood-entry>
 
 <script type="module">
     import './mood-entry.js'
@@ -32,3 +33,4 @@ A web component for entering daily mood, energy, sleep, and notes.
         console.log('New mood entry:', e.detail)
         })
  </script>
+ ```
