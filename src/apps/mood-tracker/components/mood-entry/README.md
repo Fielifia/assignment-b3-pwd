@@ -4,7 +4,7 @@ A web component for entering daily mood, energy, sleep, and notes.
 ## Attributes
 | Attribute | Description | Default
 |-----------|-------------|---------|
-| moods     | Comma-separated list of mood emojis and labels (format: emoji-label). | 😁 Happy, ☺️ Content, 😐Neutral, 😴Tired, 😒Bored, 😟Anxious, 😢Sad, 😡Angry |
+| moods     | Comma-separated list of mood emojis and labels (format: emoji-label). | 😁 Happy, ☺️ Content, 😐 Neutral, 😴 Tired, 😒 Bored, 😟 Anxious, 😢 Sad, 😡 Angry |
 
 ## Events
 | Event Name   | Fired When |
@@ -31,6 +31,6 @@ A web component for entering daily mood, energy, sleep, and notes.
     const moodEntry = document.querySelector('mood-entry')
     moodEntry.addEventListener('entry-submit', (e) => {
         console.log('New mood entry:', e.detail)
-        })
+})
  </script>
- ```
+```
