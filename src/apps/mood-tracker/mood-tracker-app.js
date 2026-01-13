@@ -8,8 +8,8 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @augments HTMLElement
  */
-import './modules/mood-entry.js'
-import { MoodManager } from './modules/mood-manager.js'
+import './components/mood-entry/mood-entry.js'
+import { MoodManager } from './utils/mood-manager.js'
 import { template } from './mood-tracker.template.js'
 /**
  * Mood Tracker App

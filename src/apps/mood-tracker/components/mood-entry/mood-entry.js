@@ -19,6 +19,7 @@ template.innerHTML = `
 .select-mood {
     position: relative;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     gap: .5rem;
 }
@@ -27,8 +28,8 @@ template.innerHTML = `
     background: #6f94ad;
     border: none;
     border-radius: 50%;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.2rem;
+    height: 1.2rem;
 }
 
 .mood-legend {
@@ -56,7 +57,7 @@ template.innerHTML = `
     width: 100%;
     flex-wrap: wrap;
     justify-content: center;
-    margin: clamp(.5rem, 1vw, 1rem) auto;
+    margin: 0 auto clamp(.5rem, 1vw, 1rem);
 }
 .mood-buttons span {
     transition: transform .1s ease;
@@ -74,6 +75,27 @@ template.innerHTML = `
 
 textarea {
     min-height: 50px;
+    font-family: inherit;
+}
+input[type="number"] {
+  background: #dde7ef;
+  border: 1px solid #8fb3cc;
+  border-radius: 10px;
+  padding: .1rem .5rem;
+  font-size: .9rem;
+  color: #000;
+  width: 3rem;
+  transition: border .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+input[type="number"]:hover {
+ background: #8fb3cc;
+}
+
+input[type="number"]:focus-visible {
+  outline: none;
+  border-color: #4d5f6a;
+  box-shadow: 0 0 0 2px rgba(77, 95, 106, 0.25);
 }
 
 .save-btn, select {
@@ -108,16 +130,15 @@ button, span, select, input {
 </style>
 
 <div class="mood-entry-container">
-<label>
-<div class="select-mood">Select mood:
+<div class="select-mood">
+<span>Select mood:
 <button class="mood-info-btn" title="Click to see meanings">?
-</button>
+</button></span>
 <div class="mood-legend">
 </div>
-</div>
 <div class="mood-buttons"></div>
-</label>
-<label>Energy:
+</div>
+<label>Energy level:
 <select class="energy-level">
 <option value="" selected disabled>Select</option>
 <option value="1">Terrible</option>
@@ -128,10 +149,6 @@ button, span, select, input {
 </select>
 </label>
 
-<label>Sleep hours:
-<input class="sleep-hours" type="number" value="8" min="0" max="24" placeholder="Hours slept">
-</label>
-
 <label>Sleep quality:
 <select class="sleep-quality">
 <option value="" selected disabled>Select</option>
@@ -139,6 +156,10 @@ button, span, select, input {
 <option value="2">Okay</option>
 <option value="3">Good</option>
 </select>
+</label>
+
+<label>Sleep hours:
+<input class="sleep-hours" type="number" value="8" min="0" max="24" placeholder="Hours slept">
 </label>
 
 <textarea placeholder="Notes..."></textarea>
