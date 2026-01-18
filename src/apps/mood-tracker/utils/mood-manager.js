@@ -21,6 +21,7 @@ export const MoodManager = {
    * @returns {Array<object>} Updated array of mood entry objects.
    */
   addEntry (entry) {
+    if (!entry.id) entry.id = crypto.randomUUID()
     const entries = this.getEntries()
     entries.push(entry)
     localStorage.setItem(this.key, JSON.stringify(entries))
@@ -28,14 +29,13 @@ export const MoodManager = {
   },
 
   /**
-   * Deletes a mood entry by date from localStorage.
+   * Deletes a mood entry by id from localStorage.
    *
-   * @param {string} date - The date of the entry to delete.
+   * @param {string} id - Unique identifier of the entry to delete.
    * @returns {Array<object>} Updated array of mood entry objects.
    */
-  deleteEntry (date) {
-    let entries = this.getEntries()
-    entries = entries.filter(e => e.date !== date)
+  deleteEntry (id) {
+    const entries = this.getEntries().filter(e => e.id !== id)
     localStorage.setItem(this.key, JSON.stringify(entries))
     return entries
   },
@@ -43,14 +43,14 @@ export const MoodManager = {
   /**
    * Updates an existing mood entry in localStorage.
    *
-   * @param {string} date - The date of the entry to update.
+   * @param {string} id - nique identifier of the entry to update.
    * @param {object} newEntry - The new mood entry data.
    * @returns {Array<object>} Updated array of mood entry objects.
    */
-  updateEntry (date, newEntry) {
+  updateEntry (id, newEntry) {
     const entries = this.getEntries()
-    entries.map(e => e.date === date ? newEntry : e)
-    localStorage.setItem(this.key, JSON.stringify(entries))
-    return entries
+    const updated = entries.map(e => e.id === id ? { ...e, ...newEntry } : e)
+    localStorage.setItem(this.key, JSON.stringify(updated))
+    return updated
   }
 }

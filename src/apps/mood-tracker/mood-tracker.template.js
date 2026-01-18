@@ -1,11 +1,12 @@
 export const template = document.createElement('template')
 template.innerHTML = `
 <style>
-:hst {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
+:host {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
 .mood-tracker-container {
     display: flex;
     flex-direction: column;
@@ -17,6 +18,22 @@ box-sizing: border-box;
     margin-top: 0;
     padding: 0;
     border-radius: 6px;
+    background: #fff;
+}
+
+.startpage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+.greeting {
+  font-size: clamp(1.5rem, 2vw, 2.5rem);
+  color: #4d5f6a;
 }
 
 h2 {
@@ -49,12 +66,18 @@ button:hover{
   color: #ff6b6b;
 }
 
-</style>
+mood-history {
+display: none;
+width: 100%;
+background: #cbd6e4;
+border-radius: 6px;
+color: #000;
+}
 
-<div class="mood-tracker-container">
-<h2>Mood Tracker</h2>
-<mood-entry></mood-entry>
-<button class="show-history-btn">History</button>
-<mood-history></mood-history>
+</style>
+<mood-startpage></mood-startpage>
+<mood-entry style="display: none;"></mood-entry>
+<mood-history style="display: none;"></mood-history>
+
 </div>
 `

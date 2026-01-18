@@ -7,7 +7,6 @@
 body {
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
     font-size: clamp(.9rem, 1.6vw, 1.1rem);
-    line-height: 1.5;
     color: #333;
     background: #f5f5f5;
     background: linear-gradient(135deg, #f5f5f5, #8fb3cc);
@@ -94,9 +93,10 @@ body {
 
 .popup-item:hover {
     color: #000;
-}   
+}
 
-.dock-icon:hover, .dock-icon:focus {
+.dock-icon:hover,
+.dock-icon:focus {
     transform: translateY(-5px) scale(1.1);
     background: #f0f0f060;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
@@ -114,11 +114,11 @@ body {
     width: fit-content;
     height: fit-content;
     max-width: 90vw;
-    max-height: 80vh;
+    max-height: 90vh;
     min-width: 300px;
     min-height: 250px;
     border-radius: 12px;
-    background: #fff;
+    background: #edf2f7;
     border: 1px solid #ccc;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
@@ -126,7 +126,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid #5f86a1;
+    outline: 2px solid #5f86a1;
 }
 
 .window:focus-within {
@@ -163,7 +163,8 @@ body {
     gap: .3rem;
 }
 
-.minimize-btn, .close-btn {
+.minimize-btn,
+.close-btn {
     background: transparent;
     border: none;
     color: #000;
@@ -182,7 +183,8 @@ body {
     padding-bottom: .3rem;
 }
 
-.minimize-btn:hover, .close-btn:hover {
+.minimize-btn:hover,
+.close-btn:hover {
     background: #5f86a1;
     transform: scale(1.15);
 }

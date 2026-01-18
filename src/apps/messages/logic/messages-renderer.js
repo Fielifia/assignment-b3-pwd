@@ -16,22 +16,3 @@ export function renderMessages (messagesList, messages, onDelete, onReply) {
   })
   messagesList.scrollTop = messagesList.scrollHeight
 }
-
-/**
- * Adds a system message to the messages array.
- *
- * @param {Array<object>} messages - The array of message objects.
- * @param {string} channel - The channel the message belongs to.
- * @param {string} text - The text content of the message.
- * @returns {void}
- */
-export function addSystemMessage (messages, channel, text) {
-  messages.push({
-    from: 'system',
-    username: 'System',
-    avatar: '💻',
-    text,
-    channel,
-    timestamp: new Date().toISOString()
-  })
-}

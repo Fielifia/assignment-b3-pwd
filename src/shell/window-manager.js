@@ -48,8 +48,8 @@ export class WindowManager {
     win.dataset.windowId = this.nextId
     win.dataset.appType = appType
 
-    win.style.top = `${30 + this.nextId * WINDOW_OFFSET}px`
-    win.style.left = `${30 + this.nextId * WINDOW_OFFSET}px`
+    win.style.top = `${20 + this.nextId * WINDOW_OFFSET}px`
+    win.style.left = `${20 + this.nextId * WINDOW_OFFSET}px`
     win.style.zIndex = this.topZ
 
     const titleBar = win.querySelector('.title-bar')

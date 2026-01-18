@@ -107,7 +107,7 @@ class MemoryApp extends HTMLElement {
       switch (this.prevView) {
         case VIEWS.IN_GAME:
           this.setView(VIEWS.IN_GAME)
-          startTimer()
+          startTimer(this.state, () => this.updateStatus())
           break
         case VIEWS.GAME_END:
         case VIEWS.START:
@@ -121,7 +121,7 @@ class MemoryApp extends HTMLElement {
     this.highScoreBtn.addEventListener('click', () => {
       if (!this.state.gameOver && this.state.timerId) {
         this.prevView = VIEWS.IN_GAME
-        stopTimer()
+        stopTimer(this.state)
       } else if (this.state.gameOver) {
         this.prevView = VIEWS.GAME_END
       } else {

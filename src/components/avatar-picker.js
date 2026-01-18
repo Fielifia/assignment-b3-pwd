@@ -10,33 +10,38 @@
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
-.avatar-container {
+* {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+}
+
+:host {
+    background: none;
+    color: #000;
+}
+.avatar-wrapper {
     display: flex;
     flex-direction: column;
     padding: 1rem;
     font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
-    gap: .5rem;
     justify-content: center;
     align-items: center;
     margin-top: 0;
-    padding: 0;
     border-radius: 6px;
-    text-transform: uppercase;
+    text-transform: uppercase; 
+    padding: .5rem;
 }
-:focus {
-  outline: 2px solid #4d5f6a;
-}
-.error-msg {
-  color: #ff6b6b;
+
+label {
+    margin: .5rem auto;
+    text-align: center;
 }
 
 #avatar-list {
     display: flex;
     gap: .5rem;
-    width: 100%;
     flex-wrap: wrap;
     justify-content: center;
-    margin: clamp(.5rem, 1vw, 1rem) auto;
 }
 #avatar-list span {
     cursor: pointer;
@@ -45,23 +50,49 @@ template.innerHTML = `
 #avatar-list span:hover {
     transform: scale(1.2);
 }
-
 #avatar-list span.selected {
-    transform: scale(2);
+    transform: scale(1.6);
 }
 
-.selected-avatar {
-    margin-bottom: .5rem;
+:focus {
+    outline: 2px solid #4d5f6a;
+}
+.error-msg {
+    color: #ff6b6b;
+}
+
+:host([variant="sidebar"]) {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+:host([variant="sidebar"]) .avatar-wrapper {
+  flex-direction: column;
+  gap: .5rem;
+}
+
+:host([variant="sidebar"]) label {
+  padding: 0;
+  margin: 0 auto;
+  font-size: .6rem;
+}
+
+:host([variant="sidebar"]) #avatar-list {
+  display: flex;
+  gap: .2rem;
+  flex-wrap: wrap;
+  justify-content: center; margin: 0;
+  font-size: .6rem;
 }
 </style>
 
-<div class="avatar-container">
-<p class="selected-avatar">Select avatar:</p>
+<div class="avatar-wrapper">
+<label for="select-avatar">Select avatar:</label>
 <div id="avatar-list"></div>
 <p id="error-msg" class="error-msg" style="display: none;">Select an avatar!</p>
 </div>
 `
-
 /**
  * AvatarPicker component class.
  */
@@ -86,11 +117,21 @@ export class AvatarPicker extends HTMLElement {
   }
 
   /**
-   * Lifecycle callback.
-   * Renders avilable avatars when component is connected.
+   * Lifecycle callback invoked when the ellement is connected to the DOM.
+   * Renders avilable avatars.
    */
   connectedCallback () {
     this.renderAvatars()
+  }
+
+  /**
+   * List of attributes to observe for changes.
+   * Needed for variant support.
+   *
+   * @returns {string[]} Array of observed attribute names
+   */
+  static get observedAttributes () {
+    return ['variant']
   }
 
   /**
@@ -101,7 +142,7 @@ export class AvatarPicker extends HTMLElement {
    */
   renderAvatars () {
     this.avatarList.innerHTML = ''
-    this.avatars.forEach(a => {
+    this.avatars.forEach((a) => {
       const span = document.createElement('span')
       span.textContent = a
 
@@ -109,16 +150,20 @@ export class AvatarPicker extends HTMLElement {
         this.selectedAvatar = a
         this.errorEl.style.display = 'none'
 
-        this.avatarList.querySelectorAll('span').forEach(s => s.classList.remove('selected'))
+        this.avatarList
+          .querySelectorAll('span')
+          .forEach((s) => s.classList.remove('selected'))
 
         span.classList.add('selected')
 
-        this.avatarList.querySelectorAll('span').forEach(s => {
-          this.dispatchEvent(new CustomEvent('avatar-selected', {
-            detail: { avatar: a },
-            bubbles: true,
-            composed: true
-          }))
+        this.avatarList.querySelectorAll('span').forEach((s) => {
+          this.dispatchEvent(
+            new CustomEvent('avatar-selected', {
+              detail: { avatar: a },
+              bubbles: true,
+              composed: true
+            })
+          )
         })
       })
       this.avatarList.appendChild(span)

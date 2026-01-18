@@ -5,18 +5,26 @@ template.innerHTML = `
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
+:host {
+    background: #edf2f7;}
+
 .container {
     display: flex;
     flex-direction: column;
     min-height: 0;
     flex: 1;
-    padding: 1rem 1rem 0;
-    background: #edf2f7;
+    padding: .5rem;
+    transition: margin-left .3s ease;
+}
+
+.container.sidebar-open {
+    margin-left: 7rem;
 }
 
 avatar-picker {
     margin-top: 1rem;
 }
+    
 nickname-form {
     margin-bottom: 1rem;
 }
@@ -28,32 +36,51 @@ nickname-form {
     min-height: 0;
 }
 
-.channel-sidebar {
+.sidebar {
     position: absolute;
     display: flex;
+    transform: translateX(-110%);
     flex-direction: column;
     background: linear-gradient(135deg, #aec9dd 20%, #b7cfe154);
     border: 1px solid #aec9dd;
     padding: 3rem .5rem .5rem;
     height: 100%;
+    width: 6rem;
+    gap: 0;
+    transition: transform .3s ease;
     z-index: 10;
 }
 
-.channel-sidebar-toggle {
+.sidebar.visible {
+    transform: translateX(0);
+}
+
+.sidebar-toggle {
     position: absolute;
-    top: 3.5rem;
-    left: .3rem;
+    top: 3.6rem;
+    left: .6rem;
+    z-index: 20;
+    display: flex;
     background: #5f86a1;
     border: none;
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    padding: .1rem .3rem .32rem .2rem;
+    padding: .2rem;
     height: 1rem;
     width: 1rem;
     align-items: center;
     justify-content: center;
     transition: transform .2s ease, background .2s ease;
+}
+
+div.sidebar-toggle i.fas.fa-chevron-right.is-open.true {
+    transform: rotate(180deg);
+}
+
+div.sidebar.visible nickname-form..in-sidebar {
+  width: 6rem;
+  font-size: .5rem;
 }
 
 .messages-list  {
@@ -62,6 +89,7 @@ nickname-form {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
+    padding: 0 .5rem;
 }
     
 .send-msg {
@@ -262,15 +290,14 @@ textarea:focus, button:focus {
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <date-time-display datetime="" format="datetime" show-seconds></date-time-display>
-<div class="channel-sidebar-toggle">
+<div class="sidebar-toggle">
 <i class="fas fa-chevron-right"></i>
 </div>
-<div class="channel-sidebar">
-<channel-picker></channel-picker>
+<div class="sidebar">
 </div>
 <div class="container">
 <avatar-picker></avatar-picker>
-<nickname-form label-text="Enter you username:" button-text="Join"></nickname-form>
+<nickname-form label-text="Enter username:" button-text="Join"></nickname-form>
 <div class="chat-container">
 <div class="messages-list"></div>
 

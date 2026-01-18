@@ -5,47 +5,49 @@
  * a custom event 'nickname-submitted' with the nickname.
  *
  * @author Sofia Andersson <sa226jf@student.lnu.se>
+ * @version 2.0.0
  */
-// Template for shadow DOM
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
 * {
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
 }
 
 :host {
     background: none;
     color: #000;
 }
-#nickname-container {
+
+form {
   display: flex;
   font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
   flex-direction: column;  
   padding: 1rem;
 }
+
 .nickname-input {
   display: flex;
   gap: 1rem;
   width: 100%;
-}
+  }
+
 label, .nickname-input, .error-msg {
-  margin: clamp(.5rem, 1vw, 1rem) auto;
+  margin: .5rem auto;
 }
-label, #submit {
-  padding: .5rem clamp(1.5rem, 2vw, 2.5rem);
+
+label {
+  padding: 0 .5rem;
   text-transform: uppercase;
+  text-align: center;
 }
+
 input {
   padding: .5rem;
   width: 100%;
 }
-:focus-visible {
-  outline: 2px solid #5f86a1;
-}
-.error-msg {
-  margin: 1rem auto;
-}
+
 button {
   padding: .5rem 1rem;
   border-radius: 6px;
@@ -53,7 +55,6 @@ button {
   background: #8fb3cc;
   color: #000;
   text-transform: uppercase;
-  font-weight: 500;
   transition: .2s ease;
   cursor: pointer;
 }
@@ -63,92 +64,161 @@ button:hover{
   transform: scale(1.05);
   cursor: pointer;
 }
+:focus-visible {
+  outline: 2px solid #5f86a1;
+}
+.error-msg {
+  margin: 1rem auto;
+}
+
+:host([variant="sidebar"]) {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+:host([variant="sidebar"]) form {
+  padding: 0;
+  margin: 0;
+  font-size: .6rem;
+}
+
+:host([variant="sidebar"]) .nickname-input {
+  flex-direction: column;
+  gap: .5rem;
+}
+
+:host([variant="sidebar"]) label {
+  margin: 0 auto;
+  padding: 0;
+}
+
+:host([variant="sidebar"]) input {
+  margin: 0;
+  padding: .2rem .5rem;
+  font-size: .6rem;
+}
+
+:host([variant="sidebar"]) button {
+  width: 100%;
+  padding: .2rem;
+  margin: 0;
+  font-size: .6rem;
+}
 </style>
-<div id="nickname-container">
-<label for="nickname">Enter your nickname:</label>
+<form novalidate>
+<label for="nickname">Enter nickname:</label>
 <div class="nickname-input">
-<input type="text" id="nickname">
-<button id="submit">Play</button>
+<input type="text" id="nickname" minlength="2">
+<button type="submit">Play</button>
 </div>
-<p id="error-msg" class="error-msg" style="display: none;">Enter a nickname!</p>
-</div>
+<p class="error-msg" style="display: none;">Enter a nickname!</p>
+</form>
 `
 /**
- * @class
- * @augments HTMLElement
+ * Web component that renders nickname input form.
+ *
+ * Validates user input and emits a custom event when
+ * a valid nickname has been submitted.
  */
-customElements.define(
-  'nickname-form',
+export class NicknameForm extends HTMLElement {
   /**
-   * Nickname form component.
+   * Creates an instance of the nickname form component.
+   *
+   * Attaches a shadow DOM, initializes internal element references,
+   * and registers the submit event handler.
    */
-  class extends HTMLElement {
-    /**
-     * Creates an instance of a nickname-form.
-     */
-    constructor () {
-      super()
+  constructor () {
+    super()
 
-      this.attachShadow({ mode: 'open' })
-      this.shadowRoot.appendChild(template.content.cloneNode(true))
+    this.attachShadow({ mode: 'open' })
+    this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-      this.inputEl = this.shadowRoot.querySelector('#nickname')
-      this.buttonEl = this.shadowRoot.querySelector('#submit')
+    this.formEl = this.shadowRoot.querySelector('form')
+    this.inputEl = this.shadowRoot.querySelector('#nickname')
+    this.errorEl = this.shadowRoot.querySelector('.error-msg')
 
-      // Click handler
-      this.buttonEl.addEventListener('click', () => this.#submit())
+    this.formEl.addEventListener('submit', (e) => this.#onSubmit(e))
+  }
 
-      // Enter key handler
-      this.inputEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') this.#submit()
-      })
+  /**
+   * Lifecycle callback invoked when the element is added to the DOM.
+   * Automatically sets focus on the nickname input field.
+   *
+   * @override
+   */
+  connectedCallback () {
+    this.inputEl.focus()
+
+    if (this.hasAttribute('label-text')) {
+      this.shadowRoot.querySelector('label').textContent =
+        this.getAttribute('label-text')
     }
-
-    /**
-     * Lifecycle callback invoked when the element is added to the DOM.
-     * Automatically sets focus on the nickname input field.
-     *
-     * @override
-     */
-    connectedCallback () {
-      this.inputEl.focus()
-
-      if (this.hasAttribute('label-text')) {
-        this.shadowRoot.querySelector('label').textContent =
-          this.getAttribute('label-text')
-      }
-
-      if (this.hasAttribute('button-text')) {
-        this.shadowRoot.querySelector('#submit').textContent =
-          this.getAttribute('button-text')
-      }
-    }
-
-    /**
-     * Handles the submit action:
-     * validates the nickname and dispatches a 'nickname-submitted' event.
-     *
-     * @private
-     */
-    #submit () {
-      const nickname = this.inputEl.value.trim()
-      const errorEl = this.shadowRoot.querySelector('#error-msg')
-
-      if (!nickname) {
-        errorEl.style.display = 'block'
-        console.log('Enter a nickname!')
-        return
-      }
-
-      errorEl.style.display = 'none'
-
-      this.dispatchEvent(
-        new CustomEvent('nickname-submitted', {
-          detail: nickname,
-          bubbles: true,
-          composed: true
-        })
-      )
+    if (this.hasAttribute('button-text')) {
+      this.shadowRoot.querySelector('button').textContent =
+        this.getAttribute('button-text')
     }
   }
-)
+
+  /**
+   * Defines which attributes the component observes for changes.
+   *
+   * - `label-text`: Custom label text.
+   * - `button-text`: Custom button text.
+   * - `variant`: Visual variant (e.g. sidebar).
+   *
+   * @returns {string[]} An array of attribute names to observe
+   */
+  static get observedAttributes () {
+    return ['button-text', 'label-text', 'variant']
+  }
+
+  /**
+   * Reacts to changes in observed attributes and updates
+   * the component UI accordingly.
+   *
+   * @param {string} name - Name of the change
+   * @param {string|null} oldValue - Previous value
+   * @param {string|null} newValue - New value
+   */
+  attributeChangedCallback (name, oldValue, newValue) {
+    if (oldValue === newValue) return
+    if (name === 'button-text') {
+      this.shadowRoot.querySelector('button').textContent = newValue
+    }
+
+    if (name === 'label-text') {
+      this.shadowRoot.querySelector('label').textContent = newValue
+    }
+  }
+
+  /**
+   * Handles form submission.
+   *
+   * Validates the nickname input and dispatches a
+   * `nickname-submitted` event if valid.
+   *
+   * @param {SubmitEvent} event - The submit event triggered by the form.
+   * @private
+   */
+  #onSubmit (event) {
+    event.preventDefault()
+
+    const nickname = this.inputEl.value.trim()
+
+    if (!nickname) {
+      this.errorEl.style.display = 'block'
+      return
+    }
+
+    this.errorEl.style.display = 'none'
+
+    this.dispatchEvent(
+      new CustomEvent('nickname-submitted', {
+        detail: nickname,
+        bubbles: true,
+        composed: true
+      })
+    )
+  }
+}
+customElements.define('nickname-form', NicknameForm)
