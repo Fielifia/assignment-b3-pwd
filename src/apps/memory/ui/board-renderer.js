@@ -36,6 +36,11 @@ export function createTileElement (tile, flipCallback) {
     }
   })
 
+  requestAnimationFrame(() => {
+    const tileSize = tileEl.clientWidth
+    frontFace.style.fontSize = `${tileSize * 0.5}px`
+  })
+
   return tileEl
 }
 

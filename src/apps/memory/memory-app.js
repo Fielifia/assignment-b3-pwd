@@ -4,7 +4,7 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @version 1.0.0
  */
-import '../../components/high-score.js'
+import './components/high-score/high-score.js'
 import '../../components/nickname-form.js'
 import { template } from './memory-app.template.js'
 import { createInitialState, initGameState, resetState } from './state/game-state.js'

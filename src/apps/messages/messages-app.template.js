@@ -20,10 +20,6 @@ template.innerHTML = `
 .container.sidebar-open {
     margin-left: 7rem;
 }
-
-avatar-picker {
-    margin-top: 1rem;
-}
     
 nickname-form {
     margin-bottom: 1rem;

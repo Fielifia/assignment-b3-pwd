@@ -32,23 +32,20 @@ template.innerHTML = `
     overflow: auto;
     padding: 1rem;
 }
-
-.memory-game.level-2 {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(40px, 1fr));
-    font-size: clamp(3rem, 15vw, 7rem);
+    
+    .memory-game.level-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(40px, 1fr));
 }
 
 .memory-game.level-4 {
     display: grid;
     grid-template-columns: repeat(4, minmax(40px, 1fr));
-    font-size: clamp(1.4rem, 10vw, 3.5rem);
 }
 
 .memory-game.level-6 {
     display: grid;
     grid-template-columns: repeat(6, minmax(40px, 1fr));
-    font-size: clamp(1rem, 7vw, 3rem);
 }
 
 .status {

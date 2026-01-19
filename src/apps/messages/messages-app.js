@@ -11,7 +11,7 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @augments HTMLElement
  */
-import '../../components/avatar-picker.js'
+import './components/avatar-picker/avatar-picker.js'
 import '../../components/dateTime-display.js'
 import '../../components/nickname-form.js'
 
