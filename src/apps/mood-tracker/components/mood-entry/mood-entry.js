@@ -6,6 +6,7 @@ template.innerHTML = `
     background: #fff;
 }
 
+/* Container */
 .mood-entry-container {
     display: flex;
     flex-direction: column;
@@ -17,10 +18,12 @@ template.innerHTML = `
     min-width: 320px;
 }
 
+/* Focus outline */
 :focus-visible {
     outline: 2px solid #4d5f6a;
 }
 
+/* Mood selection */
 .select-mood {
     position: relative;
     display: inline-flex;
@@ -29,17 +32,9 @@ template.innerHTML = `
     gap: .5rem;
 }
 
-.mood-info-btn {
-    background: #6f94ad;
-    border: none;
-    border-radius: 50%;
-    width: 1.2rem;
-    height: 1.2rem;
-}
-
 .mood-legend {
     display: none;
-    position:absolute;
+    position: absolute;
     top: 0;
     left: 100%;
     background: #dde7ef;
@@ -48,12 +43,12 @@ template.innerHTML = `
     font-size: .8rem;
     border-radius: 6px;
     color: #000;
-    z-index: 10;
     border: 1px solid #4d5f6a;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     white-space: nowrap;
     min-width: fit-content;
     max-width: 50vw;
+    z-index: 10;
 }
 
 .mood-buttons {
@@ -65,6 +60,7 @@ template.innerHTML = `
     justify-content: center;
     margin: 0 auto clamp(.5rem, 1vw, 1rem);
 }
+
 .mood-buttons span {
     transition: transform .1s ease;
 }
@@ -73,48 +69,86 @@ template.innerHTML = `
     transform: scale(1.3);
 }
 
+.mood-buttons span:active {
+    transform: scale(0.9);
+}
+
 .selected-mood {
     margin-bottom: .5rem;
 }
 
+.mood-info-btn {
+    background: #6f94ad;
+    border: none;
+    border-radius: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+/* Inputs */
 textarea {
     min-height: 50px;
     font-family: inherit;
 }
 
 input[type="number"] {
-  background: #dde7ef;
-  border: 1px solid #8fb3cc;
-  border-radius: 10px;
-  padding: .1rem .5rem;
-  font-size: .9rem;
-  color: #000;
-  width: 3rem;
-  transition: border .15s ease, box-shadow .15s ease, background .15s ease;
+    background: #dde7ef;
+    border: 1px solid #8fb3cc;
+    border-radius: 10px;
+    padding: .1rem .5rem;
+    font-size: .9rem;
+    color: #000;
+    width: 3rem;
+    transition: border .15s ease, box-shadow .15s ease, background .15s ease;
 }
 
 input[type="number"]:hover {
- background: #8fb3cc;
+    background: #8fb3cc;
 }
 
 input[type="number"]:focus-visible {
-  outline: none;
-  border-color: #4d5f6a;
-  box-shadow: 0 0 0 2px rgba(77, 95, 106, 0.25);
+    outline: none;
+    border-color: #4d5f6a;
+    box-shadow: 0 0 0 2px rgba(77, 95, 106, 0.25);
 }
 
+input[type="checkbox"] {
+    margin-right: .3rem;
+    font-size: .7rem;
+}
+
+input[type="text"] {
+    width: 100%;
+    max-width: 3.5rem;
+    font-size: .7rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #9b9ba7;
+    outline: none;
+}
+
+input[type="text"]:focus {
+    border-bottom-color: #4d5f6a;
+}
+
+select {
+    padding: .25rem .5rem;
+}
+
+/* Feelings checkboxes */
 .feeling-buttons {
     display: grid;
     grid-template-columns: repeat(4, max-content);
     gap: .3rem;
     max-width: 100%;
     justify-content: start;
-    }
+}
 
 .feeling-buttons input[type="checkbox"] {
     display: none;
 }
-    
+
 .feeling-buttons label {
     display: flex;
     align-items: center;
@@ -134,73 +168,51 @@ input[type="number"]:focus-visible {
     background: #c8d9e6;
 }
 
-.feeling-buttons label:has(input[type="checkbox"]:checked), .feeling-buttons label.active {
+.feeling-buttons label:has(input[type="checkbox"]:checked),
+.feeling-buttons label.active {
     background: #8fb3cc;
 }
 
-.mood-buttons span:active, .feeling-buttons label:active {
+.feeling-buttons label:active {
     transform: scale(0.9);
 }
 
-.feeling-buttons input[type="text"] {
-    width: 100%;
-    max-width: 3.5rem;
-    font-size: .7rem;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #9b9ba7;
-    outline: none;
-}
-
-.feeling-buttons input[type="text"]:focus {
-    border-bottom-color: #4d5f6a;
-}
-
-
-input[type="checkbox"] {
-    margin-right: .3rem;
-    font-size: .7rem;
-}
-  
-select {
-  padding: .25rem .5rem;
-}
-
+/* Headings in select-feelings */
 .select-feelings span#heading {
-  display: block;
-  text-align: center;
-  margin: .5rem auto;
+    display: block;
+    text-align: center;
+    margin: .5rem auto;
 }
 
+/* Buttons */
 .buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  align-content: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-content: center;
 }
 
-.save-btn, select, .go-back-btn {
-  border-radius: 10px;
-  border: none;
-  background: #8fb3cc;
-  color: #000;
-  transition: .2s ease;
-  }
+.save-btn, .go-back-btn, select {
+    border-radius: 10px;
+    border: none;
+    background: #8fb3cc;
+    color: #000;
+    transition: .2s ease;
+}
 
 .save-btn, .go-back-btn {
     padding: .5rem 1rem;
     text-transform: uppercase;
     width: fit-content;
     margin: 0;
-  }
-
-
-.save-btn:hover, .go-back-btn:hover {
-  background: #5f86a1;
-  transform: scale(1.05);
 }
 
+.save-btn:hover, .go-back-btn:hover {
+    background: #5f86a1;
+    transform: scale(1.05);
+}
+
+/* Global pointer cursor */
 button, span, select, input, .feeling-buttons label {
     cursor: pointer;
 }
@@ -208,7 +220,6 @@ button, span, select, input, .feeling-buttons label {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <div class="mood-entry-container">
-<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
 <span id="date-display"></span>
 <div class="select-mood">
 <span>Select mood:
@@ -354,26 +365,26 @@ export class MoodEntry extends HTMLElement {
       }))
     })
 
+    /**
+     * Fired when the user clicks "View History".
+     *
+     * @event navigate
+     * @type {CustomEvent<{page: string}>}
+     * @property {object} detail - Contains the page to navigate to
+     */
+    this.historyBtn.addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('navigate', {
+        detail: { page: 'history', from: 'entry' },
+        bubbles: true,
+        composed: true
+      }))
+    })
+
     this.saveBtn.addEventListener('click', () => {
       if (!this.selectedMood) {
         alert('Please select a mood!')
         return
       }
-
-      /**
-       * Fired when the user clicks "View History".
-       *
-       * @event navigate
-       * @type {CustomEvent<{page: string}>}
-       * @property {object} detail - Contains the page to navigate to
-       */
-      this.historyBtn.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('navigate', {
-          detail: { page: 'history' },
-          bubbles: true,
-          composed: true
-        }))
-      })
 
       const entryId = crypto.randomUUID()
       const formattedDate = new Date().toLocaleDateString(undefined, {

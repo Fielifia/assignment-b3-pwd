@@ -9,7 +9,7 @@ The component is built using **Vanilla JavaScript**, **Web Components**, and **S
 - Displays mood history in a scrollable list
 - Shows date, mood (icon + label), energy, sleep, feelings, and notes
 - Delete individual entries using the **Delete** button
-- Navigate back to start page using **Go back** button
+- Navigate back to start or entry page using **Go back** button
 
 All UI logic and state handling are encapsulated within the component.
 
@@ -51,7 +51,7 @@ historyComponent.addEventListener('delete-entry', (event) => {
 Dispatches when the **Go back** button is clicked.
 ```js
 historyComponent.addEventListener('navigate', (event) => {
-    const page = event.detail.page // 'start'
+    const page = event.detail.page // 'start' ||'entry'
 })
 ```
 ---

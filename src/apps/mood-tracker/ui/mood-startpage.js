@@ -35,15 +35,12 @@ button:hover{
 }
 </style>
 <div class="startpage">
-<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
 <div class="greeting"></div>
 <div class="buttons">
 <button class="create-entry-btn">Create new entry</button>
 <button class="view-history-btn">View History</button>
 </div>
 </div>
-<mood-entry></mood-entry>
-<mood-history></mood-history>
 `
 /**
  * Start page for the Mood Tracker App.
@@ -83,6 +80,7 @@ export class MoodStartPage extends HTMLElement {
         composed: true
       }))
     })
+
     /**
      * Fired when the user clicks "View History".
      *

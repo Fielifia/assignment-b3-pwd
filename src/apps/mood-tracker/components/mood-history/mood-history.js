@@ -129,8 +129,9 @@ export class MoodHistory extends HTMLElement {
     this.#upgradeProperty('entries')
 
     this.goBackBtn.addEventListener('click', () => {
+      const target = this.previousPage || 'start'
       this.dispatchEvent(new CustomEvent('navigate', {
-        detail: { page: 'start' },
+        detail: { page: target },
         bubbles: true,
         composed: true
       }))

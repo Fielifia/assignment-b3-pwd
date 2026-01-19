@@ -58,8 +58,17 @@ button:hover{
 }
 
 
-
+date-time-display {
+    display: block;
+    padding: .5rem;
+    background: linear-gradient(145deg, #dde7ef, #8fb3cc);
+    color: #000;
+    text-align: right;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
+}
 </style>
+<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
+
 <mood-startpage></mood-startpage>
 <mood-entry style="display: none;"></mood-entry>
 <mood-history style="display: none;"></mood-history>

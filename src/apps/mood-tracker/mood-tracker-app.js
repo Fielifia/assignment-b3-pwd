@@ -49,9 +49,25 @@ export class MoodTrackerApp extends HTMLElement {
 
     document.body.addEventListener('navigate', (e) => {
       const page = e.detail.page
-      startPage.style.display = page === 'start' ? 'block' : 'none'
-      entryComponent.style.display = page === 'entry' ? 'block' : 'none'
-      historyComponent.style.display = page === 'history' ? 'block' : 'none'
+
+      switch (page) {
+        case 'entry':
+          entryComponent.style.display = 'block'
+          historyComponent.style.display = 'none'
+          startPage.style.display = 'none'
+          break
+        case 'history':
+          historyComponent.previousPage = e.detail.from || 'start'
+          entryComponent.style.display = 'none'
+          historyComponent.style.display = 'block'
+          startPage.style.display = 'none'
+          break
+        case 'start':
+          entryComponent.style.display = 'none'
+          historyComponent.style.display = 'none'
+          startPage.style.display = 'block'
+          break
+      }
     })
 
     historyComponent.entries = this.state.entries
