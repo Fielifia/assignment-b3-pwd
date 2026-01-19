@@ -1,52 +1,79 @@
 # <mood-history>
-A web component displaying a list of previously recorded mood entries, including mood, energy, sleep, and notes.
+A Web Component that displays a list of saved mood mood entries, including mood, energy, sleep, feelings, and notes.
 
-## Attributes
-| Attribute | Description | Default
-|-----------|-------------|---------|
-| (none)     | This component does not have attributes. It relies on passing entries via methods or events | N/A |
+The component is built using **Vanilla JavaScript**, **Web Components**, and **Shadow DOM**.
 
-## Events
-| Event Name   | Fired When |
-|--------------|------------|
-| delete-entry | When the user clicks the delete button for a specific entry. The `detail` contains the date of the entry to delete. |
+---
 
-### Example Event Detail
-```js
-"2026-01-13" // The date of the entry the user wants to delete
-```
+## Features
+- Displays mood history in a scrollable list
+- Shows date, mood (icon + label), energy, sleep, feelings, and notes
+- Delete individual entries using the **Delete** button
+- Navigate back to start page using **Go back** button
+
+All UI logic and state handling are encapsulated within the component.
+
+---
+
+## Usage
 
 ```html
 <mood-history></mood-history>
-
-<script type="module">
-    import './mood-history.js'
-
-    const history = document.querySelector('mood-history')
-
-    // Example data
-    const entries = [
-        {
-            date: "2026-01-13",
-            mood: {emoji: "😊", label: "Content"},
-            energy: "4",
-            sleep: {hours: 8, quality: "Good"},
-            notes: "Felt productive today!"
-        },
-                {
-            date: "2026-01-12",
-            mood: {emoji: "😐", label: "Neutral"},
-            energy: "3",
-            sleep: {hours: 7, quality: "Okay"},
-            notes: "Average day."
-        }
-    ]
-    // Render entries in the component
-    history.getEntries(entries)
-
-    // Listen for delete-entry events.
-    history.addEventListener('delete-entry' (e) => {
-        console.log('Delete entry for date:', e.detail)
-    })
- </script>
 ```
+**Sets entries programmatically:**
+```js
+historyComponent.entries = [
+    {
+        id: '1',
+        date: 'Thu, Jan 19, 2026',
+        mood: { icon: 'fa-smile-beam', label: 'Content', color: '#c9dcc9'},
+        energy: '3',
+        sleep: { hours: 8, quality: 'Good'},
+        notes: 'Felt productive today!'
+    }
+]
+```
+---
+
+## Events
+### `delete-entry`
+Dispatches when the user deletes an entry.
+- **Bubbles:** yes
+- **Composed:** yes
+
+```js
+historyComponent.addEventListener('delete-entry', (event) => {
+    const entryID = event.detail
+    // remove entry
+})
+```
+### `navigate`
+Dispatches when the **Go back** button is clicked.
+```js
+historyComponent.addEventListener('navigate', (event) => {
+    const page = event.detail.page // 'start'
+})
+```
+---
+
+## Styling
+- Styles are scoped inside Shadow DOM
+- Grid layout for entries
+- Buttons have hover and focus states for better UX
+- Scrollable list for history
+
+---
+
+## Browser Support
+Requires modern browsers supporting:
+- Custom Elements
+- Shadow DOM
+- ES6+ features (let/const, arrow functions, template literals)
+
+Supported in all modern evergreen browsers (Chrome, Firefox, Safari, Edge).
+
+---
+
+## Author
+**Sofia Andersson**
+Web Programming Student – Linnaeus University

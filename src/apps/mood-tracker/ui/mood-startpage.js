@@ -35,6 +35,7 @@ button:hover{
 }
 </style>
 <div class="startpage">
+<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
 <div class="greeting"></div>
 <div class="buttons">
 <button class="create-entry-btn">Create new entry</button>
@@ -77,7 +78,7 @@ export class MoodStartPage extends HTMLElement {
      */
     this.createBtn.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('navigate', {
-        detail: { page: 'create-entry' },
+        detail: { page: 'entry' },
         bubbles: true,
         composed: true
       }))

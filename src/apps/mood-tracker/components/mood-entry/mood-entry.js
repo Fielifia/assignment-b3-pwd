@@ -3,17 +3,18 @@ template.innerHTML = `
 <style>
 :host {
     display: none;
+    background: #fff;
 }
+
 .mood-entry-container {
     display: flex;
     flex-direction: column;
     font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
-    gap: 1rem;
+    gap: 1.5rem;
     margin: 0;
     padding: 1rem;
     border-radius: 6px;
     min-width: 320px;
-    background: #fff;
 }
 
 :focus-visible {
@@ -133,7 +134,7 @@ input[type="number"]:focus-visible {
     background: #c8d9e6;
 }
 
-.feeling-buttons label:has(input[type="checkbox"]:checked) {
+.feeling-buttons label:has(input[type="checkbox"]:checked), .feeling-buttons label.active {
     background: #8fb3cc;
 }
 
@@ -164,6 +165,12 @@ input[type="checkbox"] {
   
 select {
   padding: .25rem .5rem;
+}
+
+.select-feelings span#heading {
+  display: block;
+  text-align: center;
+  margin: .5rem auto;
 }
 
 .buttons {
@@ -201,6 +208,7 @@ button, span, select, input, .feeling-buttons label {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <div class="mood-entry-container">
+<date-time-display datetime="" format="datetime" show-seconds></date-time-display>
 <span id="date-display"></span>
 <div class="select-mood">
 <span>Select mood:
@@ -237,7 +245,7 @@ button, span, select, input, .feeling-buttons label {
 </label>
 
 <div class="select-feelings">
-<span>I'm feeling:</span>
+<span id="heading">I'm feeling:</span>
 <div class="feeling-buttons"></div>
 </div>
 
@@ -246,12 +254,12 @@ button, span, select, input, .feeling-buttons label {
 <button class="go-back-btn">Go back</button>
 <button class="save-btn">Save</button>
 </div>
+<button class="view-history-btn">View History</button>
 </div>
 `
 /**
  * @typedef {object} MoodEntryData
  * @property {string} id - Unique identifier
- * @property {string} dateISO - ISO date string
  * @property {string} date - Formatted date string
  * @property {[icon: string, label: string, color: string]} mood - Selected mood
  * @property {string}  energy - Energy level
@@ -326,6 +334,7 @@ export class MoodEntry extends HTMLElement {
     this.textarea = this.shadowRoot.querySelector('textarea')
     this.saveBtn = this.shadowRoot.querySelector('.save-btn')
     this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
+    this.historyBtn = this.shadowRoot.querySelector('.view-history-btn')
     this.selectedMood = null
   }
 
@@ -351,8 +360,22 @@ export class MoodEntry extends HTMLElement {
         return
       }
 
+      /**
+       * Fired when the user clicks "View History".
+       *
+       * @event navigate
+       * @type {CustomEvent<{page: string}>}
+       * @property {object} detail - Contains the page to navigate to
+       */
+      this.historyBtn.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('navigate', {
+          detail: { page: 'history' },
+          bubbles: true,
+          composed: true
+        }))
+      })
+
       const entryId = crypto.randomUUID()
-      const isoDate = new Date().toISOString()
       const formattedDate = new Date().toLocaleDateString(undefined, {
         weekday: 'long',
         year: 'numeric',
@@ -364,7 +387,6 @@ export class MoodEntry extends HTMLElement {
       /** @type {MoodEntryData} */
       const data = {
         id: entryId,
-        dateISO: isoDate,
         date: formattedDate,
         mood: this.selectedMood,
         energy: this.energyLevel.value,
@@ -448,6 +470,7 @@ export class MoodEntry extends HTMLElement {
       const label = document.createElement('label')
       const input = document.createElement('input')
       input.type = 'text'
+      input.placeholder = 'Custom'
 
       input.addEventListener('input', () => {
         this.selectedFeelings = this.selectedFeelings.filter(
@@ -455,6 +478,9 @@ export class MoodEntry extends HTMLElement {
         )
         if (input.value.trim()) {
           this.selectedFeelings.push(`custom${i}:${input.value.trim()}`)
+          label.classList.add('active')
+        } else {
+          label.classList.remove('active')
         }
       })
       label.appendChild(input)

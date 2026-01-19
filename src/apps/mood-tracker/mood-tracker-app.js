@@ -42,30 +42,20 @@ export class MoodTrackerApp extends HTMLElement {
    */
   connectedCallback () {
     this.loadState()
+
     const startPage = this.shadowRoot.querySelector('mood-startpage')
     const entryComponent = this.shadowRoot.querySelector('mood-entry')
     const historyComponent = this.shadowRoot.querySelector('mood-history')
 
-    startPage.addEventListener('navigate', e => {
+    document.body.addEventListener('navigate', (e) => {
       const page = e.detail.page
-      startPage.style.display = 'none'
-      entryComponent.style.display = page === 'create-entry' ? 'block' : 'none'
+      startPage.style.display = page === 'start' ? 'block' : 'none'
+      entryComponent.style.display = page === 'entry' ? 'block' : 'none'
       historyComponent.style.display = page === 'history' ? 'block' : 'none'
     })
 
-    entryComponent.addEventListener('navigate', e => {
-      const page = e.detail.page
-      startPage.style.display = page === 'start' ? 'block' : 'none'
-      entryComponent.style.display = 'none'
-    })
-
-    historyComponent.addEventListener('navigate', e => {
-      const page = e.detail.page
-      startPage.style.display = page === 'start' ? 'block' : 'none'
-      historyComponent.style.display = 'none'
-    })
-
     historyComponent.entries = this.state.entries
+    historyComponent.style.display = 'none'
 
     entryComponent.addEventListener('entry-submit', (e) => {
       this.state.entries = MoodManager.addEntry(e.detail)
@@ -77,10 +67,6 @@ export class MoodTrackerApp extends HTMLElement {
       this.state.entries = MoodManager.deleteEntry(e.detail)
       historyComponent.entries = this.state.entries
     })
-
-    historyComponent.entries = this.state.entries
-
-    historyComponent.style.display = 'none'
   }
 
   /**
@@ -93,15 +79,6 @@ export class MoodTrackerApp extends HTMLElement {
     } catch {
       this.state.entries = []
     }
-  }
-
-  /**
-   * Returns today's date in YYY-MM-DD format.
-   *
-   * @returns {string} Today's date
-   */
-  getToday () {
-    return new Date().toISOString().slice(0, 10)
   }
 }
 

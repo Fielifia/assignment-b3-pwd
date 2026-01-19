@@ -3,7 +3,9 @@ template.innerHTML = `
 <style>
 :host {
     display: none;
+    background: #edf2f7;
 }
+
 .history-container {
     display: flex;
     flex-direction: column;
@@ -55,7 +57,7 @@ h3 {
 }
 
 .delete-btn {
-    grid.column: span 2;
+    grid-column: span 2;
     justify-self: end;
     background: none;
     border: none;

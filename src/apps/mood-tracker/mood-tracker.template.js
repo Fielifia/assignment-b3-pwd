@@ -21,15 +21,6 @@ template.innerHTML = `
     background: #fff;
 }
 
-.startpage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 1rem;
-    text-align: center;
-}
 
 .greeting {
   font-size: clamp(1.5rem, 2vw, 2.5rem);
@@ -66,13 +57,7 @@ button:hover{
   color: #ff6b6b;
 }
 
-mood-history {
-display: none;
-width: 100%;
-background: #cbd6e4;
-border-radius: 6px;
-color: #000;
-}
+
 
 </style>
 <mood-startpage></mood-startpage>
