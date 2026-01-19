@@ -77,7 +77,7 @@ export class DateTimeDisplay extends HTMLElement {
    * @param {string|null} newValue - The new value of the attribute.
    */
   attributeChangedCallback (name, oldValue, newValue) {
-    if (!oldValue !== newValue) {
+    if (oldValue !== newValue) {
       if (name === 'show-seconds') {
         if (this.hasAttribute('show-seconds')) this.startClock()
         else this.stopClock()

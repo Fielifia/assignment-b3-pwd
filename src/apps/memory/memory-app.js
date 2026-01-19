@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 import './components/high-score/high-score.js'
-import '../../components/nickname-form.js'
+import '../../components/nickname-form/nickname-form.js'
 import { template } from './memory-app.template.js'
 import { createInitialState, initGameState, resetState } from './state/game-state.js'
 import { startTimer, stopTimer } from './utils/timer.js'

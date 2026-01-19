@@ -13,7 +13,7 @@
  */
 import './components/avatar-picker/avatar-picker.js'
 import '../../components/date-time-display/dateTime-display.js'
-import '../../components/nickname-form.js'
+import '../../components/nickname-form/nickname-form.js'
 
 import { addMessage, removeMessage } from './logic/messages-manager.js'
 import { renderMessages } from './logic/messages-renderer.js'
