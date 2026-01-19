@@ -156,15 +156,13 @@ export class AvatarPicker extends HTMLElement {
 
         span.classList.add('selected')
 
-        this.avatarList.querySelectorAll('span').forEach((s) => {
-          this.dispatchEvent(
-            new CustomEvent('avatar-selected', {
-              detail: { avatar: a },
-              bubbles: true,
-              composed: true
-            })
-          )
-        })
+        this.dispatchEvent(
+          new CustomEvent('avatar-selected', {
+            detail: { avatar: a },
+            bubbles: true,
+            composed: true
+          })
+        )
       })
       this.avatarList.appendChild(span)
     })
