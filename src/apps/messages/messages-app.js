@@ -12,7 +12,7 @@
  * @augments HTMLElement
  */
 import './components/avatar-picker/avatar-picker.js'
-import '../../components/dateTime-display.js'
+import '../../components/date-time-display/dateTime-display.js'
 import '../../components/nickname-form.js'
 
 import { addMessage, removeMessage } from './logic/messages-manager.js'
