@@ -13,7 +13,7 @@ export const Storage = {
     try {
       return JSON.parse(localStorage.getItem(key)) || null
     } catch (error) {
-      console.error(`Error parsing localStorage key "${key}"`, error)
+      console.error(`Failed to get key "${key}" from localStorage`, error)
       return null
     }
   },
@@ -29,7 +29,7 @@ export const Storage = {
     try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}"`, error)
+      console.error(`Failed to set key "${key}" from localStorage`, error)
     }
   },
 
@@ -43,7 +43,7 @@ export const Storage = {
     try {
       localStorage.removeItem(key)
     } catch (error) {
-      console.error(`Error removing localStorage key "${key}"`, error)
+      console.error(`Failed to remove key "${key}" from localStorage`, error)
     }
   }
 }

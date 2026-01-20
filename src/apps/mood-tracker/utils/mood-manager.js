@@ -1,14 +1,18 @@
 import { Storage } from './storage.js'
 export const MoodManager = {
   key: 'mood-tracker-entries',
-
   /**
    * Retrieves all mood entries from localStorage.
    *
    * @returns {Array<object>} Array of mood entry objects.
    */
   getEntries () {
-    return Storage.get(this.key) || []
+    try {
+      return Storage.get(this.key) || []
+    } catch (error) {
+      console.error('Failed to get entries from localStorage', error)
+      return []
+    }
   },
 
   /**
@@ -18,11 +22,16 @@ export const MoodManager = {
    * @returns {Array<object>} Updated array of mood entry objects.
    */
   addEntry (entry) {
-    if (!entry.id) entry.id = crypto.randomUUID()
-    const entries = this.getEntries()
-    entries.push(entry)
-    Storage.set(this.key, entries)
-    return entries
+    try {
+      if (!entry.id) entry.id = crypto.randomUUID()
+      const entries = this.getEntries()
+      entries.push(entry)
+      Storage.set(this.key, entries)
+      return entries
+    } catch (error) {
+      console.error('Failed to add entry:', error)
+      return this.getEntries()
+    }
   },
 
   /**
@@ -32,10 +41,15 @@ export const MoodManager = {
    * @returns {Array<object>} Updated array of mood entry objects.
    */
   deleteEntry (id) {
-    const entries = this.getEntries()
-    const updated = entries.filter(e => e.id !== id)
-    Storage.set(this.key, updated)
-    return updated
+    try {
+      const entries = this.getEntries()
+      const updated = entries.filter(e => e.id !== id)
+      Storage.set(this.key, updated)
+      return updated
+    } catch (error) {
+      console.error('Failed to delete entry:', error)
+      return this.getEntries()
+    }
   },
 
   /**
@@ -46,9 +60,14 @@ export const MoodManager = {
    * @returns {Array<object>} Updated array of mood entry objects.
    */
   updateEntry (id, newEntry) {
-    const entries = this.getEntries()
-    const updated = entries.map(e => e.id === id ? { ...e, ...newEntry } : e)
-    localStorage.setItem(this.key, JSON.stringify(updated))
-    return updated
+    try {
+      const entries = this.getEntries()
+      const updated = entries.map(e => e.id === id ? { ...e, ...newEntry } : e)
+      localStorage.setItem(this.key, JSON.stringify(updated))
+      return updated
+    } catch (error) {
+      console.error('Failed to update entry:', error)
+      return this.getEntries()
+    }
   }
 }

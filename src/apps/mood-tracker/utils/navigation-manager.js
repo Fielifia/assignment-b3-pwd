@@ -6,13 +6,14 @@
  */
 export const NavigationManager = {
   /**
-   * Initializes naviagtion handling.
+   * Initializes navigation handling.
    *
    * @param {HTMLElement} startPage - The start page component.
    * @param {HTMLElement} entryComponent - The mood entry component.
    * @param {HTMLElement} historyComponent - The mood history component.
+   * @param {AbortSignal} signal - Optional abort signal to remove listeners automatically.
    */
-  init (startPage, entryComponent, historyComponent) {
+  init (startPage, entryComponent, historyComponent, signal) {
     document.body.addEventListener('navigate', (e) => {
       const page = e.detail.page
       switch (page) {
@@ -33,6 +34,6 @@ export const NavigationManager = {
           startPage.style.display = 'block'
           break
       }
-    })
+    }, { signal })
   }
 }

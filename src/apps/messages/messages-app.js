@@ -25,7 +25,7 @@ import { initUI } from './ui/ui-init.js'
  *
  * @class
  */
-export class MessagesApp extends HTMLElement {
+class MessagesApp extends HTMLElement {
   /** @type {object[]} Array of message objects in the chat */
   #messages = []
   /** @type {object|null} Currently replying to this message */
@@ -104,7 +104,7 @@ export class MessagesApp extends HTMLElement {
   }
 
   /**
-   * Lifecycle callback when connected to DOM.
+   * Lifecycle callback when the component is added to the DOM.
    */
   connectedCallback () {
     this.#abortController = new AbortController()

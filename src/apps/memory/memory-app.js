@@ -20,6 +20,8 @@ import { VIEWS, viewConfig } from './ui/views.js'
  * @augments HTMLElement
  */
 class MemoryApp extends HTMLElement {
+  /** @type {AbortController|null} Controller for removing event listeners on disconnect */
+  #abortController
   /**
    * Handles nickname submission from the nickname-form.
    *
@@ -55,12 +57,15 @@ class MemoryApp extends HTMLElement {
   }
 
   /**
-   * Called when the component is added to the DOM.
+   * Lifecycle callback when the component is added to the DOM.
    * Initilizes the game.
    *
    * @returns {void}
    */
   connectedCallback () {
+    this.#abortController = new AbortController()
+    const signal = this.#abortController.signal
+
     this.container = this.shadowRoot.querySelector('.memory-container')
     this.boardEl = this.shadowRoot.querySelector('.memory-game')
     this.statusEl = this.shadowRoot.querySelector('.status')
@@ -86,7 +91,7 @@ class MemoryApp extends HTMLElement {
 
     this.nicknameForm.addEventListener(
       'nickname-submitted',
-      this.#onNicknameSubmitted
+      this.#onNicknameSubmitted, { signal }
     )
 
     this.levelSelect.addEventListener('change', (e) => {
@@ -96,12 +101,24 @@ class MemoryApp extends HTMLElement {
       if (this.highScoreComponent) {
         this.highScoreComponent.setLevel(this.state.level)
       }
-    })
+    }, { signal })
 
     this.goBackBtn.addEventListener('click', () => {
       console.log('Go back clicked')
       this.backToStart()
-    })
+    }, { signal })
+    this.restartBtn.addEventListener('click', () => this.initGame(), { signal })
+    this.highScoreBtn.addEventListener('click', () => {
+      if (!this.state.gameOver && this.state.timerId) {
+        this.prevView = VIEWS.IN_GAME
+        stopTimer(this.state)
+      } else if (this.state.gameOver) {
+        this.prevView = VIEWS.GAME_END
+      } else {
+        this.prevView = VIEWS.START
+      }
+      this.setView(VIEWS.HIGHSCORES)
+    }, { signal })
 
     this.highScoreComponent.addEventListener('highscore-back', () => {
       switch (this.prevView) {
@@ -116,21 +133,7 @@ class MemoryApp extends HTMLElement {
           break
       }
       this.prevView = null
-    })
-
-    this.highScoreBtn.addEventListener('click', () => {
-      if (!this.state.gameOver && this.state.timerId) {
-        this.prevView = VIEWS.IN_GAME
-        stopTimer(this.state)
-      } else if (this.state.gameOver) {
-        this.prevView = VIEWS.GAME_END
-      } else {
-        this.prevView = VIEWS.START
-      }
-      this.setView(VIEWS.HIGHSCORES)
-    })
-
-    this.restartBtn.addEventListener('click', () => this.initGame())
+    }, { signal })
   }
 
   /**
@@ -140,10 +143,7 @@ class MemoryApp extends HTMLElement {
    * @returns {void}
    */
   disconnectedCallback () {
-    this.nicknameForm?.removeEventListener(
-      'nickname-submitted',
-      this.#onNicknameSubmitted
-    )
+    this.#abortController.abort()
   }
 
   /**

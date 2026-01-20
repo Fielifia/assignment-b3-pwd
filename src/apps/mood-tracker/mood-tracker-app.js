@@ -26,7 +26,9 @@ import { template } from './templates/mood-tracker.template.js'
 /**
  *
  */
-export class MoodTrackerApp extends HTMLElement {
+class MoodTrackerApp extends HTMLElement {
+  /** @type {AbortController|null} Controller for removing event listeners on disconnect */
+  #abortController
   /**
    * Creates the component, initializes state, and attaches shadow DOM.
    */
@@ -38,17 +40,20 @@ export class MoodTrackerApp extends HTMLElement {
   }
 
   /**
-   * Called when the component is added to the DOM.
+   * Lifecycle callback when the component is added to the DOM.
    * Initializes state, renders mood buttons, and history.
    */
   connectedCallback () {
+    this.#abortController = new AbortController()
+    const signal = this.#abortController.signal
+
     this.loadState()
 
     const startPage = this.shadowRoot.querySelector('mood-startpage')
     const entryComponent = this.shadowRoot.querySelector('mood-entry')
     const historyComponent = this.shadowRoot.querySelector('mood-history')
 
-    NavigationManager.init(startPage, entryComponent, historyComponent)
+    NavigationManager.init(startPage, entryComponent, historyComponent, signal)
 
     StateUpdater.updateHistory(historyComponent, this.state.entries)
     historyComponent.style.display = 'none'
@@ -56,13 +61,19 @@ export class MoodTrackerApp extends HTMLElement {
     entryComponent.addEventListener('entry-submit', (e) => {
       this.state.entries = MoodManager.addEntry(e.detail)
       historyComponent.entries = this.state.entries
-    })
+    }, { signal })
 
     historyComponent.addEventListener('delete-entry', (e) => {
-      console.log('DELETE EVENT RECIEVED', e.detail)
       this.state.entries = MoodManager.deleteEntry(e.detail)
       historyComponent.entries = this.state.entries
-    })
+    }, { signal })
+  }
+
+  /**
+   * Lifecycle callback when disconnected.
+   * */
+  disconnectedCallback () {
+    this.#abortController.abort()
   }
 
   /**
