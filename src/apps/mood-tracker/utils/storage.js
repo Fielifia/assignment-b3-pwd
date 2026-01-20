@@ -1,3 +1,7 @@
+/**
+ * Simple wrapper for localStorage.
+ * Handle get/set/remove with JSON parsing/stringify
+ */
 export const Storage = {
   /**
    * Retrieves data from localStorage.

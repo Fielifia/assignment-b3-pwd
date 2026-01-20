@@ -12,6 +12,8 @@ import './components/mood-entry/mood-entry.js'
 import './components/mood-history/mood-history.js'
 import './components/mood-startpage/mood-startpage.js'
 import { MoodManager } from './utils/mood-manager.js'
+import { NavigationManager } from './utils/navigation-manager.js'
+import { StateUpdater } from './utils/state-updater.js'
 import { template } from './templates/mood-tracker.template.js'
 /**
  * Mood Tracker App
@@ -32,7 +34,6 @@ export class MoodTrackerApp extends HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
-
     this.state = { entries: [] }
   }
 
@@ -47,30 +48,9 @@ export class MoodTrackerApp extends HTMLElement {
     const entryComponent = this.shadowRoot.querySelector('mood-entry')
     const historyComponent = this.shadowRoot.querySelector('mood-history')
 
-    document.body.addEventListener('navigate', (e) => {
-      const page = e.detail.page
+    NavigationManager.init(startPage, entryComponent, historyComponent)
 
-      switch (page) {
-        case 'entry':
-          entryComponent.style.display = 'block'
-          historyComponent.style.display = 'none'
-          startPage.style.display = 'none'
-          break
-        case 'history':
-          historyComponent.previousPage = e.detail.from || 'start'
-          entryComponent.style.display = 'none'
-          historyComponent.style.display = 'block'
-          startPage.style.display = 'none'
-          break
-        case 'start':
-          entryComponent.style.display = 'none'
-          historyComponent.style.display = 'none'
-          startPage.style.display = 'block'
-          break
-      }
-    })
-
-    historyComponent.entries = this.state.entries
+    StateUpdater.updateHistory(historyComponent, this.state.entries)
     historyComponent.style.display = 'none'
 
     entryComponent.addEventListener('entry-submit', (e) => {
@@ -89,12 +69,7 @@ export class MoodTrackerApp extends HTMLElement {
    * Loads saved state from localStorage.
    */
   loadState () {
-    try {
-      this.state.entries =
-        JSON.parse(localStorage.getItem('mood-tracker-entries')) || []
-    } catch {
-      this.state.entries = []
-    }
+    this.state.entries = MoodManager.getEntries()
   }
 }
 
