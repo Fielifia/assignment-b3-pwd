@@ -10,9 +10,9 @@
  */
 import './components/mood-entry/mood-entry.js'
 import './components/mood-history/mood-history.js'
-import './ui/mood-startpage.js'
+import './components/mood-startpage/mood-startpage.js'
 import { MoodManager } from './utils/mood-manager.js'
-import { template } from './mood-tracker.template.js'
+import { template } from './templates/mood-tracker.template.js'
 /**
  * Mood Tracker App
  *

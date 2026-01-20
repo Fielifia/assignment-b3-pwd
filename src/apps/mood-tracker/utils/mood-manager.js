@@ -1,3 +1,4 @@
+import { Storage } from './storage.js'
 export const MoodManager = {
   key: 'mood-tracker-entries',
 
@@ -7,11 +8,7 @@ export const MoodManager = {
    * @returns {Array<object>} Array of mood entry objects.
    */
   getEntries () {
-    try {
-      return JSON.parse(localStorage.getItem(this.key)) || []
-    } catch {
-      return []
-    }
+    return Storage.get(this.key) || []
   },
 
   /**
@@ -24,7 +21,7 @@ export const MoodManager = {
     if (!entry.id) entry.id = crypto.randomUUID()
     const entries = this.getEntries()
     entries.push(entry)
-    localStorage.setItem(this.key, JSON.stringify(entries))
+    Storage.set(this.key, entries)
     return entries
   },
 
@@ -35,9 +32,10 @@ export const MoodManager = {
    * @returns {Array<object>} Updated array of mood entry objects.
    */
   deleteEntry (id) {
-    const entries = this.getEntries().filter(e => e.id !== id)
-    localStorage.setItem(this.key, JSON.stringify(entries))
-    return entries
+    const entries = this.getEntries()
+    const updated = entries.filter(e => e.id !== id)
+    Storage.set(this.key, updated)
+    return updated
   },
 
   /**

@@ -17,7 +17,7 @@ import '../../components/nickname-form/nickname-form.js'
 
 import { addMessage, removeMessage } from './logic/messages-manager.js'
 import { renderMessages } from './logic/messages-renderer.js'
-import { template } from './messages-app.template.js'
+import { template } from './templates/messages-app.template.js'
 import { initSocket } from './services/socket.js'
 import { initUI } from './ui/ui-init.js'
 /**

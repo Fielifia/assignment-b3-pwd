@@ -6,9 +6,9 @@
  */
 import './components/high-score/high-score.js'
 import '../../components/nickname-form/nickname-form.js'
-import { template } from './memory-app.template.js'
-import { createInitialState, initGameState, resetState } from './state/game-state.js'
-import { startTimer, stopTimer } from './utils/timer.js'
+import { template } from './templates/memory-app.template.js'
+import { createInitialState, initGameState, resetState } from './services/game-state.js'
+import { startTimer, stopTimer } from './services/timer.js'
 import { renderBoard } from './ui/board-renderer.js'
 import { flipTile, checkMatch } from './logic/game-logic.js'
 import { VIEWS, viewConfig } from './ui/views.js'
