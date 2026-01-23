@@ -4,18 +4,17 @@ template.innerHTML = `
 :host {
     display: none;
     background: #fff;
+    padding: .5rem 1rem 1rem;
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 /* Container */
 .mood-entry-container {
     display: flex;
     flex-direction: column;
-    font-size: clamp(.9rem, 1.5vw + .6rem, 1rem);
-    gap: 1.5rem;
-    margin: 0;
-    padding: 1rem;
-    border-radius: 6px;
-    min-width: 320px;
+    padding: 0;
+    width: 100%;
 }
 
 /* Focus outline */
@@ -26,43 +25,33 @@ template.innerHTML = `
 /* Mood selection */
 .select-mood {
     position: relative;
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .5rem;
-}
-
-.mood-legend {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 100%;
-    background: #dde7ef;
-    padding: .5rem;
-    margin: 0 .5rem;
-    font-size: .8rem;
-    border-radius: 6px;
-    color: #000;
-    border: 1px solid #4d5f6a;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    white-space: nowrap;
-    min-width: fit-content;
-    max-width: 50vw;
-    z-index: 10;
+    margin: 2rem auto;
 }
 
 .mood-buttons {
     display: flex;
-    gap: .6rem;
-    font-size: 1.6rem;
-    width: 100%;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 0 auto clamp(.5rem, 1vw, 1rem);
+    width: 100%;
+    margin: 3rem auto;
 }
-
+    
 .mood-buttons span {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    font-size: 3rem;
     transition: transform .1s ease;
+}
+    
+.mood-buttons span p {
+    font-size: .6rem;
+    text-align: center;
+    text-transform: lowercase;
 }
 
 .mood-buttons span.selected {
@@ -77,18 +66,98 @@ template.innerHTML = `
     margin-bottom: .5rem;
 }
 
-.mood-info-btn {
-    background: #6f94ad;
-    border: none;
+.mood-details {
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 0 1rem;
+}
+
+.selected-mood-top {
+  font-size: 2rem;
+}
+
+
+/* activities buttons */
+.activity-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 350px;
+    justify-content: center;
+    gap: .3rem;
+}
+
+.activity-buttons input[type="checkbox"] {
+    display: none;
+}
+
+.activity-buttons label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.activity-buttons label .icon-circle {
+    display: flex;
     border-radius: 50%;
-    width: 1.2rem;
-    height: 1.2rem;
+    padding: .5rem;
+    background: #dde7ef;
+    font-size: 1.2rem;
+    aspect-ratio: 1/1;
+    align-items: center;
+    justify-content: center;
+    transition: .2s ease;
+}
+
+.activity-buttons label p {
+  text-align: center;
+  font-size: .5rem;
+}
+
+.activity-buttons label span i {
+  font-size: 1.2rem;
+  margin-bottom: .2rem;
+}
+
+.activity-buttons label:hover {
+    background: #c8d9e6;
+}
+
+.activity-buttons label:has(input[type="checkbox"]:checked),
+.activity-buttons label.active {
+    background: #8fb3cc;
+}
+
+.activity-buttons label:active {
+    transform: scale(0.9);
+}
+
+/* Headings in select-activities */
+span#heading {
+    display: block;
+    text-align: center;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    margin: 1rem auto;
+    max-width: 200px;
 }
 
 /* Inputs */
+input[type="date"] {
+    font-family: inherit;
+    border: none;
+    border-bottom: 1px solid #000;
+}
+
 textarea {
     min-height: 50px;
     font-family: inherit;
+    font-size: .7rem;
+    border: none;
+    background: #f2f6fa;
+    border: 1px solid #dde7ef;
+    padding: .5rem;
+    border-radius: 6px;
 }
 
 input[type="number"] {
@@ -136,54 +205,6 @@ select {
     padding: .25rem .5rem;
 }
 
-/* Feelings checkboxes */
-.feeling-buttons {
-    display: grid;
-    grid-template-columns: repeat(4, max-content);
-    gap: .3rem;
-    max-width: 100%;
-    justify-content: start;
-}
-
-.feeling-buttons input[type="checkbox"] {
-    display: none;
-}
-
-.feeling-buttons label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: .2rem;
-    padding: .3rem .6rem;
-    border-radius: 6px;
-    background: #dde7ef;
-    font-size: .7rem;
-    user-select: none;
-    width: fit-content;
-    white-space: nowrap;
-    transition: .2s ease;
-}
-
-.feeling-buttons label:hover {
-    background: #c8d9e6;
-}
-
-.feeling-buttons label:has(input[type="checkbox"]:checked),
-.feeling-buttons label.active {
-    background: #8fb3cc;
-}
-
-.feeling-buttons label:active {
-    transform: scale(0.9);
-}
-
-/* Headings in select-feelings */
-.select-feelings span#heading {
-    display: block;
-    text-align: center;
-    margin: .5rem auto;
-}
-
 /* Buttons */
 .buttons {
     display: flex;
@@ -192,45 +213,62 @@ select {
     align-content: center;
 }
 
-.save-btn, .go-back-btn, select {
+.save-btn {
+    padding: .5rem 1rem;
+    text-transform: uppercase;
+    margin: 0;
+    background: #8fb3cc;
     border-radius: 10px;
     border: none;
-    background: #8fb3cc;
+    transition: .2s ease;
+}
+
+.go-back-btn, .view-history-btn, select {
+    border-radius: 10px;
+    border: none;
+    background: #dde7ef;
     color: #000;
     transition: .2s ease;
 }
 
-.save-btn, .go-back-btn {
+.go-back-btn, .view-history-btn {
     padding: .5rem 1rem;
     text-transform: uppercase;
     width: fit-content;
     margin: 0;
 }
 
-.save-btn:hover, .go-back-btn:hover {
+.save-btn:hover, .go-back-btn:hover, .view-history-btn:hover {
     background: #5f86a1;
     transform: scale(1.05);
 }
 
 /* Global pointer cursor */
-button, span, select, input, .feeling-buttons label {
+button, span, select, input, .activity-buttons label {
     cursor: pointer;
 }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <div class="mood-entry-container">
-<span id="date-display"></span>
 <div class="select-mood">
-<span>Select mood:
+<span id="heading">How are you?
 </span>
-
-<div class="mood-legend">
-</div>
+<input type="date"></input>
 
 <div class="mood-buttons"></div>
 </div>
+</div>
 
+<div class="selected-mood-top" style="display:none; text-align:center;"></div>
+<div class="mood-details" style="display: none;">
+
+<div class="select-activities">
+<span id="heading">What have you been up to?</span>
+<div class="activity-buttons"></div>
+</div>
 <label>⚡Energy level:
 <select class="energy-level">
 <option value="" selected disabled>Select</option>
@@ -255,27 +293,24 @@ button, span, select, input, .feeling-buttons label {
 <input class="sleep-hours" type="number" value="8" min="0" max="24" placeholder="Hours slept">
 </label>
 
-<div class="select-feelings">
-<span id="heading">I'm feeling:</span>
-<div class="feeling-buttons"></div>
-</div>
-
 <textarea placeholder="Notes..."></textarea>
-<div class="buttons">
-<button class="go-back-btn">Go back</button>
-<button class="save-btn">Save</button>
 </div>
+<div class="buttons">
+<button class="save-btn" style="display:none;">Save</button>
+<button class="go-back-btn">Go back</button>
 <button class="view-history-btn">View History</button>
+</div>
 </div>
 `
 /**
  * @typedef {object} MoodEntryData
  * @property {string} id - Unique identifier
  * @property {string} date - Formatted date string
+ * @property {string} time - Formatted time string
  * @property {[icon: string, label: string, color: string]} mood - Selected mood
  * @property {string}  energy - Energy level
  * @property {{hours: number, quality: string}} sleep - Sleep info
- * @property {Array<string>} feelings - Selected feelings
+ * @property {[icon: string, label: string]} activities - Selected activities
  * @property {string} notes - Optional notes
  */
 
@@ -285,7 +320,7 @@ button, span, select, input, .feeling-buttons label {
  * Web component that allows a user to:
  * - select their mood
  * - rate energy level and sleep
- * - select multiple feelings (checkboxes)
+ * - select multiple activities (checkboxes)
  * - add notes
  * - save entries (to localStorage)
  *
@@ -293,7 +328,7 @@ button, span, select, input, .feeling-buttons label {
  */
 export class MoodEntry extends HTMLElement {
   /**
-   * Creates the component, attaches shadow DOM, initializes state and default moods/feelings.
+   * Creates the component, attaches shadow DOM, initializes state and default moods/activities.
    */
   constructor () {
     super()
@@ -304,44 +339,45 @@ export class MoodEntry extends HTMLElement {
     this.moodValues = this.getAttribute('moods')
       ? this.getAttribute('moods').split(',')
       : [
-          { icon: 'fa-angry', label: 'Angry', color: '#af6b6a' },
-          { icon: 'fa-frown', label: 'Sad', color: '#95b4c8' },
-          { icon: 'fa-grimace', label: 'Worried', color: '#fad6a2' },
-          { icon: 'fa-smile-beam', label: 'Content', color: '#c9dcc9' },
-          { icon: 'fa-laugh', label: 'Happy', color: '#a2b5a2' }
+          { icon: 'fa-tired', label: 'Awful', color: '#af6b6a' },
+          { icon: 'fa-frown', label: 'Bad', color: '#95b4c8' },
+          { icon: 'fa-meh', label: 'Meh', color: '#fad6a2' },
+          { icon: 'fa-smile', label: 'Good', color: '#c9dcc9' },
+          { icon: 'fa-laugh-beam', label: 'Rad', color: '#a2b5a2' }
         ]
 
-    /** @type {Array<string>} Available feelings for checkboxes */
-    this.feelingValues = [
-      'Loved',
-      'Grateful',
-      'Proud',
-      'Productive',
-      'Motivated',
-      'Confident',
-      'Relaxed',
-      'Calm',
-      'Satisfied',
-      'Excited',
-      'Anxious',
-      'Nervous',
-      'Annoyed',
-      'Tired',
-      'Upset',
-      'Bored',
-      'Stressed',
-      'Hurt'
-    ]
+    /** @type {Array<{icon: string, label:string}>} Available activities */
+    this.activityValues = this.getAttribute('activities')
+      ? this.getAttribute('activities').split(',')
+      : [
+          { icon: 'fa-solid fa-briefcase', label: 'Work' },
+          { icon: 'fa-solid fa-users', label: 'Family' },
+          { icon: 'fa-solid fa-person-walking', label: 'Walking' },
+          { icon: 'fa-solid fa-user-group', label: 'Friends' },
+          { icon: 'fa-solid fa-user-graduate', label: 'School' },
+          { icon: 'fa-solid fa-heart', label: 'Date' },
+          { icon: 'fa-solid fa-utensils', label: 'Good food' },
+          { icon: 'fa-solid fa-ticket', label: 'Movie' },
+          { icon: 'fa-solid fa-champagne-glasses', label: 'Party' },
+          { icon: 'fa-solid fa-gamepad', label: 'Gaming' },
+          { icon: 'fa-solid fa-person-walking-luggage', label: 'Travel' },
+          { icon: 'fa-solid fa-dumbbell', label: 'Workout' },
+          { icon: 'fa-solid fa-cart-shopping', label: 'Shopping' },
+          { icon: 'fa-solid fa-bacterium', label: 'Sick' },
+          { icon: 'fa-solid fa-book-open', label: 'Reading' },
+          { icon: 'fa-solid fa-couch', label: 'Relax' }
+        ]
 
-    this.selectedFeelings = []
+    this.selectedactivities = []
 
     this.dateDisplay = this.shadowRoot.querySelector('#date-display')
-    this.moodLegend = this.shadowRoot.querySelector('.mood-legend')
+    this.moodSelect = this.shadowRoot.querySelector('.select-mood')
     this.moodButtons = this.shadowRoot.querySelector('.mood-buttons')
+    this.moodDetails = this.shadowRoot.querySelector('.mood-details')
     this.energyLevel = this.shadowRoot.querySelector('.energy-level')
     this.sleepHours = this.shadowRoot.querySelector('.sleep-hours')
     this.sleepQuality = this.shadowRoot.querySelector('.sleep-quality')
-    this.feelingButtons = this.shadowRoot.querySelector('.feeling-buttons')
+    this.activityButtons = this.shadowRoot.querySelector('.activity-buttons')
     this.textarea = this.shadowRoot.querySelector('textarea')
     this.saveBtn = this.shadowRoot.querySelector('.save-btn')
     this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
@@ -355,7 +391,7 @@ export class MoodEntry extends HTMLElement {
    */
   connectedCallback () {
     this.renderMoodButtons()
-    this.renderFeelingsCheckboxes()
+    this.renderactivitiesCheckboxes()
 
     this.goBackBtn.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('navigate', {
@@ -381,17 +417,20 @@ export class MoodEntry extends HTMLElement {
     })
 
     this.saveBtn.addEventListener('click', () => {
-      if (!this.selectedMood) {
-        alert('Please select a mood!')
-        return
-      }
-
       const entryId = crypto.randomUUID()
-      const formattedDate = new Date().toLocaleDateString(undefined, {
+      const now = new Date()
+      const formattedDate = now.toLocaleDateString('en-US', {
+        timeZone: 'Europe/Stockholm',
         weekday: 'long',
-        year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
+        year: 'numeric'
+      })
+
+      const formattedTime = now.toLocaleTimeString('sv-SE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
       })
       this.dateDisplay.textContent = formattedDate
 
@@ -399,13 +438,14 @@ export class MoodEntry extends HTMLElement {
       const data = {
         id: entryId,
         date: formattedDate,
+        time: formattedTime,
         mood: this.selectedMood,
         energy: this.energyLevel.value,
         sleep: {
           hours: this.sleepHours.value,
           quality: this.sleepQuality.selectedOptions[0]?.text || ''
         },
-        feelings: this.selectedFeelings,
+        activities: this.selectedactivities,
         notes: this.textarea.value
       }
 
@@ -433,7 +473,10 @@ export class MoodEntry extends HTMLElement {
     this.moodButtons.innerHTML = ''
     this.moodValues.forEach((m) => {
       const span = document.createElement('span')
-      span.innerHTML = `<i class="far ${m.icon}" style="color: ${m.color};"></i>`
+      span.innerHTML = `
+      <i class="far ${m.icon}" style="color: ${m.color};"></i>
+      <p class="mood-label">${m.label}</p>
+      `
       span.title = m.label
 
       span.addEventListener('click', () => {
@@ -442,39 +485,58 @@ export class MoodEntry extends HTMLElement {
           .querySelectorAll('span')
           .forEach((s) => s.classList.remove('selected'))
         span.classList.add('selected')
+
+        this.moodDetails.style.display = 'flex'
+        this.saveBtn.style.display = 'block'
+        this.moodSelect.style.display = 'none'
+
+        const topContainer = this.shadowRoot.querySelector('.selected-mood-top')
+        topContainer.innerHTML = `<i class="far ${m.icon}" style="color:${m.color}"></i>`
+        topContainer.style.display = 'block'
+
+        span.style.position = 'absolute'
+        span.style.top = '.5rem'
+        span.style.left = '50%'
+        span.style.transform = 'translateX(-50%)'
       })
       this.moodButtons.appendChild(span)
     })
   }
 
   /**
-   * Renders checkboxes for all feelings and tracks selected ones.
+   * Renders checkboxes for all activities and tracks selected ones.
    */
-  renderFeelingsCheckboxes () {
-    this.feelingButtons.innerHTML = ''
-    this.selectedFeelings = []
+  renderactivitiesCheckboxes () {
+    this.activityButtons.innerHTML = ''
+    this.selectedactivities = []
 
-    this.feelingValues.forEach((feeling) => {
+    this.activityValues.forEach((activity) => {
       const label = document.createElement('label')
+
       const checkbox = document.createElement('input')
       checkbox.type = 'checkbox'
-      checkbox.value = feeling
+      checkbox.value = activity.label
 
-      const text = document.createElement('span')
-      text.textContent = feeling
+      const circle = document.createElement('div')
+      circle.classList.add('icon-circle')
+      circle.innerHTML = `<i class="${activity.icon}"></i>`
+
+      const text = document.createElement('p')
+      text.textContent = activity.label
 
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) {
-          this.selectedFeelings.push(feeling)
+          this.selectedactivities.push(activity.label)
         } else {
-          this.selectedFeelings = this.selectedFeelings.filter(
-            (f) => f !== feeling
+          this.selectedactivities = this.selectedactivities.filter(
+            (f) => f !== activity.label
           )
         }
       })
       label.appendChild(checkbox)
+      label.appendChild(circle)
       label.appendChild(text)
-      this.feelingButtons.appendChild(label)
+      this.activityButtons.appendChild(label)
     })
 
     for (let i = 0; i < 2; i++) {
@@ -484,18 +546,18 @@ export class MoodEntry extends HTMLElement {
       input.placeholder = 'Custom'
 
       input.addEventListener('input', () => {
-        this.selectedFeelings = this.selectedFeelings.filter(
+        this.selectedactivities = this.selectedactivities.filter(
           (f) => !f.startsWith(`custom${i}:`)
         )
         if (input.value.trim()) {
-          this.selectedFeelings.push(`custom${i}:${input.value.trim()}`)
+          this.selectedactivities.push(`custom${i}:${input.value.trim()}`)
           label.classList.add('active')
         } else {
           label.classList.remove('active')
         }
       })
       label.appendChild(input)
-      this.feelingButtons.appendChild(label)
+      this.activityButtons.appendChild(label)
     }
   }
 
@@ -511,12 +573,12 @@ export class MoodEntry extends HTMLElement {
     this.sleepHours.value = '8'
     this.sleepQuality.value = ''
     this.textarea.value = ''
-    this.selectedFeelings = []
+    this.selectedactivities = []
 
-    this.feelingButtons
+    this.activityButtons
       .querySelectorAll('input[type="checkbox"]')
       .forEach((cb) => (cb.checked = false))
-    this.feelingButtons
+    this.activityButtons
       .querySelectorAll('input[type="text"]')
       .forEach((tf) => (tf.value = ''))
   }

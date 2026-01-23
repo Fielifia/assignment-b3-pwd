@@ -1,3 +1,4 @@
+import { playFlipSound, playMatchSound } from '../utils/sounds.js'
 /**
  * Handles a tile flip.
  * Flips the tile, checks for matches and updates state.
@@ -16,6 +17,7 @@ export function flipTile (state, tile, tileEl, checkMatchCallback) {
 
   tileEl.classList.add('flip')
   state.flipped.push({ tile, el: tileEl })
+  playFlipSound()
 
   if (state.flipped.length === 2) {
     state.isBusy = true
@@ -48,7 +50,8 @@ export function checkMatch (state, gameOverCallback) {
     setTimeout(() => {
       first.el.classList.add('matched')
       second.el.classList.add('matched')
-    }, 500)
+      playMatchSound()
+    }, 400)
   } else {
     first.el.classList.remove('flip')
     second.el.classList.remove('flip')

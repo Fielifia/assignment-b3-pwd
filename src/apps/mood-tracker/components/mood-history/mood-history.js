@@ -4,6 +4,7 @@ template.innerHTML = `
 :host {
     display: none;
     background: #edf2f7;
+    box-sizing: border-box;
 }
 
 .history-container {
@@ -13,6 +14,7 @@ template.innerHTML = `
     width: 100%;
     font-size: .9rem;
     padding: 1rem;
+    box-sizing: border-box;
 }
 
 .entries-list {
@@ -20,7 +22,6 @@ template.innerHTML = `
     flex-direction: column;
     gap: .5rem;
     max-height: 400px;
-    overflow-y: auto;
 }
 
 h3 {
@@ -29,31 +30,76 @@ h3 {
 
 .entry {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .5rem;
-    padding: .5rem;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto auto;
+    position: relative;
+    gap: 1rem;
+    padding: 1rem;
+    min-width: 0;
     border-radius: 8px;
     background: #edf2f7;
     align-items: center;
+    box-shadow: 2px 6px 12px rgba(0,0,0,0.1);
 }
 
-.entry-left {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    color: #3b4a59;
+.entry-date {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: .8rem;
 }
 
-.entry-right {
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-    font-size: .85rem;
-    color: #333;
+.entry-icon {
+  grid-column: 1;
+  grid-row: 2 / 4;
+  display: flex;
+  font-size: 3rem;
+  align-items: center;
+  justify-content: center;
 }
 
-.entry span {
-    display: block;
+.entry-mood-time {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  gap: 1rem;
+}
+
+.entry-mood-time .mood {
+  font-size: 1.6rem;
+  text-transform: uppercase;
+}
+
+.entry-mood-time .time {
+  font-size: .8rem;
+}
+
+.entry-feelings {
+  grid-column: 2;
+  grid-row: 3;
+  display: flex;
+}
+
+.entry-details {
+  background: #ccc;
+  grid-row: 5;
+}
+
+.details-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  background: none;
+  border: none;
+  transition: .2s ease;
+}
+
+.details-btn:hover {
+  background: none;
+  color: blue;
 }
 
 .delete-btn {
@@ -66,6 +112,7 @@ h3 {
 }
 button {
   padding: .5rem 1rem;
+  margin: 1rem;
   border-radius: 6px;
   border: none;
   background: #8fb3cc;
@@ -95,6 +142,7 @@ button:hover {
  * @typedef {object} MoodHistoryEntry
  * @property {string} id - Unique identifier
  * @property {string} date - Formatted date string
+ * @property {string} time - Formatted time string
  * @property {[icon: string, label: string, color: string]} mood - Selected mood
  * @property {string}  energy - Energy level
  * @property {{hours: number, quality: string}} sleep - Sleep info
@@ -185,20 +233,33 @@ export class MoodHistory extends HTMLElement {
       const div = document.createElement('div')
       div.classList.add('entry')
       div.innerHTML = `
-      <div class="entry-left">
-                <span>Date: ${entry.date}</span>
-                <span>Mood: <i class="far ${entry.mood.icon}" style="color: ${entry.mood.color};"></i> ${entry.mood?.label}</span>
+                <span class="entry-date">${entry.date}</span>
+                <div class="entry-icon">
+                <i class="far ${entry.mood.icon}" style="color: ${entry.mood.color};"></i>
                 </div>
-                <div class="entry-right">
+
+                <div class="entry-mood-time">
+                <span class="mood" style="color: ${entry.mood.color};">${entry.mood?.label}</span>
+                <span class="entry-time">${entry.time}</span>
+                </div>
+
+                <div class="entry-feelings">
+                <span>Feelings: ${entry.feelings.join(', ')}</span>
+                </div>
+                
+                <button class="details-btn">v</button>
+                <div class="entry-details" style="display:none;">
                 <span>Energy level: ${entry.energy}</span>
                 <span>Hours slept: ${entry.sleep?.hours}h</span>
                 <span>Sleep quality: ${entry.sleep?.quality}</span>
-                <span>Feelings: ${entry.feelings.join(', ')}</span>
                 <span>Notes: ${entry.notes || '-'}</span>
                 <button class="delete-btn">🗑️</button>
                 </div>`
 
-      div.querySelector('.delete-btn')
+      div.querySelector('.details-btn').addEventListener('click', () => {
+        div.querySelector('.entry-details').style.display = 'flex'
+      })
+
       /**
        * Fired when a mood entry is deleted.
        *
@@ -206,14 +267,14 @@ export class MoodHistory extends HTMLElement {
        * @type {CustomEvent<string>}
        * @property {string} detail - Date of the entry to delete.
        */
-        .addEventListener('click', () => {
-          console.log('DELETE CLICKED!')
-          this.dispatchEvent(new CustomEvent('delete-entry', {
-            detail: entry.id,
-            bubbles: true,
-            composed: true
-          }))
-        })
+      div.querySelector('.delete-btn').addEventListener('click', () => {
+        console.log('DELETE CLICKED!')
+        this.dispatchEvent(new CustomEvent('delete-entry', {
+          detail: entry.id,
+          bubbles: true,
+          composed: true
+        }))
+      })
       this.entryList.appendChild(div)
     })
   }

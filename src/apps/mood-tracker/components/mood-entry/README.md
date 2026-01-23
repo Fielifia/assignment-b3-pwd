@@ -1,23 +1,26 @@
 # `<mood-entry>` - Mood Tracker Entry Component
 A reusable Web Component for creating mood tracker entries.
 The component allows users to:
-- Select a mood from predefined options
-- Rate energy level and sleep
-- Select multiple feelings and/or add custom feelings
-- Add optional notes
+- Select a mood from predefined options (Font Awesome icons)
+- Rate energy level (1–5)
+- Log sleep hours and quality
+- Select multiple predefined activities
+- Add up to two custom activities
+- Write optional notes
 - Save entries via a custom event
+- Navigate back to the start page or view history
 
 The component is built using **Vanilla JavaScript**, **Web Components**, and **Shadow DOM**.
 
 ---
 
 ## Features
-- Select a mood using Font Awesome icons
-- Rate energy level (1–5)
-- Log sleep hours and rate sleep quality (Poor–Okay–Good)
-- Select multiple predefined feelings
-- Add up to two custom feelings
-- Write optional notes
+- Mood selection using icons and color codes
+- Energy level dropdown (Terrible–Low–Okay–Good–Great)
+- Sleep tracking: hours (number input) and quality (Poor–Okay–Good)
+- Multiple activities selection with checkboxes
+- Custom activities: up to two text inputs
+- Optional notes via a textarea
 - Save entries and emit structured data
 - Provides two buttons for navigation:
   - **Go back** → navigates to the start page
@@ -54,6 +57,7 @@ element.addEventListener('entry-submit', (event) => {
 {
     id: string,
     date: string,
+    time: string,
     mood: {
         icon: string,
         label: string,
@@ -64,7 +68,7 @@ element.addEventListener('entry-submit', (event) => {
         hours: number,
         quality: string
     },
-    feelings: string[],
+    activities: string[],
     notes: string
 }
 ```

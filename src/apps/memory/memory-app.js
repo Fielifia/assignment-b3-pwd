@@ -12,6 +12,7 @@ import { startTimer, stopTimer } from './services/timer.js'
 import { renderBoard } from './ui/board-renderer.js'
 import { flipTile, checkMatch } from './logic/game-logic.js'
 import { VIEWS, viewConfig } from './ui/views.js'
+import { playWinnerSound } from './utils/sounds.js'
 
 /**
  * Custom element <memory-app> representing a Memory Game.
@@ -226,6 +227,7 @@ class MemoryApp extends HTMLElement {
     stopTimer(this.state)
     this.prevView = VIEWS.GAME_END
     this.setView(VIEWS.GAME_END)
+    playWinnerSound()
     this.showMessage(
       `<strong>${this.nickname}</strong>, you finished in ${this.state.time} seconds with ${this.state.attempts} attempts! 🎉`
     )

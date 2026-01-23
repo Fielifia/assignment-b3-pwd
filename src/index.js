@@ -13,7 +13,7 @@ import { PwdShell } from './shell/pwd-shell.js'
 new PwdShell()
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async function () {
+  window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('../public/serviceworker.js')
       console.log('ServiceWorker: Registration successfull with scope: ', registration.scope)

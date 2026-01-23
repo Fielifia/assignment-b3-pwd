@@ -78,7 +78,7 @@ const cachedFetch = async request => {
 }
 
 /**
- * Fetch event; intercepts request and responds with cachedFetch.
+ * Fetch event: intercepts request and responds with cachedFetch.
  */
 self.addEventListener('fetch', event => {
   console.log('ServiceWorker: Fetching')

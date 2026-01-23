@@ -16,6 +16,13 @@ template.innerHTML = `
   color: #4d5f6a;
 }
 
+.buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-content: center;
+}
+
 button {
     border-radius: 10px;
     border: none;

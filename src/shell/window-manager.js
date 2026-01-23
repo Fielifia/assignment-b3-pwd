@@ -60,9 +60,13 @@ export class WindowManager {
     const closeBtn = win.querySelector('.close-btn')
 
     const content = win.querySelector('.content')
-    const tag = APP_TAGS[appType]
-    const appEl = tag ? document.createElement(tag) : document.createElement('div')
+
+    const appEl = document.createElement('div')
     content.appendChild(appEl)
+
+    const tag = APP_TAGS[appType]
+    const el = tag ? document.createElement(tag) : document.createElement('div')
+    content.appendChild(el)
 
     makeDraggable(win, titleBar)
 
