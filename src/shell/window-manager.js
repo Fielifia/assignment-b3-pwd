@@ -61,7 +61,8 @@ export class WindowManager {
     const content = win.querySelector('.content')
 
     if (!APP_LOADERS[appType] || !APP_TAGS[appType]) {
-      console.warn(`Unknown appType: ${appType}`)
+      console.warn(`Unknown appType: ${appType}
+        return null`)
       return win
     }
     try {
@@ -92,6 +93,8 @@ export class WindowManager {
    * @param {HTMLElement} win - The window to focus.
    */
   focusWindow (win) {
+    if (!win || !win.style) return
+
     this.topZ++
     win.style.zIndex = this.topZ
   }

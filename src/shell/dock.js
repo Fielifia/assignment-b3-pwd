@@ -34,8 +34,9 @@ export class Dock {
       icon.setAttribute('role', 'button')
       icon.setAttribute('data-app-type', app.type)
 
-      addActivateListener(icon, () => {
-        const win = this.windowManager.createWindow(app.title, app.type)
+      addActivateListener(icon, async () => {
+        const win = await this.windowManager.createWindow(app.title, app.type)
+        if (!win) return
         this.windowManager.focusWindow(win)
         win.focus()
       })
