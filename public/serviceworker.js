@@ -86,6 +86,12 @@ self.addEventListener('fetch', event => {
   event.respondWith(cachedFetch(event.request))
 })
 
+self.addEventListener('notificationclick', event => {
+  event.notification.close()
+
+  event.waitUntil(clients.openWindow('/'))
+})
+
 /**
  * Message event: handle messages sent from the main application.
  */

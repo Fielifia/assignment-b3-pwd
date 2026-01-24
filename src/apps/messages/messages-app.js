@@ -5,6 +5,7 @@
  * - Username selection
  * - Avatar selection
  * - Reply functionality
+ * - Notifications when new message is recieved
  *
  * Handles sending, receiving, and replying to messages.
  *
@@ -20,6 +21,7 @@ import { renderMessages } from './logic/messages-renderer.js'
 import { template } from './templates/messages-app.template.js'
 import { initSocket } from './services/socket.js'
 import { initUI } from './ui/ui-init.js'
+import { requestNotificationPermission, showNotification } from '../../ui/notifications.js'
 /**
  * MessagesApp class for the chat component.
  *
@@ -113,6 +115,14 @@ class MessagesApp extends HTMLElement {
     this.cancelReplyBtn.addEventListener('click', this.#handleCancelReply, { signal })
     this.sidebarToggleBtn.addEventListener('click', this.#handleToggleSidebar, { signal })
 
+    requestNotificationPermission()
+
+    this.notifyBtn = document.createElement('button')
+    this.notifyBtn.classList.add('notify-btn')
+    this.notifyBtn.addEventListener('click', () => {
+      showNotification()
+    })
+
     initUI({
       avatarPicker: this.avatarPicker,
       usernameForm: this.usernameForm,
@@ -135,7 +145,17 @@ class MessagesApp extends HTMLElement {
       this.textarea.value = ''
     })
 
-    this.#socket = initSocket(this.state, this.#messages, this.#renderMessages)
+    this.#socket = initSocket(this.state, this.#messages, () => {
+      this.#renderMessages()
+
+      const msgs = this.#messages
+      if (msgs.length > 0) {
+        const lastMsg = msgs[msgs.length - 1]
+        if (lastMsg.username !== this.state.username) {
+          showNotification('New message', `${lastMsg.username}: ${lastMsg.text}`)
+        }
+      }
+    })
   }
 
   /**

@@ -9,10 +9,10 @@ import { PwdShell } from './shell/pwd-shell.js'
 /* eslint-disable-next-line no-new */
 new PwdShell()
 
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('../public/serviceworker.js')
+      const registration = await navigator.serviceWorker.register('/serviceworker.js')
       console.log('ServiceWorker: Registration successfull with scope: ', registration.scope)
     } catch (error) {
       console.error('ServiceWorker: Registration failed: ', error)
