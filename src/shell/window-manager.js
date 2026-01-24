@@ -1,5 +1,5 @@
 import { makeDraggable } from '../ui/draggable.js'
-import { APP_TAGS, WINDOW_OFFSET, INITIAL_Z_INDEX } from './constants.js'
+import { APP_TAGS, APP_LOADERS, WINDOW_OFFSET, INITIAL_Z_INDEX } from './constants.js'
 import { updateDock } from '../ui/updateDock.js'
 const template = document.createElement('template')
 template.innerHTML = `
@@ -43,7 +43,7 @@ export class WindowManager {
    * @param {string} appType - The application type key.
    * @returns {HTMLElement} The created window element.
    */
-  createWindow (title, appType) {
+  async createWindow (title, appType) {
     const win = template.content.cloneNode(true).querySelector('.window')
     win.dataset.windowId = this.nextId
     win.dataset.appType = appType
@@ -58,15 +58,19 @@ export class WindowManager {
 
     const minimizeBtn = win.querySelector('.minimize-btn')
     const closeBtn = win.querySelector('.close-btn')
-
     const content = win.querySelector('.content')
 
-    const appEl = document.createElement('div')
-    content.appendChild(appEl)
-
-    const tag = APP_TAGS[appType]
-    const el = tag ? document.createElement(tag) : document.createElement('div')
-    content.appendChild(el)
+    if (!APP_LOADERS[appType] || !APP_TAGS[appType]) {
+      console.warn(`Unknown appType: ${appType}`)
+      return win
+    }
+    try {
+      await APP_LOADERS[appType]()
+      content.appendChild(document.createElement(APP_TAGS[appType]))
+    } catch (error) {
+      console.error(`Failed to load app: ${appType}`, error)
+      content.textContent = 'Could not load application.'
+    }
 
     makeDraggable(win, titleBar)
 

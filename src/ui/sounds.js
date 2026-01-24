@@ -1,6 +1,7 @@
 let flipSound
 let matchSound
 let winnerSound
+let Howler
 
 /**
  * Plays the flip sound effect for a card.
@@ -40,3 +41,5 @@ export function playWinnerSound () {
   }
   winnerSound.play()
 }
+
+Howler.volume(0.5)

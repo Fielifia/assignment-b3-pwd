@@ -1,6 +1,3 @@
-import './apps/memory/memory-app.js'
-import './apps/messages/messages-app.js'
-import './apps/mood-tracker/mood-tracker-app.js'
 /**
  * Entry point for the Progressive Web Desktop application.
  *

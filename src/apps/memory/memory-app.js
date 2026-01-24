@@ -4,15 +4,19 @@
  * @author Sofia Andersson <sa226jf@student.lnu.se>
  * @version 1.0.0
  */
-import './components/high-score/high-score.js'
 import '../../components/nickname-form/nickname-form.js'
-import { template } from './templates/memory-app.template.js'
-import { createInitialState, initGameState, resetState } from './services/game-state.js'
+import { playWinnerSound } from '../../ui/sounds.js'
+import './components/high-score/high-score.js'
+import { checkMatch, flipTile } from './logic/game-logic.js'
+import {
+  createInitialState,
+  initGameState,
+  resetState
+} from './services/game-state.js'
 import { startTimer, stopTimer } from './services/timer.js'
+import { template } from './templates/memory-app.template.js'
 import { renderBoard } from './ui/board-renderer.js'
-import { flipTile, checkMatch } from './logic/game-logic.js'
 import { VIEWS, viewConfig } from './ui/views.js'
-import { playWinnerSound } from './utils/sounds.js'
 
 /**
  * Custom element <memory-app> representing a Memory Game.
@@ -92,49 +96,66 @@ class MemoryApp extends HTMLElement {
 
     this.nicknameForm.addEventListener(
       'nickname-submitted',
-      this.#onNicknameSubmitted, { signal }
+      this.#onNicknameSubmitted,
+      { signal }
     )
 
-    this.levelSelect.addEventListener('change', (e) => {
-      this.state.level = parseInt(e.target.value, 10)
-      this.boardEl.classList.add(`level-${this.state.level}`)
-      this.setView(VIEWS.START)
-      if (this.highScoreComponent) {
-        this.highScoreComponent.setLevel(this.state.level)
-      }
-    }, { signal })
+    this.levelSelect.addEventListener(
+      'change',
+      (e) => {
+        this.state.level = parseInt(e.target.value, 10)
+        this.boardEl.classList.add(`level-${this.state.level}`)
+        this.setView(VIEWS.START)
+        if (this.highScoreComponent) {
+          this.highScoreComponent.setLevel(this.state.level)
+        }
+      },
+      { signal }
+    )
 
-    this.goBackBtn.addEventListener('click', () => {
-      console.log('Go back clicked')
-      this.backToStart()
-    }, { signal })
+    this.goBackBtn.addEventListener(
+      'click',
+      () => {
+        console.log('Go back clicked')
+        this.backToStart()
+      },
+      { signal }
+    )
     this.restartBtn.addEventListener('click', () => this.initGame(), { signal })
-    this.highScoreBtn.addEventListener('click', () => {
-      if (!this.state.gameOver && this.state.timerId) {
-        this.prevView = VIEWS.IN_GAME
-        stopTimer(this.state)
-      } else if (this.state.gameOver) {
-        this.prevView = VIEWS.GAME_END
-      } else {
-        this.prevView = VIEWS.START
-      }
-      this.setView(VIEWS.HIGHSCORES)
-    }, { signal })
+    this.highScoreBtn.addEventListener(
+      'click',
+      () => {
+        if (!this.state.gameOver && this.state.timerId) {
+          this.prevView = VIEWS.IN_GAME
+          stopTimer(this.state)
+        } else if (this.state.gameOver) {
+          this.prevView = VIEWS.GAME_END
+        } else {
+          this.prevView = VIEWS.START
+        }
+        this.setView(VIEWS.HIGHSCORES)
+      },
+      { signal }
+    )
 
-    this.highScoreComponent.addEventListener('highscore-back', () => {
-      switch (this.prevView) {
-        case VIEWS.IN_GAME:
-          this.setView(VIEWS.IN_GAME)
-          startTimer(this.state, () => this.updateStatus())
-          break
-        case VIEWS.GAME_END:
-        case VIEWS.START:
-        default:
-          this.setView(VIEWS.START)
-          break
-      }
-      this.prevView = null
-    }, { signal })
+    this.highScoreComponent.addEventListener(
+      'highscore-back',
+      () => {
+        switch (this.prevView) {
+          case VIEWS.IN_GAME:
+            this.setView(VIEWS.IN_GAME)
+            startTimer(this.state, () => this.updateStatus())
+            break
+          case VIEWS.GAME_END:
+          case VIEWS.START:
+          default:
+            this.setView(VIEWS.START)
+            break
+        }
+        this.prevView = null
+      },
+      { signal }
+    )
   }
 
   /**
@@ -172,7 +193,11 @@ class MemoryApp extends HTMLElement {
     this.boardEl.classList.add(`level-${this.state.level}`)
     this.messageEl.textContent = ''
 
-    renderBoard(this.boardEl, this.state.board, (tile, tileEl) => flipTile(this.state, tile, tileEl, (state) => checkMatch(state, () => this.handleGameOver())))
+    renderBoard(this.boardEl, this.state.board, (tile, tileEl) =>
+      flipTile(this.state, tile, tileEl, (state) =>
+        checkMatch(state, () => this.handleGameOver())
+      )
+    )
     this.restartBtn.textContent = 'Restart'
   }
 

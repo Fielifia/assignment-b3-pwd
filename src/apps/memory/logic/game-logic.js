@@ -1,4 +1,4 @@
-import { playFlipSound, playMatchSound } from '../utils/sounds.js'
+import { playFlipSound, playMatchSound } from '../../../ui/sounds.js'
 /**
  * Handles a tile flip.
  * Flips the tile, checks for matches and updates state.
@@ -12,8 +12,9 @@ import { playFlipSound, playMatchSound } from '../utils/sounds.js'
 export function flipTile (state, tile, tileEl, checkMatchCallback) {
   if (
     state.isBusy ||
-      tile.matched ||
-      state.flipped.some((f) => f.tile === tile)) return
+    tile.matched ||
+    state.flipped.some((f) => f.tile === tile)
+  ) { return }
 
   tileEl.classList.add('flip')
   state.flipped.push({ tile, el: tileEl })
