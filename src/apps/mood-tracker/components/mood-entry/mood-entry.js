@@ -39,13 +39,25 @@ template.innerHTML = `
     margin: 3rem auto;
 }
     
-.mood-buttons span {
+.mood-buttons span, .activity-buttons .icon-circle {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-content: center;
-    font-size: 3rem;
     transition: transform .1s ease;
+}
+
+.mood-buttons span {
+    flex-direction: column;
+    font-size: 3rem;
+}
+
+.activity-buttons .icon-circle {
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    padding: .5rem;
+    font-size: 1.2rem;
+    background: #dde7ef;
+    transition: background .2s ease;
 }
     
 .mood-buttons span p {
@@ -54,12 +66,16 @@ template.innerHTML = `
     text-transform: lowercase;
 }
 
-.mood-buttons span.selected {
-    transform: scale(1.3);
+.mood-buttons span:hover, .activity-buttons .icon-circle:hover, .selected-mood-top:hover {
+    transform: scale(1.1);
 }
 
-.mood-buttons span:active {
+.mood-buttons span:active, .activity-buttons .icon-circle:active {
     transform: scale(0.9);
+}
+
+.mood-buttons span.selected {
+    transform: scale(1.3);
 }
 
 .selected-mood {
@@ -79,11 +95,11 @@ template.innerHTML = `
 
 /* activities buttons */
 .activity-buttons {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
     max-width: 350px;
     justify-content: center;
-    gap: .3rem;
+    gap: .5rem;
 }
 
 .activity-buttons input[type="checkbox"] {
@@ -94,42 +110,37 @@ template.innerHTML = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
 }
 
-.activity-buttons label .icon-circle {
-    display: flex;
-    border-radius: 50%;
-    padding: .5rem;
-    background: #dde7ef;
-    font-size: 1.2rem;
-    aspect-ratio: 1/1;
-    align-items: center;
-    justify-content: center;
-    transition: .2s ease;
-}
 
-.activity-buttons label p {
+.activity-buttons label p, .activity-buttons input[type="text"] {
   text-align: center;
-  font-size: .5rem;
+  font-size: .6rem;
+}
+
+.activity-buttons .icon-circle:hover {
+    background: #c8d9e6;
+}
+
+.activity-buttons label:has(input[type="checkbox"]:checked) .icon-circle {
+    background: #8fb3cc;
+    transform: scale(1.1);
+}
+    
+input[type="text"] {
+    width: 100%;
+    font-size: .6rem;
+    padding-top: .6rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(to right, transparent 0%, transparent 15%, #9b9ba7 15%,#9b9ba7 85%, transparent 85%, transparent 100%) 1;
+    outline: none;
 }
 
 .activity-buttons label span i {
   font-size: 1.2rem;
   margin-bottom: .2rem;
-}
-
-.activity-buttons label:hover {
-    background: #c8d9e6;
-}
-
-.activity-buttons label:has(input[type="checkbox"]:checked),
-.activity-buttons label.active {
-    background: #8fb3cc;
-}
-
-.activity-buttons label:active {
-    transform: scale(0.9);
 }
 
 /* Headings in select-activities */
@@ -171,7 +182,7 @@ input[type="number"] {
     transition: border .15s ease, box-shadow .15s ease, background .15s ease;
 }
 
-input[type="number"]:hover {
+input:hover, select:hover {
     background: #8fb3cc;
 }
 
@@ -184,17 +195,6 @@ input[type="number"]:focus-visible {
 input[type="checkbox"] {
     margin-right: .3rem;
     font-size: .7rem;
-}
-
-input[type="text"] {
-    width: 100%;
-    max-width: 3.5rem;
-    font-size: .7rem;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #9b9ba7;
-    outline: none;
 }
 
 input[type="text"]:focus {
@@ -244,7 +244,7 @@ select {
 }
 
 /* Global pointer cursor */
-button, span, select, input, .activity-buttons label {
+button, .mood-buttons span, select, input[type="number"], .icon-circle, .selected-mood-top {
     cursor: pointer;
 }
 </style>
@@ -256,7 +256,7 @@ button, span, select, input, .activity-buttons label {
 <div class="select-mood">
 <span id="heading">How are you?
 </span>
-<input type="date"></input>
+<input type="date" id="date"></input>
 
 <div class="mood-buttons"></div>
 </div>
@@ -352,27 +352,34 @@ export class MoodEntry extends HTMLElement {
       : [
           { icon: 'fa-solid fa-briefcase', label: 'Work' },
           { icon: 'fa-solid fa-users', label: 'Family' },
-          { icon: 'fa-solid fa-person-walking', label: 'Walking' },
+          { icon: 'fa-solid fa-running', label: 'Exercise' },
           { icon: 'fa-solid fa-user-group', label: 'Friends' },
           { icon: 'fa-solid fa-user-graduate', label: 'School' },
           { icon: 'fa-solid fa-heart', label: 'Date' },
-          { icon: 'fa-solid fa-utensils', label: 'Good food' },
           { icon: 'fa-solid fa-ticket', label: 'Movie' },
           { icon: 'fa-solid fa-champagne-glasses', label: 'Party' },
           { icon: 'fa-solid fa-gamepad', label: 'Gaming' },
           { icon: 'fa-solid fa-person-walking-luggage', label: 'Travel' },
           { icon: 'fa-solid fa-dumbbell', label: 'Workout' },
           { icon: 'fa-solid fa-cart-shopping', label: 'Shopping' },
-          { icon: 'fa-solid fa-bacterium', label: 'Sick' },
+          { icon: 'fa-solid fa-viruses', label: 'Sick' },
           { icon: 'fa-solid fa-book-open', label: 'Reading' },
-          { icon: 'fa-solid fa-couch', label: 'Relax' }
+          { icon: 'fa-solid fa-couch', label: 'Relax' },
+          { icon: 'fa-solid fa-spa', label: 'Spa' },
+          { icon: 'fa-solid fa-skiing', label: 'Skiing' },
+          { icon: 'fa-solid fa-umbrella-beach', label: 'Vacation' },
+          { icon: 'fa-solid fa-couch', label: 'Relax' },
+          { icon: 'fa-solid fa-paint-roller', label: 'Redecorating' },
+          { icon: 'fa-solid fa-air-freshener', label: 'Clean' },
+          { icon: 'fa-solid fa-birthday-cake', label: 'Birthday' }
         ]
 
     this.selectedactivities = []
 
-    this.dateDisplay = this.shadowRoot.querySelector('#date-display')
+    this.dateInput = this.shadowRoot.querySelector('#date')
     this.moodSelect = this.shadowRoot.querySelector('.select-mood')
     this.moodButtons = this.shadowRoot.querySelector('.mood-buttons')
+    this.topContainer = this.shadowRoot.querySelector('.selected-mood-top')
     this.moodDetails = this.shadowRoot.querySelector('.mood-details')
     this.energyLevel = this.shadowRoot.querySelector('.energy-level')
     this.sleepHours = this.shadowRoot.querySelector('.sleep-hours')
@@ -383,6 +390,10 @@ export class MoodEntry extends HTMLElement {
     this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
     this.historyBtn = this.shadowRoot.querySelector('.view-history-btn')
     this.selectedMood = null
+
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0]
+    this.dateInput.value = today
   }
 
   /**
@@ -391,7 +402,7 @@ export class MoodEntry extends HTMLElement {
    */
   connectedCallback () {
     this.renderMoodButtons()
-    this.renderactivitiesCheckboxes()
+    this.renderactivityCheckboxes()
 
     this.goBackBtn.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('navigate', {
@@ -472,41 +483,40 @@ export class MoodEntry extends HTMLElement {
   renderMoodButtons () {
     this.moodButtons.innerHTML = ''
     this.moodValues.forEach((m) => {
-      const span = document.createElement('span')
-      span.innerHTML = `
+      const moodButton = document.createElement('span')
+      moodButton.innerHTML = `
       <i class="far ${m.icon}" style="color: ${m.color};"></i>
       <p class="mood-label">${m.label}</p>
       `
-      span.title = m.label
+      moodButton.title = m.label
 
-      span.addEventListener('click', () => {
+      moodButton.addEventListener('click', () => {
+        if (this.moodSelect.style.display === 'none') return
+
         this.selectedMood = m
+
         this.moodButtons
           .querySelectorAll('span')
           .forEach((s) => s.classList.remove('selected'))
-        span.classList.add('selected')
+        moodButton.classList.add('selected')
 
-        this.moodDetails.style.display = 'flex'
-        this.saveBtn.style.display = 'block'
-        this.moodSelect.style.display = 'none'
-
-        const topContainer = this.shadowRoot.querySelector('.selected-mood-top')
-        topContainer.innerHTML = `<i class="far ${m.icon}" style="color:${m.color}"></i>`
-        topContainer.style.display = 'block'
-
-        span.style.position = 'absolute'
-        span.style.top = '.5rem'
-        span.style.left = '50%'
-        span.style.transform = 'translateX(-50%)'
+        setTimeout(() => {
+          this.showDetails()
+          this.topContainer.innerHTML = `<i class="far ${m.icon}" style="color:${m.color}"></i>`
+          this.topContainer.style.display = 'block'
+          this.topContainer.addEventListener('click', () => {
+            this.showMoodSelection()
+          })
+        }, 250)
       })
-      this.moodButtons.appendChild(span)
+      this.moodButtons.appendChild(moodButton)
     })
   }
 
   /**
    * Renders checkboxes for all activities and tracks selected ones.
    */
-  renderactivitiesCheckboxes () {
+  renderactivityCheckboxes () {
     this.activityButtons.innerHTML = ''
     this.selectedactivities = []
 
@@ -541,24 +551,62 @@ export class MoodEntry extends HTMLElement {
 
     for (let i = 0; i < 2; i++) {
       const label = document.createElement('label')
-      const input = document.createElement('input')
-      input.type = 'text'
-      input.placeholder = 'Custom'
 
-      input.addEventListener('input', () => {
+      const circle = document.createElement('div')
+      circle.classList.add('icon-circle')
+      circle.innerHTML = '<i class="fa-solid fa-edit"></i>'
+
+      const text = document.createElement('input')
+      text.type = 'text'
+      text.placeholder = 'Custom'
+
+      text.addEventListener('focus', () => {
+        text.placeholder = ''
+      })
+      text.addEventListener('blur', () => {
+        if (!text.value.trim()) text.placeholder = 'Custom'
+      })
+
+      circle.addEventListener('input', () => {
+        text.textContent = text.value.trim() || 'Custom'
+
         this.selectedactivities = this.selectedactivities.filter(
           (f) => !f.startsWith(`custom${i}:`)
         )
-        if (input.value.trim()) {
-          this.selectedactivities.push(`custom${i}:${input.value.trim()}`)
+        if (text.value.trim()) {
+          this.selectedactivities.push(`custom${i}:${text.value.trim()}`)
           label.classList.add('active')
         } else {
           label.classList.remove('active')
         }
       })
-      label.appendChild(input)
+      label.append(circle, text)
       this.activityButtons.appendChild(label)
     }
+  }
+
+  /**
+   * Shows the mood selection view and hides the details view.
+   *
+   * Resets the UI to allow the user to choose another mood.
+   */
+  showMoodSelection () {
+    this.topContainer.style.display = 'none'
+    this.moodSelect.style.display = 'flex'
+    this.moodDetails.style.display = 'none'
+    this.saveBtn.style.display = 'none'
+    this.shadowRoot.querySelector('.selected-mood-top').style.display = 'none'
+  }
+
+  /**
+   * Shows the mood details view and hides the mood selection.
+   */
+  showDetails () {
+    this.topContainer.style.display = 'block'
+    this.moodSelect.style.display = 'none'
+    this.moodDetails.style.display = 'flex'
+    this.saveBtn.style.display = 'block'
+    this.shadowRoot.querySelector('.selected-mood-top').style.display = 'block'
   }
 
   /**
