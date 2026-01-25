@@ -6,7 +6,8 @@ template.innerHTML = `
 }
 
 :host {
-    background: #edf2f7;}
+    background: #edf2f7;
+}
 
 .container {
     display: flex;
@@ -39,7 +40,7 @@ nickname-form {
     flex-direction: column;
     background: linear-gradient(135deg, #aec9dd 20%, #b7cfe154);
     border: 1px solid #aec9dd;
-    padding: 3rem .5rem .5rem;
+    padding: 1rem .5rem;
     height: 100%;
     width: 6rem;
     gap: 0;
@@ -53,7 +54,7 @@ nickname-form {
 
 .sidebar-toggle {
     position: absolute;
-    top: 3.6rem;
+    top: 3.4rem;
     left: .6rem;
     z-index: 20;
     display: flex;
@@ -68,6 +69,10 @@ nickname-form {
     align-items: center;
     justify-content: center;
     transition: transform .2s ease, background .2s ease;
+}
+
+.sidebar.visible + .sidebar-toggle {
+    transform: translateX(7rem);
 }
 
 div.sidebar-toggle i.fas.fa-chevron-right.is-open.true {
@@ -286,10 +291,10 @@ textarea:focus, button:focus {
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <date-time-display datetime="" format="datetime" show-seconds></date-time-display>
+<div class="sidebar">
+</div>
 <div class="sidebar-toggle">
 <i class="fas fa-chevron-right"></i>
-</div>
-<div class="sidebar">
 </div>
 <div class="container">
 <avatar-picker></avatar-picker>

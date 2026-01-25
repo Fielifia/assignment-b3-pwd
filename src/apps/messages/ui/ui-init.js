@@ -41,6 +41,8 @@ export function initUI ({ avatarPicker, usernameForm, sidebar, chatContainer, te
     sidebar.appendChild(usernameForm)
     sidebar.appendChild(avatarPicker)
 
+    usernameForm.setAttribute('label-text', 'change username')
+
     chatContainer.style.display = 'flex'
     requestAnimationFrame(() => textarea.focus())
   }
