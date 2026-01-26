@@ -1,14 +1,30 @@
 import { library, icon } from '@fortawesome/fontawesome-svg-core'
 
-import { faTired, faFrown, faMeh, faSmile, faLaughBeam } from '@fortawesome/free-regular-svg-icons'
+import { faTired, faFrown, faMeh, faSmile, faLaughBeam, faTrashCan } from '@fortawesome/free-regular-svg-icons'
 
 import {
   faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
   faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
   faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
   faPaintRoller, faAirFreshener, faBirthdayCake, faEdit
-  , faChevronDown, faTrash
+  , faChevronDown
 } from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faTired, faFrown, faMeh, faSmile, faLaughBeam,
+  faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
+  faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
+  faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
+  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit, faChevronDown, faTrashCan
+)
+
+const moodIconMap = {
+  tired: faTired,
+  frown: faFrown,
+  meh: faMeh,
+  smile: faSmile,
+  'laugh-beam': faLaughBeam
+}
 
 const template = document.createElement('template')
 template.innerHTML = `
@@ -96,12 +112,35 @@ h3 {
 }
 
 .entry-details {
-  display: none;
-  flex-direction: column;
-  gap .3rem;
-  padding-top: .5rem;
-  border-top: 1px solid #ccc;
   grid-column: 1 / -1;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .35s ease, opacity .25s ease;
+  border-top: 1px solid #ccc;
+  padding-top: 0;
+}
+
+.entry-details.open {
+  max-height: 300px;
+  opacity: 1;
+  padding-top: .75rem;
+}
+
+
+.details-content {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  position: relative;
+}
+
+.delete-btn {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: .5rem;
 }
 
 .details-btn {
@@ -111,8 +150,13 @@ h3 {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
   transition: .2s ease;
+}
+
+.details-btn.open {
+  transform: rotate(180deg);
 }
 
 .details-btn:hover {
@@ -121,12 +165,17 @@ h3 {
 }
 
 .delete-btn {
+    position: absolute;
+    bottom: .6rem;
+    right: .6rem;
     justify-self: end;
     background: none;
     border: none;
     cursor: pointer;
-    font-size: .9rem;
+    width: 1.6rem;
+    height: 1.6rem;
 }
+
 button.go-back-btn {
   padding: .5rem 1rem;
   margin: 1rem;
@@ -153,13 +202,6 @@ button.bo-back-btn:hover {
 <button class="go-back-btn">Go back</button>
 </div>
 `
-library.add(
-  faTired, faFrown, faMeh, faSmile, faLaughBeam,
-  faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
-  faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
-  faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
-  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit, faChevronDown, faTrash
-)
 /**
  * @typedef {object} MoodHistoryEntry
  * @property {string} id - Unique identifier
@@ -242,86 +284,93 @@ export class MoodHistory extends HTMLElement {
   }
 
   /**
-   * Generates a HTML template string for a mood tracker entry.
+   * Renders all mood history entries into the history list.
    *
-   * The template includes date, mood icon and label, time, activities,
-   * detailed info (energy, sleep, notes), and action buttons.
+   * This method clears the current list and rebuilds it based on
+   * {@link MoodHistory#entries}. For each entry it:
    *
-   * @param {object} entry - The mood tracker entry object.
-   * @param {string} [entry.date] - The date of the entry.
-   * @param {string} [entry.time] - The time of the entry.
-   * @param {object} [entry.mood] - Mood information.
-   * @param {string} [entry.mood.icon] - Emoji or icon representing the mood.
-   * @param {string} [entry.mood.label] - Text label for the mood.
-   * @param {string} [entry.mood.color] - Color associated with the mood.
-   * @param {string[]} [entry.activities] - List of activities for the entry.
-   * @param {number} [entry.energy] - Energy level for the entry.
-   * @param {object} [entry.sleep] - Sleep information.
-   * @param {number} [entry.sleep.hours] - Hours slept.
-   * @param {string} [entry.sleep.quality] - Quality of sleep.
-   * @param {string} [entry.notes] - Additional notes for the entry.
-   * @returns {string} HTML string representing the entry.
-   */
-  #entryTemplate (entry) {
-    const detailsChevron = icon(faChevronDown).html[0]
-    const trashIcon = icon(faTrash).html[0]
-
-    return `
-      <span class="entry-date">${entry.date || '-'}</span>
-      <div class="entry-icon" style="color: ${entry.mood?.color || '#000'}">${entry.mood?.icon || '?'}</div>
-      <div class="entry-mood-time">
-        <span class="mood" style="color: ${entry.mood?.color || '#000'}">${entry.mood?.label || '-'}</span>
-        <span class="entry-time">${entry.time || '-'}</span>
-      </div>
-      <div class="entry-activity">
-        <span>Activities: ${entry.activities?.join(', ') || '-'}</span>
-      </div>
-      <button class="details-btn">${detailsChevron}</button>
-      <div class="entry-details">
-        <span>Energy level: ${entry.energy || '-'}</span>
-        <span>Hours slept: ${entry.sleep?.hours || '-'}h</span>
-        <span>Sleep quality: ${entry.sleep?.quality || '-'}</span>
-        <span>Notes: ${entry.notes || '-'}</span>
-        <button class="delete-btn">${trashIcon}</button>
-      </div>
-    `
-  }
-
-  /**
-   * Renders the mood entries in the history container.
+   * - Creates a grid-based entry container.
+   * - Renders the mood icon using Font Awesome based on `entry.mood.icon`.
+   * - Displays mood label, color and time.
+   * - Adds a toggle button that expands/collapses the details section
+   * with a smooth CSS transition and rotates the chevron icon.
+   * - Renders additional details such as energy, sleep and notes.
+   * - Adds a delete button that dispatches a `delete-entry` event
+   * with the entry id when clicked.
    *
-   * @param {Array<MoodHistoryEntry>} entries - Array of mood entry objects.
+   * The method does not return a value and performs direct DOM manipulation.
+   *
    * @returns {void}
    */
-  render (entries) {
+  render () {
     this.entryList.innerHTML = ''
-    entries.forEach(entry => {
-      const div = document.createElement('div')
-      div.classList.add('entry')
-      div.innerHTML = this.#entryTemplate(entry)
 
-      const detailsBtn = div.querySelector('.details-btn')
-      const detailsDiv = div.querySelector('.entry-details')
+    this.entries.forEach(entry => {
+      const wrapper = document.createElement('div')
+      wrapper.className = 'entry'
+
+      /* DATE */
+      wrapper.innerHTML = `
+        <span class="entry-date">${entry.date}</span>
+      `
+
+      /* ICON */
+      const iconDiv = document.createElement('div')
+      iconDiv.className = 'entry-icon'
+      iconDiv.style.color = entry.mood.color
+
+      const moodFa = moodIconMap[entry.mood.icon]
+      if (moodFa) {
+        iconDiv.appendChild(icon(moodFa).node[0])
+      }
+
+      /* MOOD + TIME */
+      const moodTime = document.createElement('div')
+      moodTime.className = 'entry-mood-time'
+      moodTime.innerHTML = `
+        <span class="mood" style="color:${entry.mood.color}">
+          ${entry.mood.label}
+        </span>
+        <span class="time">${entry.time}</span>
+      `
+
+      /* CHEVRON */
+      const detailsBtn = document.createElement('button')
+      detailsBtn.className = 'details-btn'
+      detailsBtn.appendChild(icon(faChevronDown).node[0])
+
+      /* DETAILS */
+      const details = document.createElement('div')
+      details.className = 'entry-details'
+      details.innerHTML = `
+        <div class="details-content">
+          <span>Energy: ${entry.energy}</span>
+          <span>Sleep: ${entry.sleep?.hours || '-'}h (${entry.sleep?.quality || '-'})</span>
+          <span>Notes: ${entry.notes || '-'}</span>
+        </div>
+      `
+
+      const deleteBtn = document.createElement('button')
+      deleteBtn.className = 'delete-btn'
+      deleteBtn.appendChild(icon(faTrashCan).node[0])
+
+      details.querySelector('.details-content').appendChild(deleteBtn)
+
       detailsBtn.addEventListener('click', () => {
-        detailsDiv.style.display = detailsDiv.style.display === 'flex' ? 'none' : 'flex'
+        details.classList.toggle('open')
+        detailsBtn.classList.toggle('open')
       })
 
-      /**
-       * Fired when a mood entry is deleted.
-       *
-       * @event delete-entry
-       * @type {CustomEvent<string>}
-       * @property {string} detail - Date of the entry to delete.
-       */
-      div.querySelector('.delete-btn').addEventListener('click', () => {
-        console.log('DELETE CLICKED!')
+      deleteBtn.addEventListener('click', () => {
         this.dispatchEvent(new CustomEvent('delete-entry', {
           detail: entry.id,
           bubbles: true,
           composed: true
         }))
       })
-      this.entryList.appendChild(div)
+
+      wrapper.append(iconDiv, moodTime, detailsBtn, details)
+      this.entryList.appendChild(wrapper)
     })
   }
 }
