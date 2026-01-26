@@ -29,6 +29,7 @@ class MemoryApp extends HTMLElement {
   #abortController
   /**
    * Handles nickname submission from the nickname-form.
+   * Sets the nickname, validates the selected level, and initializes the game.
    *
    * @param {CustomEvent} event - Contains the nickname inside event.detail.
    * @returns {void}
@@ -48,14 +49,13 @@ class MemoryApp extends HTMLElement {
   }
 
   /**
-   * Creates an instance of MemoryApp
+   * Creates an instance of MemoryApp.
    * Initializes shadow DOM and the initial game state.
    */
   constructor () {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
-
     this.state = createInitialState()
     this.currentView = null
     this.prevView = null
@@ -63,7 +63,7 @@ class MemoryApp extends HTMLElement {
 
   /**
    * Lifecycle callback when the component is added to the DOM.
-   * Initilizes the game.
+   * Initilizes UI elements, attaches event listeners, and prepares game interactions.
    *
    * @returns {void}
    */
@@ -116,7 +116,6 @@ class MemoryApp extends HTMLElement {
     this.goBackBtn.addEventListener(
       'click',
       () => {
-        console.log('Go back clicked')
         this.backToStart()
       },
       { signal }
@@ -170,7 +169,7 @@ class MemoryApp extends HTMLElement {
 
   /**
    * Initializes the memory game after nickname submission.
-   * Creates the board, shuffle tiles, and resets game state.
+   * Creates the board, shuffle tiles, resets game state, and starts the timer.
    *
    * @param {string} nickname - The player's nickname
    * @returns {void}
@@ -243,7 +242,7 @@ class MemoryApp extends HTMLElement {
   /**
    * Handles the end of the game.
    * Stops the timer, hides the board and status,
-   * shows a completion message and updates high scores.
+   * shows a completion message, plays winner sound, and updates high scores.
    *
    * @returns {void}
    */
@@ -267,7 +266,7 @@ class MemoryApp extends HTMLElement {
   }
 
   /**
-   * Shows a message to the player.
+   * Shows a message to the player in the message container.
    *
    * @param {string} text - The message text to display.
    * @param {string} size - Optional font size (default '1.4rem').
@@ -280,7 +279,7 @@ class MemoryApp extends HTMLElement {
   }
 
   /**
-   * Toggles visibility of control buttons.
+   * Toggles visibility of control buttons based on provided options.
    *
    * @param {object} options - Show/hide specific controls.
    * @param {boolean} [options.levelSelect] - Show/hide the level select dropdown

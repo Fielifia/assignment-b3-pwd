@@ -92,18 +92,3 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(clients.openWindow('/'))
 })
 
-/**
- * Message event: handle messages sent from the main application.
- */
-self.addEventListener('message', event => {
-  console.log('ServiceWorker: Got a message')
-  // TODO: Handle events from the main application
-})
-
-/**
- * Push-event: handles push-notifications from the server.
- */
-self.addEventListener('push', event => {
-  console.log('ServiceWorker: Got a push message from the server')
-  // TODO: Show a notification for the user
-})

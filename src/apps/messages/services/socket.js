@@ -1,49 +1,90 @@
+const SOCKET_URL = 'wss://courselab.lnu.se/message-app/socket'
+const API_KEY = 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd'
+
+const PING_INTERVAL = 10_000 // 10s
+const TIMEOUT = 20_000
 /**
- * Initializes a WebSocket and handles incoming messages.
+ * Initializes a WebSocket and manages incoming messages and connection status.
  *
- * @param {object} state - Component state.
- * @param {Array<object>} messages - Array to store messages.
- * @param {Function} onMessage - Callback to render/update messages.
- * @param {Function} onHeartbeat - Callback for heartbeat events.
+ * @param {object} state - Component state containing username and avatar.
+ * @param {Array<object>} messages - Array where recieved messages are stored.
+ * @param {Function} onMessage - Callback triggered when a new message is recieved.
+ * @param {Function} onStatusChange - Callback triggered when connection status changes.
  * @returns {WebSocket} The initialized WebSocket instance.
  */
-export function initSocket (state, messages, onMessage, onHeartbeat) {
-  const socket = new WebSocket('wss://courselab.lnu.se/message-app/socket')
+export function initSocket (state, messages, onMessage, onStatusChange) {
+  const socket = new WebSocket(SOCKET_URL)
 
-  // Connection opened
-  socket.addEventListener('open', () => console.log('Connected'))
-  // Connection closed
-  socket.addEventListener('close', () => console.log('Disconnected'))
+  let lastPong = Date.now()
+  let pingInterval
 
-  // Listen for incoming messages
+  /**
+   * Sends a ping message to keep the connection alive
+   * and detect stalled connections.
+   *
+   * @private
+   */
+  const sendPing = () => {
+    if (socket.readyState !== WebSocket.OPEN) return
+
+    socket.send(JSON.stringify({
+      type: 'ping',
+      key: API_KEY
+    }))
+  }
+
+  socket.addEventListener('open', () => {
+    console.log('Connected')
+    lastPong = Date.now()
+    onStatusChange?.('online')
+
+    pingInterval = setInterval(() => {
+      sendPing()
+
+      if (Date.now() - lastPong > TIMEOUT) {
+        onStatusChange?.('offline')
+      }
+    }, PING_INTERVAL)
+  })
+
+  socket.addEventListener('close', () => {
+    console.log('Disconnected')
+    clearInterval(pingInterval)
+    onStatusChange?.('offline')
+  })
+
   socket.addEventListener('message', (e) => {
-    const msg = JSON.parse(e.data) // Parse the JSON string
+    lastPong = Date.now()
 
-    if (msg.type === 'heartbeat') {
-      onHeartbeat?.()
+    let msg
+    try {
+      msg = JSON.parse(e.data)
+    } catch {
       return
     }
 
-    // Only handle messages from others and non-epmty text
-    if (msg.username !== state.username && msg.data?.trim()) {
-      messages.push({
-        from: 'them', // Marks this message as coming from someone else
-        username: msg.username,
-        avatar: '👤', // Default avatar for others
-        text: msg.data,
-        timestamp: new Date().toISOString(),
-        channel: msg.channel
-      })
-      onMessage() // Trigger re-render
-    }
+    if (msg.type !== 'message') return
+    if (!msg.data?.trim()) return
+
+    messages.push({
+      from: msg.username === state.username ? 'me' : 'them',
+      username: msg.username,
+      avatar: msg.username === state.username ? state.avatar : '👤',
+      text: msg.data,
+      timestamp: new Date().toISOString(),
+      channel: msg.channel
+    })
+
+    onMessage()
   })
+
   return socket
 }
 
 /**
- * Sends a message over the WebSocket.
+ * Sends a message over an open WebSocket connection.
  *
- * @param {WebSocket} socket - The WebSocket instance to send the message through.
+ * @param {WebSocket} socket - Active WebSocket connection.
  * @param {string} text - The message text to send.
  * @param {object} state - Component state object containing username and channel.
  */

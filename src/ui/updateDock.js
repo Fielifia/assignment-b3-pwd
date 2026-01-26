@@ -8,6 +8,7 @@ export function updateDock (appType) {
   const minimized = this.minimized
   const count = minimized[appType]?.length || 0
 
+  // Find existing dock icon or create a new one
   let icon = dockContainer.querySelector(`.dock-icon[data-app-type='${appType}']`)
   if (!icon) {
     icon = document.createElement('div')
@@ -18,6 +19,7 @@ export function updateDock (appType) {
 
   icon.dataset.count = count
 
+  // Create or update badge to show number of minimized windows
   let badge = icon.querySelector('.badge')
   if (!badge) {
     badge = document.createElement('span')
@@ -27,11 +29,13 @@ export function updateDock (appType) {
   badge.textContent = count > 0 ? count : ''
   badge.style.display = count > 0 ? 'flex' : 'none'
   if (!count) {
+    // If no minimized windows, remove popup if it exists
     const popup = icon.querySelector('.popup')
     if (popup) popup.remove()
     return
   }
 
+  // Create or clear popup for minimized windows
   let popup = icon.querySelector('.popup')
   if (!popup) {
     popup = document.createElement('div')
@@ -41,6 +45,7 @@ export function updateDock (appType) {
 
   popup.innerHTML = ''
 
+  // Add each minimized windows as a clickable item in popup
   minimized[appType]?.forEach(w => {
     const titelEl = document.createElement('div')
     titelEl.classList.add('popup-titel-el')
@@ -48,6 +53,7 @@ export function updateDock (appType) {
 
     titelEl.addEventListener('click', (event) => {
       event.stopPropagation()
+      // Restore window when clicked
       w.style.display = 'block'
       this.focusWindow(w)
       minimized[appType] = minimized[appType].filter(win => win !== w)

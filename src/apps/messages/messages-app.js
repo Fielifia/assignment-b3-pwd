@@ -38,8 +38,6 @@ class MessagesApp extends HTMLElement {
   /** @type {AbortController|null} Controller for removing event listeners on disconnect */
   #abortController
 
-  #lastHeartbeat = Date.now()
-  #offlineCheckInterval
   /**
    * Handles click on the cancel reply button.
    *
@@ -133,7 +131,7 @@ class MessagesApp extends HTMLElement {
       textarea: this.textarea,
       sendBtn: this.sendBtn
     }, this.state, () => {
-      // Callback when sendinfg a message
+      // Callback when sending a message
       addMessage(
         this.textarea.value,
         this.#messages,
@@ -154,24 +152,17 @@ class MessagesApp extends HTMLElement {
       this.#renderMessages()
 
       // Show notification if the last message is from another user
-      const msgs = this.#messages
-      if (msgs.length > 0) {
-        const lastMsg = msgs[msgs.length - 1]
-        if (lastMsg.username !== this.state.username) {
-          showNotification('New message', `${lastMsg.username}: ${lastMsg.text}`)
-        }
+      const last = this.#messages.at(-1)
+      if (last && last.username !== this.state.username) {
+        showNotification('New message', `${last.username}: ${last.text}`)
       }
     },
-    () => {
-      this.#lastHeartbeat = Date.now()
-      this.#updateConnectionStatus(true)
-    })
-    this.#offlineCheckInterval = setInterval(() => {
-      const now = Date.now()
-      if (now - this.#lastHeartbeat > 1000) {
-        this.#updateConnectionStatus(false)
-      }
-    }, 5000)
+    (status) => {
+      this.setAttribute('data-status', status)
+      this.updateConnectionStatus(status)
+      console.log('Socket status:', status)
+    }
+    )
   }
 
   /**
@@ -180,7 +171,27 @@ class MessagesApp extends HTMLElement {
   disconnectedCallback () {
     this.#abortController.abort()
     this.#socket?.close()
-    clearInterval(this.#offlineCheckInterval)
+  }
+
+  /**
+   * Updates UI based on socket connection status.
+   *
+   * When offline, the message input and send buttons are disabled and
+   * an offline placeholdewr is shown. When online, the input is re-enabled.
+   *
+   * @param {'online'|'offline'} status - Current connection status.
+   */
+  updateConnectionStatus (status) {
+    const isOnline = status === 'online'
+
+    this.textarea.disabled = !isOnline
+    this.sendBtn.disabled = !isOnline
+
+    if (!isOnline) {
+      this.textarea.placeholder = 'Offline – cannot send messages'
+    } else {
+      this.textarea.placeholder = 'Write a message'
+    }
   }
 
   /**
@@ -212,16 +223,6 @@ class MessagesApp extends HTMLElement {
     this.replyPreview.style.display = 'none'
     this.replyText.innerHTML = ''
     requestAnimationFrame(() => this.textarea.focus())
-  }
-
-  /**
-   * Updates the textarea based on websocket connection.
-   *
-   * @param {boolean} isOnline - True if connected, false if offline.
-   */
-  #updateConnectionStatus (isOnline) {
-    this.textarea.disabled = !isOnline
-    this.textarea.placeholder = 'Offline'
   }
 }
 customElements.define('messages-app', MessagesApp)
