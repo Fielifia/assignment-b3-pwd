@@ -4,28 +4,37 @@
  * @param {object} state - Component state.
  * @param {Array<object>} messages - Array to store messages.
  * @param {Function} onMessage - Callback to render/update messages.
+ * @param {Function} onHeartbeat - Callback for heartbeat events.
  * @returns {WebSocket} The initialized WebSocket instance.
  */
-export function initSocket (state, messages, onMessage) {
+export function initSocket (state, messages, onMessage, onHeartbeat) {
   const socket = new WebSocket('wss://courselab.lnu.se/message-app/socket')
 
+  // Connection opened
   socket.addEventListener('open', () => console.log('Connected'))
+  // Connection closed
   socket.addEventListener('close', () => console.log('Disconnected'))
 
+  // Listen for incoming messages
   socket.addEventListener('message', (e) => {
-    const msg = JSON.parse(e.data)
-    if (msg.type === 'heartbeat') return
+    const msg = JSON.parse(e.data) // Parse the JSON string
 
+    if (msg.type === 'heartbeat') {
+      onHeartbeat?.()
+      return
+    }
+
+    // Only handle messages from others and non-epmty text
     if (msg.username !== state.username && msg.data?.trim()) {
       messages.push({
-        from: 'them',
+        from: 'them', // Marks this message as coming from someone else
         username: msg.username,
-        avatar: '👤',
+        avatar: '👤', // Default avatar for others
         text: msg.data,
         timestamp: new Date().toISOString(),
         channel: msg.channel
       })
-      onMessage()
+      onMessage() // Trigger re-render
     }
   })
   return socket

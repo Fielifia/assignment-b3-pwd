@@ -1,7 +1,7 @@
 import { sendMessage } from '../services/socket.js'
 import { renderMessages } from './messages-renderer.js'
 /**
- * Adds a message and re-renders.
+ * Adds a message to the chat and re-renders the messages list.
  *
  * @param {string} text - The message text to add.
  * @param {Array<object>} messages - The array of messages to update.
@@ -22,8 +22,9 @@ export function addMessage (
   onReply
 ) {
   const trimmed = text.trim()
-  if (!trimmed) return
+  if (!trimmed) return // Don't add empty messages
 
+  // Add message to the local array
   messages.push({
     from: 'me',
     username: state.username,
@@ -33,13 +34,14 @@ export function addMessage (
     replyTo,
     channel: state.channel
   })
-
+  // Re-renders messages in the DOM
   renderMessages(messagesList, messages, () => { }, onReply)
+  // Send the message trough WebSocket to the server
   sendMessage(socket, trimmed, state)
 }
 
 /**
- * Removes a message at the given index and re-renders.
+ * Removes a message at the given index and re-renders the messages.
  *
  * @param {number} index - Index of the message to remove.
  * @param {Array<object>} messages - The array of messages to update.
@@ -47,6 +49,6 @@ export function addMessage (
  * @returns {void}
  */
 export function removeMessage (index, messages, messagesList) {
-  messages.splice(index, 1)
+  messages.splice(index, 1) // Remove message from local array
   renderMessages(messagesList, messages, () => { })
 }

@@ -106,6 +106,7 @@ export class AvatarPicker extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
+    // Default avatars, or read from attribute
     this.avatars = this.getAttribute('avatars')
       ? this.getAttribute('avatars').split(',')
       : ['😃', '😎', '🤖', '👽', '🐱', '🐶', '🦊', '🐸', '🐵', '🦄']
@@ -147,15 +148,18 @@ export class AvatarPicker extends HTMLElement {
       span.textContent = a
 
       span.addEventListener('click', () => {
+        // Update internal state
         this.selectedAvatar = a
         this.errorEl.style.display = 'none'
 
+        // Remove previous selection styling
         this.avatarList
           .querySelectorAll('span')
           .forEach((s) => s.classList.remove('selected'))
 
         span.classList.add('selected')
 
+        // Dispatch custom event to parent when an avatar is selected
         this.dispatchEvent(
           new CustomEvent('avatar-selected', {
             detail: { avatar: a },
@@ -169,7 +173,7 @@ export class AvatarPicker extends HTMLElement {
   }
 
   /**
-   * Validates that an avatar has been selected.
+   * Validates is user has selected an avatar.
    *
    * @returns {boolean} True if an avatar is selected, false otherwise.
    */

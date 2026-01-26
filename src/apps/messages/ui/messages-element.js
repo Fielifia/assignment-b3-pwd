@@ -9,7 +9,7 @@
  */
 export function createMessageElement (m, index, onDelete, onReply) {
   const msgEl = document.createElement('div')
-  msgEl.classList.add('message', m.from)
+  msgEl.classList.add('message', m.from) // "me" or "them"
 
   const msgContent = document.createElement('div')
   msgContent.classList.add('message-content', m.from)
@@ -51,6 +51,7 @@ function createBodyEl (m, index, onDelete, onReply) {
   textEl.textContent = m.text
   textContainer.appendChild(textEl)
 
+  // Reply overlay
   if (m.replyTo) {
     const replyUsername = document.createElement('span')
     replyUsername.classList.add('username-el')

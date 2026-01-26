@@ -2,14 +2,15 @@ import { APP_TYPES } from './constants.js'
 import { addActivateListener } from '../ui/accessibility.js'
 
 /**
- * Handles the dock UI and app launching.
+ * Manages the dock at the bottom of the Progressive Web Desktop.
+ * Handles app icons, click events, and minimized windows.
  */
 export class Dock {
   /**
-   * Creates a dock instance.
+   * Initializes a Dock instance.
    *
    * @param {HTMLElement} container - The dock container element.
-   * @param {object} windowManager - Instance of WindowManager.
+   * @param {object} windowManager - The WindowManager instance.
    */
   constructor (container, windowManager) {
     this.container = container

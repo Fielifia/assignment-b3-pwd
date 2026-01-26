@@ -30,10 +30,10 @@ export class WindowManager {
   constructor (container, dockContainer) {
     this.container = container
     this.dockContainer = dockContainer
-    this.windows = []
-    this.minimized = {}
-    this.topZ = INITIAL_Z_INDEX
-    this.nextId = 1
+    this.windows = [] // Store all open windows
+    this.minimized = {} // Store minimized windows grouped by app type
+    this.topZ = INITIAL_Z_INDEX // Track z-index for stacking windows
+    this.nextId = 1 // Unique ID for windows
   }
 
   /**
@@ -44,10 +44,12 @@ export class WindowManager {
    * @returns {HTMLElement} The created window element.
    */
   async createWindow (title, appType) {
+    // Clone template to create a new window element
     const win = template.content.cloneNode(true).querySelector('.window')
     win.dataset.windowId = this.nextId
     win.dataset.appType = appType
 
+    // Position window with offset
     win.style.top = `${20 + this.nextId * WINDOW_OFFSET}px`
     win.style.left = `${20 + this.nextId * WINDOW_OFFSET}px`
     win.style.zIndex = this.topZ
@@ -60,11 +62,13 @@ export class WindowManager {
     const closeBtn = win.querySelector('.close-btn')
     const content = win.querySelector('.content')
 
+    // Validate that appType exists
     if (!APP_LOADERS[appType] || !APP_TAGS[appType]) {
       console.warn(`Unknown appType: ${appType}
         return null`)
       return win
     }
+    // Load application content
     try {
       await APP_LOADERS[appType]()
       content.appendChild(document.createElement(APP_TAGS[appType]))
@@ -73,6 +77,7 @@ export class WindowManager {
       content.textContent = 'Could not load application.'
     }
 
+    // Make window draggable via title bar
     makeDraggable(win, titleBar)
 
     win.addEventListener('mousedown', () => this.focusWindow(win))
@@ -108,6 +113,7 @@ export class WindowManager {
     win.remove()
     this.windows = this.windows.filter(w => w !== win)
     const appType = win.dataset.appType
+    // Remove from minimized list if needed and update dock
     if (this.minimized[appType]) {
       this.minimized[appType] = this.minimized[appType].filter(w => w !== win)
       updateDock.call(this, appType)

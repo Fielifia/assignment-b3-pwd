@@ -13,6 +13,8 @@ export const APP_TYPES = {
 /**
  * Maps application types to their custom element tags.
  *
+ * Used by WindowManager to know which HTML element to create for each app.
+ *
  * @readonly
  * @type {{[key: string]: string}}
  */
@@ -25,7 +27,8 @@ export const APP_TAGS = {
 /**
  * Lazy loaders for application modules.
  *
- * Each loader dynamically imports the module that defines the corresponding custom element.
+ * Dynamically imports the module that defines the corresponding custom element.
+ * This allows apps to be loaded only when needed.
  *
  * @readonly
  * @type {{[key: string]: function(): Promise<any>}}
@@ -55,12 +58,16 @@ export const APP_LOADERS = {
 /**
  * Pixel offset used to stagger newly opened windows.
  *
+ * Ensures that each window does not completely overlap the previous one.
+ *
  * @type {number}
  */
 export const WINDOW_OFFSET = 10
 
 /**
  * Initial z-index value for application windows.
+ *
+ * Windows with higher z-index on top of others.
  *
  * @type {number}
  */

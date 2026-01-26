@@ -1,3 +1,15 @@
+import { library, icon } from '@fortawesome/fontawesome-svg-core'
+
+import { faTired, faFrown, faMeh, faSmile, faLaughBeam } from '@fortawesome/free-regular-svg-icons'
+
+import {
+  faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
+  faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
+  faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
+  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit
+  , faChevronDown, faTrash
+} from '@fortawesome/free-solid-svg-icons'
+
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
@@ -21,7 +33,8 @@ template.innerHTML = `
     display: flex;
     flex-direction: column;
     gap: .5rem;
-    max-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
 }
 
 h3 {
@@ -54,9 +67,8 @@ h3 {
   grid-column: 1;
   grid-row: 2 / 4;
   display: flex;
-  font-size: 3rem;
-  align-items: center;
-  justify-content: center;
+  width: 3rem;
+  height: 3rem;
 }
 
 .entry-mood-time {
@@ -84,33 +96,38 @@ h3 {
 }
 
 .entry-details {
-  background: #ccc;
-  grid-row: 5;
+  display: none;
+  flex-direction: column;
+  gap .3rem;
+  padding-top: .5rem;
+  border-top: 1px solid #ccc;
+  grid-column: 1 / -1;
 }
 
 .details-btn {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
+  grid-column: 3;
+  grid-row: 2;
+  justify-self: end;
   background: none;
   border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
   transition: .2s ease;
 }
 
 .details-btn:hover {
-  background: none;
-  color: blue;
+  color: #5f86a1;
+  transform: scale(1.1);
 }
 
 .delete-btn {
-    grid-column: span 2;
     justify-self: end;
     background: none;
     border: none;
     cursor: pointer;
     font-size: .9rem;
 }
-button {
+button.go-back-btn {
   padding: .5rem 1rem;
   margin: 1rem;
   border-radius: 6px;
@@ -124,29 +141,34 @@ button {
   width: fit-content;
 }
 
-button:hover {
+button.bo-back-btn:hover {
   background: #5f86a1;
   transform: scale(1.05);
   cursor: pointer;
 }
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 <div class="history-container">
 <h3>History</h3>
 <div class="entries-list"></div>
 <button class="go-back-btn">Go back</button>
 </div>
 `
+library.add(
+  faTired, faFrown, faMeh, faSmile, faLaughBeam,
+  faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
+  faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
+  faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
+  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit, faChevronDown, faTrash
+)
 /**
  * @typedef {object} MoodHistoryEntry
  * @property {string} id - Unique identifier
  * @property {string} date - Formatted date string
  * @property {string} time - Formatted time string
- * @property {[icon: string, label: string, color: string]} mood - Selected mood
+ * @property {{icon: string, label: string, color: string, prefix: string}} mood - Selected mood
  * @property {string}  energy - Energy level
  * @property {{hours: number, quality: string}} sleep - Sleep info
- * @property {Array<string>} feelings - Selected feelings
+ * @property {Array<string>} activities - Selected activities
  * @property {string} notes - Optional notes
  */
 
@@ -163,7 +185,6 @@ export class MoodHistory extends HTMLElement {
   constructor () {
     super()
     this.attachShadow({ mode: 'open' })
-
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this.entryList = this.shadowRoot.querySelector('.entries-list')
     this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
@@ -175,7 +196,6 @@ export class MoodHistory extends HTMLElement {
    */
   connectedCallback () {
     this.#upgradeProperty('entries')
-
     this.goBackBtn.addEventListener('click', () => {
       const target = this.previousPage || 'start'
       this.dispatchEvent(new CustomEvent('navigate', {
@@ -222,6 +242,52 @@ export class MoodHistory extends HTMLElement {
   }
 
   /**
+   * Generates a HTML template string for a mood tracker entry.
+   *
+   * The template includes date, mood icon and label, time, activities,
+   * detailed info (energy, sleep, notes), and action buttons.
+   *
+   * @param {object} entry - The mood tracker entry object.
+   * @param {string} [entry.date] - The date of the entry.
+   * @param {string} [entry.time] - The time of the entry.
+   * @param {object} [entry.mood] - Mood information.
+   * @param {string} [entry.mood.icon] - Emoji or icon representing the mood.
+   * @param {string} [entry.mood.label] - Text label for the mood.
+   * @param {string} [entry.mood.color] - Color associated with the mood.
+   * @param {string[]} [entry.activities] - List of activities for the entry.
+   * @param {number} [entry.energy] - Energy level for the entry.
+   * @param {object} [entry.sleep] - Sleep information.
+   * @param {number} [entry.sleep.hours] - Hours slept.
+   * @param {string} [entry.sleep.quality] - Quality of sleep.
+   * @param {string} [entry.notes] - Additional notes for the entry.
+   * @returns {string} HTML string representing the entry.
+   */
+  #entryTemplate (entry) {
+    const detailsChevron = icon(faChevronDown).html[0]
+    const trashIcon = icon(faTrash).html[0]
+
+    return `
+      <span class="entry-date">${entry.date || '-'}</span>
+      <div class="entry-icon" style="color: ${entry.mood?.color || '#000'}">${entry.mood?.icon || '?'}</div>
+      <div class="entry-mood-time">
+        <span class="mood" style="color: ${entry.mood?.color || '#000'}">${entry.mood?.label || '-'}</span>
+        <span class="entry-time">${entry.time || '-'}</span>
+      </div>
+      <div class="entry-activity">
+        <span>Activities: ${entry.activities?.join(', ') || '-'}</span>
+      </div>
+      <button class="details-btn">${detailsChevron}</button>
+      <div class="entry-details">
+        <span>Energy level: ${entry.energy || '-'}</span>
+        <span>Hours slept: ${entry.sleep?.hours || '-'}h</span>
+        <span>Sleep quality: ${entry.sleep?.quality || '-'}</span>
+        <span>Notes: ${entry.notes || '-'}</span>
+        <button class="delete-btn">${trashIcon}</button>
+      </div>
+    `
+  }
+
+  /**
    * Renders the mood entries in the history container.
    *
    * @param {Array<MoodHistoryEntry>} entries - Array of mood entry objects.
@@ -232,32 +298,12 @@ export class MoodHistory extends HTMLElement {
     entries.forEach(entry => {
       const div = document.createElement('div')
       div.classList.add('entry')
-      div.innerHTML = `
-                <span class="entry-date">${entry.date}</span>
-                <div class="entry-icon">
-                <i class="far ${entry.mood.icon}" style="color: ${entry.mood.color};"></i>
-                </div>
+      div.innerHTML = this.#entryTemplate(entry)
 
-                <div class="entry-mood-time">
-                <span class="mood" style="color: ${entry.mood.color};">${entry.mood?.label}</span>
-                <span class="entry-time">${entry.time}</span>
-                </div>
-
-                <div class="entry-feelings">
-                <span>Feelings: ${entry.feelings.join(', ')}</span>
-                </div>
-                
-                <button class="details-btn">v</button>
-                <div class="entry-details" style="display:none;">
-                <span>Energy level: ${entry.energy}</span>
-                <span>Hours slept: ${entry.sleep?.hours}h</span>
-                <span>Sleep quality: ${entry.sleep?.quality}</span>
-                <span>Notes: ${entry.notes || '-'}</span>
-                <button class="delete-btn">🗑️</button>
-                </div>`
-
-      div.querySelector('.details-btn').addEventListener('click', () => {
-        div.querySelector('.entry-details').style.display = 'flex'
+      const detailsBtn = div.querySelector('.details-btn')
+      const detailsDiv = div.querySelector('.entry-details')
+      detailsBtn.addEventListener('click', () => {
+        detailsDiv.style.display = detailsDiv.style.display === 'flex' ? 'none' : 'flex'
       })
 
       /**

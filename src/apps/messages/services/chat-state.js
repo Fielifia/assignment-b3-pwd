@@ -5,10 +5,10 @@
  */
 export function createChatState () {
   return {
-    messages: [],
-    replyTo: null,
-    username: localStorage.getItem('messagesUsername') || '',
-    avatar: localStorage.getItem('messagesAvatar') || '',
-    channel: 'default'
+    messages: [], // Array to store all messages
+    replyTo: null, // Currently selected message to reply to
+    username: localStorage.getItem('messagesUsername') || '', // Load saved username from localStorage
+    avatar: localStorage.getItem('messagesAvatar') || '', // Load saved avatar from localStorage
+    channel: 'default' // Default chat channel
   }
 }

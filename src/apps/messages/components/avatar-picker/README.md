@@ -17,7 +17,8 @@ The component is built using **Vanilla JavaScript**, **Web Components**, and **S
 - Visually highlights the selected avatar
 - Dispatches a custom event on selection
 - Shows validation feedback if no avatar is selected
-- Supports a `sidebar` variant for compact layiout
+- Supports a `sidebar` variant for compact layout
+- 
 
 All UI logic and state handling are encapsulated within the component.
 
@@ -32,9 +33,8 @@ All UI logic and state handling are encapsulated within the component.
 ### Custom avatar list
 You can provide a custom list of avatars using the avatars attribute:
 ```html
-<avatar-picker avatars="🕺, 😍, 🤠, 🐲"></avatar-picker>
+<avatar-picker avatars="🕺 😍 🤠 🐲"></avatar-picker>
 ```
-Avatars must be provided as a comma-separated string.
 
 ---
 
@@ -44,7 +44,7 @@ Defines the list of avatars to display.
 - Type: `string`
 - Format: comma-separated values
 ```html
-<avatar-picker avatars="🕺, 😍, 🤠, 🐲"></avatar-picker>
+<avatar-picker avatars="🕺 😍 🤠 🐲"></avatar-picker>
 ```  
 If omitted, a default avatar set is used.
 

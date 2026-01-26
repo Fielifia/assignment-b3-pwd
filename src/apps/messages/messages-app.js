@@ -28,6 +28,7 @@ import { requestNotificationPermission, showNotification } from '../../ui/notifi
  * @class
  */
 class MessagesApp extends HTMLElement {
+  // Private fields for storing messages, reply target, socket, and abort controller
   /** @type {object[]} Array of message objects in the chat */
   #messages = []
   /** @type {object|null} Currently replying to this message */
@@ -37,8 +38,10 @@ class MessagesApp extends HTMLElement {
   /** @type {AbortController|null} Controller for removing event listeners on disconnect */
   #abortController
 
+  #lastHeartbeat = Date.now()
+  #offlineCheckInterval
   /**
-   * Handles click on cancel reply button.
+   * Handles click on the cancel reply button.
    *
    * @private
    * @returns {void}
@@ -65,7 +68,7 @@ class MessagesApp extends HTMLElement {
   }
 
   /**
-   * Renders all messages to the messages list.
+   * Renders all messages by calling the renderer and passingt callbacks for delete/reply.
    *
    * @private
    * @returns {void}
@@ -77,19 +80,21 @@ class MessagesApp extends HTMLElement {
 
   /**
    * Creates the MessagesApp component.
-   * Initializes state, DOM references, (and message storage).
+   * Initializes shadow DOM, state, and UI references.
    */
   constructor () {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
+    // State object for username and avatar (persisted in localStorage)
     /** @type {{username: string, avatar: string}} */
     this.state = {
       username: localStorage.getItem('messagesUsername') || '',
       avatar: localStorage.getItem('messagesAvatar') || ''
     }
 
+    // Query and store references to UI elements
     this.dateDisplay = this.shadowRoot.querySelector('date-time-display')
     this.dateDisplay.classList.add('time-display')
     this.chatContainer = this.shadowRoot.querySelector('.chat-container')
@@ -112,17 +117,14 @@ class MessagesApp extends HTMLElement {
     this.#abortController = new AbortController()
     const signal = this.#abortController.signal
 
+    // Event listeners with signal for automatic cleanup
     this.cancelReplyBtn.addEventListener('click', this.#handleCancelReply, { signal })
     this.sidebarToggleBtn.addEventListener('click', this.#handleToggleSidebar, { signal })
 
+    // Ask perminssion to show notifications
     requestNotificationPermission()
 
-    this.notifyBtn = document.createElement('button')
-    this.notifyBtn.classList.add('notify-btn')
-    this.notifyBtn.addEventListener('click', () => {
-      showNotification()
-    })
-
+    // Initialize UI interactions
     initUI({
       avatarPicker: this.avatarPicker,
       usernameForm: this.usernameForm,
@@ -131,6 +133,7 @@ class MessagesApp extends HTMLElement {
       textarea: this.textarea,
       sendBtn: this.sendBtn
     }, this.state, () => {
+      // Callback when sendinfg a message
       addMessage(
         this.textarea.value,
         this.#messages,
@@ -141,13 +144,16 @@ class MessagesApp extends HTMLElement {
         (msg) => this.setReply(msg)
       )
 
+      // Clear reply state and textarea
       this.clearReply()
       this.textarea.value = ''
     })
 
+    // Initialize WebSocket connection
     this.#socket = initSocket(this.state, this.#messages, () => {
       this.#renderMessages()
 
+      // Show notification if the last message is from another user
       const msgs = this.#messages
       if (msgs.length > 0) {
         const lastMsg = msgs[msgs.length - 1]
@@ -155,19 +161,30 @@ class MessagesApp extends HTMLElement {
           showNotification('New message', `${lastMsg.username}: ${lastMsg.text}`)
         }
       }
+    },
+    () => {
+      this.#lastHeartbeat = Date.now()
+      this.#updateConnectionStatus(true)
     })
+    this.#offlineCheckInterval = setInterval(() => {
+      const now = Date.now()
+      if (now - this.#lastHeartbeat > 1000) {
+        this.#updateConnectionStatus(false)
+      }
+    }, 5000)
   }
 
   /**
-   * Lifecycle callback when disconnected.
-   * */
+   * Lifecycle callback when component is removed from DOM.
+   */
   disconnectedCallback () {
     this.#abortController.abort()
     this.#socket?.close()
+    clearInterval(this.#offlineCheckInterval)
   }
 
   /**
-   * Sets replyTo and shows preview.
+   * Set a message as reply target and show preview.
    *
    * @param {object} message  - Message object to reply to.
    */
@@ -188,13 +205,23 @@ class MessagesApp extends HTMLElement {
   }
 
   /**
-   * Clears replyTo and hides preview.
+   * Clears reply state and hides preview.
    */
   clearReply () {
     this.#replyTo = null
     this.replyPreview.style.display = 'none'
     this.replyText.innerHTML = ''
     requestAnimationFrame(() => this.textarea.focus())
+  }
+
+  /**
+   * Updates the textarea based on websocket connection.
+   *
+   * @param {boolean} isOnline - True if connected, false if offline.
+   */
+  #updateConnectionStatus (isOnline) {
+    this.textarea.disabled = !isOnline
+    this.textarea.placeholder = 'Offline'
   }
 }
 customElements.define('messages-app', MessagesApp)

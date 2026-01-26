@@ -10,9 +10,11 @@ import { createMessageElement } from '../ui/messages-element.js'
  * @returns {void}
  */
 export function renderMessages (messagesList, messages, onDelete, onReply) {
-  messagesList.innerHTML = ''
+  messagesList.innerHTML = '' // Clear previous messages
+  // Loops through all messages and append DOM elements
   messages.forEach((m, i) => {
     messagesList.appendChild(createMessageElement(m, i, onDelete, onReply))
   })
+  // Scroll to the bottom so latest message is visible
   messagesList.scrollTop = messagesList.scrollHeight
 }

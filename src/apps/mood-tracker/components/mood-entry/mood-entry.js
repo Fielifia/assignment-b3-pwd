@@ -1,3 +1,25 @@
+/**
+ * @typedef {object} MoodEntryData
+ * @property {string} id - Unique identifier
+ * @property {string} date - Formatted date string
+ * @property {string} time - Formatted time string
+ * @property {[icon: string, label: string, color: string]} mood - Selected mood
+ * @property {string}  energy - Energy level
+ * @property {{hours: number, quality: string}} sleep - Sleep info
+ * @property {[icon: string, label: string]} activities - Selected activities
+ * @property {string} notes - Optional notes
+ */
+
+import { library, icon } from '@fortawesome/fontawesome-svg-core'
+
+import { faTired, faFrown, faMeh, faSmile, faLaughBeam } from '@fortawesome/free-regular-svg-icons'
+
+import {
+  faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
+  faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
+  faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
+  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit
+} from '@fortawesome/free-solid-svg-icons'
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
@@ -37,6 +59,7 @@ template.innerHTML = `
     justify-content: center;
     width: 100%;
     margin: 3rem auto;
+    gap: .5rem;
 }
     
 .mood-buttons span, .activity-buttons .icon-circle {
@@ -50,11 +73,18 @@ template.innerHTML = `
     flex-direction: column;
     font-size: 3rem;
 }
+    
+.mood-icon {
+    width: 3rem;
+    height: 3rem;
+}
 
 .activity-buttons .icon-circle {
     aspect-ratio: 1/1;
     border-radius: 50%;
     padding: .5rem;
+    width: 1.2rem;
+    height: 1.2rem;
     font-size: 1.2rem;
     background: #dde7ef;
     transition: background .2s ease;
@@ -90,6 +120,11 @@ template.innerHTML = `
 
 .selected-mood-top {
   font-size: 2rem;
+}
+
+div.selected-mood-top > svg{
+    width: 2rem;
+    height: 2rem;
 }
 
 
@@ -182,7 +217,7 @@ input[type="number"] {
     transition: border .15s ease, box-shadow .15s ease, background .15s ease;
 }
 
-input:hover, select:hover {
+input[type="number"]:hover, select:hover {
     background: #8fb3cc;
 }
 
@@ -248,10 +283,6 @@ button, .mood-buttons span, select, input[type="number"], .icon-circle, .selecte
     cursor: pointer;
 }
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 <div class="mood-entry-container">
 <div class="select-mood">
 <span id="heading">How are you?
@@ -302,18 +333,14 @@ button, .mood-buttons span, select, input[type="number"], .icon-circle, .selecte
 </div>
 </div>
 `
-/**
- * @typedef {object} MoodEntryData
- * @property {string} id - Unique identifier
- * @property {string} date - Formatted date string
- * @property {string} time - Formatted time string
- * @property {[icon: string, label: string, color: string]} mood - Selected mood
- * @property {string}  energy - Energy level
- * @property {{hours: number, quality: string}} sleep - Sleep info
- * @property {[icon: string, label: string]} activities - Selected activities
- * @property {string} notes - Optional notes
- */
 
+library.add(
+  faTired, faFrown, faMeh, faSmile, faLaughBeam,
+  faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
+  faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
+  faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
+  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit
+)
 /**
  * Mood Tracker Entry Component.
  *
@@ -335,65 +362,59 @@ export class MoodEntry extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-    /** @type {Array<{icon: string, label:string, color:string}>} Available moods */
-    this.moodValues = this.getAttribute('moods')
-      ? this.getAttribute('moods').split(',')
-      : [
-          { icon: 'fa-tired', label: 'Awful', color: '#af6b6a' },
-          { icon: 'fa-frown', label: 'Bad', color: '#95b4c8' },
-          { icon: 'fa-meh', label: 'Meh', color: '#fad6a2' },
-          { icon: 'fa-smile', label: 'Good', color: '#c9dcc9' },
-          { icon: 'fa-laugh-beam', label: 'Rad', color: '#a2b5a2' }
-        ]
+    /** @type {Array<{icon:string,label:string,color:string}>} */
+    this.moodValues = [
+      { icon: 'tired', label: 'Awful', color: '#af6b6a', prefix: 'far' },
+      { icon: 'frown', label: 'Bad', color: '#95b4c8', prefix: 'far' },
+      { icon: 'meh', label: 'Meh', color: '#fad6a2', prefix: 'far' },
+      { icon: 'smile', label: 'Good', color: '#c9dcc9', prefix: 'far' },
+      { icon: 'laugh-beam', label: 'Rad', color: '#a2b5a2', prefix: 'far' }
+    ]
 
-    /** @type {Array<{icon: string, label:string}>} Available activities */
-    this.activityValues = this.getAttribute('activities')
-      ? this.getAttribute('activities').split(',')
-      : [
-          { icon: 'fa-solid fa-briefcase', label: 'Work' },
-          { icon: 'fa-solid fa-users', label: 'Family' },
-          { icon: 'fa-solid fa-running', label: 'Exercise' },
-          { icon: 'fa-solid fa-user-group', label: 'Friends' },
-          { icon: 'fa-solid fa-user-graduate', label: 'School' },
-          { icon: 'fa-solid fa-heart', label: 'Date' },
-          { icon: 'fa-solid fa-ticket', label: 'Movie' },
-          { icon: 'fa-solid fa-champagne-glasses', label: 'Party' },
-          { icon: 'fa-solid fa-gamepad', label: 'Gaming' },
-          { icon: 'fa-solid fa-person-walking-luggage', label: 'Travel' },
-          { icon: 'fa-solid fa-dumbbell', label: 'Workout' },
-          { icon: 'fa-solid fa-cart-shopping', label: 'Shopping' },
-          { icon: 'fa-solid fa-viruses', label: 'Sick' },
-          { icon: 'fa-solid fa-book-open', label: 'Reading' },
-          { icon: 'fa-solid fa-couch', label: 'Relax' },
-          { icon: 'fa-solid fa-spa', label: 'Spa' },
-          { icon: 'fa-solid fa-skiing', label: 'Skiing' },
-          { icon: 'fa-solid fa-umbrella-beach', label: 'Vacation' },
-          { icon: 'fa-solid fa-couch', label: 'Relax' },
-          { icon: 'fa-solid fa-paint-roller', label: 'Redecorating' },
-          { icon: 'fa-solid fa-air-freshener', label: 'Clean' },
-          { icon: 'fa-solid fa-birthday-cake', label: 'Birthday' }
-        ]
+    /** @type {Array<{icon:string,label:string,prefix:string}>} */
+    this.activityValues = [
+      { icon: 'briefcase', label: 'Work', prefix: 'fas' },
+      { icon: 'users', label: 'Family', prefix: 'fas' },
+      { icon: 'running', label: 'Exercise', prefix: 'fas' },
+      { icon: 'user-group', label: 'Friends', prefix: 'fas' },
+      { icon: 'user-graduate', label: 'School', prefix: 'fas' },
+      { icon: 'heart', label: 'Date', prefix: 'fas' },
+      { icon: 'ticket', label: 'Movie', prefix: 'fas' },
+      { icon: 'champagne-glasses', label: 'Party', prefix: 'fas' },
+      { icon: 'gamepad', label: 'Gaming', prefix: 'fas' },
+      { icon: 'person-walking-luggage', label: 'Travel', prefix: 'fas' },
+      { icon: 'dumbbell', label: 'Workout', prefix: 'fas' },
+      { icon: 'cart-shopping', label: 'Shopping', prefix: 'fas' },
+      { icon: 'viruses', label: 'Sick', prefix: 'fas' },
+      { icon: 'book-open', label: 'Reading', prefix: 'fas' },
+      { icon: 'couch', label: 'Relax', prefix: 'fas' },
+      { icon: 'spa', label: 'Spa', prefix: 'fas' },
+      { icon: 'skiing', label: 'Skiing', prefix: 'fas' },
+      { icon: 'umbrella-beach', label: 'Vacation', prefix: 'fas' },
+      { icon: 'paint-roller', label: 'Redecorating', prefix: 'fas' },
+      { icon: 'air-freshener', label: 'Clean', prefix: 'fas' },
+      { icon: 'birthday-cake', label: 'Birthday', prefix: 'fas' }
+    ]
 
-    this.selectedactivities = []
+    this.selectedMood = null
+    this.selectedActivities = []
 
     this.dateInput = this.shadowRoot.querySelector('#date')
-    this.moodSelect = this.shadowRoot.querySelector('.select-mood')
     this.moodButtons = this.shadowRoot.querySelector('.mood-buttons')
     this.topContainer = this.shadowRoot.querySelector('.selected-mood-top')
+    this.moodSelect = this.shadowRoot.querySelector('.select-mood')
     this.moodDetails = this.shadowRoot.querySelector('.mood-details')
+    this.activityButtons = this.shadowRoot.querySelector('.activity-buttons')
     this.energyLevel = this.shadowRoot.querySelector('.energy-level')
     this.sleepHours = this.shadowRoot.querySelector('.sleep-hours')
     this.sleepQuality = this.shadowRoot.querySelector('.sleep-quality')
-    this.activityButtons = this.shadowRoot.querySelector('.activity-buttons')
     this.textarea = this.shadowRoot.querySelector('textarea')
     this.saveBtn = this.shadowRoot.querySelector('.save-btn')
     this.goBackBtn = this.shadowRoot.querySelector('.go-back-btn')
     this.historyBtn = this.shadowRoot.querySelector('.view-history-btn')
-    this.selectedMood = null
 
     // Set default date to today
-    const today = new Date().toISOString().split('T')[0]
-    this.dateInput.value = today
+    this.dateInput.value = new Date().toISOString().split('T')[0]
   }
 
   /**
@@ -403,15 +424,21 @@ export class MoodEntry extends HTMLElement {
   connectedCallback () {
     this.renderMoodButtons()
     this.renderactivityCheckboxes()
+    this.setupEventListeners()
+  }
 
+  /**
+   * Sets upp event listeners for the component.
+   *
+   * Currently adds a click listener to the "go back" button that
+   * dispatches a custom "navigate" event with page details.
+   *
+   * @returns {void}
+   */
+  setupEventListeners () {
     this.goBackBtn.addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('navigate', {
-        detail: { page: 'start' },
-        bubbles: true,
-        composed: true
-      }))
+      this.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'start' }, bubbles: true, composed: true }))
     })
-
     /**
      * Fired when the user clicks "View History".
      *
@@ -420,34 +447,17 @@ export class MoodEntry extends HTMLElement {
      * @property {object} detail - Contains the page to navigate to
      */
     this.historyBtn.addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('navigate', {
-        detail: { page: 'history', from: 'entry' },
-        bubbles: true,
-        composed: true
-      }))
+      this.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'history', from: 'entry' }, bubbles: true, composed: true }))
     })
 
     this.saveBtn.addEventListener('click', () => {
-      const entryId = crypto.randomUUID()
       const now = new Date()
-      const formattedDate = now.toLocaleDateString('en-US', {
-        timeZone: 'Europe/Stockholm',
-        weekday: 'long',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })
-
-      const formattedTime = now.toLocaleTimeString('sv-SE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      })
-      this.dateDisplay.textContent = formattedDate
+      const formattedDate = now.toLocaleDateString('en-US', { timeZone: 'Europe/Stockholm', weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
+      const formattedTime = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', hour12: true })
 
       /** @type {MoodEntryData} */
       const data = {
-        id: entryId,
+        id: crypto.randomUUID(),
         date: formattedDate,
         time: formattedTime,
         mood: this.selectedMood,
@@ -456,7 +466,7 @@ export class MoodEntry extends HTMLElement {
           hours: this.sleepHours.value,
           quality: this.sleepQuality.selectedOptions[0]?.text || ''
         },
-        activities: this.selectedactivities,
+        activities: this.selectedActivities,
         notes: this.textarea.value
       }
 
@@ -466,13 +476,7 @@ export class MoodEntry extends HTMLElement {
        * @event entry-submit
        * @type {CustomEvent<MoodEntryData>}
        */
-      this.dispatchEvent(
-        new CustomEvent('entry-submit', {
-          detail: data,
-          bubbles: true,
-          composed: true
-        })
-      )
+      this.dispatchEvent(new CustomEvent('entry-submit', { detail: data, bubbles: true, composed: true }))
       this.resetForm()
     })
   }
@@ -484,11 +488,18 @@ export class MoodEntry extends HTMLElement {
     this.moodButtons.innerHTML = ''
     this.moodValues.forEach((m) => {
       const moodButton = document.createElement('span')
-      moodButton.innerHTML = `
-      <i class="far ${m.icon}" style="color: ${m.color};"></i>
-      <p class="mood-label">${m.label}</p>
-      `
-      moodButton.title = m.label
+
+      const moodIcon = document.createElement('div')
+      moodIcon.innerHTML = icon({ prefix: m.prefix, iconName: m.icon }).html[0]
+      moodIcon.classList.add('mood-icon')
+      moodIcon.style.color = m.color
+      moodButton.appendChild(moodIcon)
+
+      const label = document.createElement('p')
+      label.textContent = m.label
+      label.style.fontSize = '.6rem'
+      label.style.textAlign = 'center'
+      moodButton.appendChild(label)
 
       moodButton.addEventListener('click', () => {
         if (this.moodSelect.style.display === 'none') return
@@ -502,8 +513,9 @@ export class MoodEntry extends HTMLElement {
 
         setTimeout(() => {
           this.showDetails()
-          this.topContainer.innerHTML = `<i class="far ${m.icon}" style="color:${m.color}"></i>`
+          this.topContainer.innerHTML = icon({ prefix: m.prefix, iconName: m.icon }).html[0]
           this.topContainer.style.display = 'block'
+          this.topContainer.style.color = m.color
           this.topContainer.addEventListener('click', () => {
             this.showMoodSelection()
           })
@@ -518,34 +530,29 @@ export class MoodEntry extends HTMLElement {
    */
   renderactivityCheckboxes () {
     this.activityButtons.innerHTML = ''
-    this.selectedactivities = []
+    this.selectedActivities = []
 
-    this.activityValues.forEach((activity) => {
+    this.activityValues.forEach(a => {
       const label = document.createElement('label')
 
       const checkbox = document.createElement('input')
       checkbox.type = 'checkbox'
-      checkbox.value = activity.label
-
-      const circle = document.createElement('div')
-      circle.classList.add('icon-circle')
-      circle.innerHTML = `<i class="${activity.icon}"></i>`
-
-      const text = document.createElement('p')
-      text.textContent = activity.label
+      checkbox.value = a.label
 
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) {
-          this.selectedactivities.push(activity.label)
-        } else {
-          this.selectedactivities = this.selectedactivities.filter(
-            (f) => f !== activity.label
-          )
-        }
+          this.selectedActivities.push(a.icon, a.label)
+        } else this.selectedActivities = this.selectedActivities.filter(f => f !== a.label)
       })
-      label.appendChild(checkbox)
-      label.appendChild(circle)
-      label.appendChild(text)
+
+      const circle = document.createElement('div')
+      circle.classList.add('icon-circle')
+      circle.innerHTML = icon({ prefix: a.prefix, iconName: a.icon }).html[0]
+
+      const text = document.createElement('p')
+      text.textContent = a.label
+
+      label.append(checkbox, circle, text)
       this.activityButtons.appendChild(label)
     })
 
@@ -554,33 +561,33 @@ export class MoodEntry extends HTMLElement {
 
       const circle = document.createElement('div')
       circle.classList.add('icon-circle')
-      circle.innerHTML = '<i class="fa-solid fa-edit"></i>'
+      circle.innerHTML = icon({ prefix: 'fas', iconName: 'edit' }).html[0]
 
-      const text = document.createElement('input')
-      text.type = 'text'
-      text.placeholder = 'Custom'
-
-      text.addEventListener('focus', () => {
-        text.placeholder = ''
-      })
-      text.addEventListener('blur', () => {
-        if (!text.value.trim()) text.placeholder = 'Custom'
-      })
+      const input = document.createElement('input')
+      input.type = 'text'
+      input.placeholder = 'Custom'
 
       circle.addEventListener('input', () => {
-        text.textContent = text.value.trim() || 'Custom'
+        input.textContent = input.value.trim() || 'Custom'
 
-        this.selectedactivities = this.selectedactivities.filter(
+        this.selectedActivities = this.selectedActivities.filter(
           (f) => !f.startsWith(`custom${i}:`)
         )
-        if (text.value.trim()) {
-          this.selectedactivities.push(`custom${i}:${text.value.trim()}`)
+        if (input.value.trim()) {
+          this.selectedActivities.push(`custom${i}:${input.value.trim()}`)
           label.classList.add('active')
         } else {
           label.classList.remove('active')
         }
       })
-      label.append(circle, text)
+
+      input.addEventListener('focus', () => {
+        input.placeholder = ''
+      })
+      input.addEventListener('blur', () => {
+        if (!input.value.trim()) input.placeholder = 'Custom'
+      })
+      label.append(circle, input)
       this.activityButtons.appendChild(label)
     }
   }
@@ -621,7 +628,7 @@ export class MoodEntry extends HTMLElement {
     this.sleepHours.value = '8'
     this.sleepQuality.value = ''
     this.textarea.value = ''
-    this.selectedactivities = []
+    this.selectedActivities = []
 
     this.activityButtons
       .querySelectorAll('input[type="checkbox"]')
