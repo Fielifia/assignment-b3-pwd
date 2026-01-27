@@ -66,7 +66,7 @@ class MessagesApp extends HTMLElement {
   }
 
   /**
-   * Renders all messages by calling the renderer and passingt callbacks for delete/reply.
+   * Renders all messages by calling the renderer and passing callbacks for delete/reply.
    *
    * @private
    * @returns {void}

@@ -6,8 +6,7 @@ import {
   faBriefcase, faUsers, faRunning, faUserGroup, faUserGraduate, faHeart,
   faTicket, faChampagneGlasses, faGamepad, faPersonWalkingLuggage, faDumbbell,
   faCartShopping, faViruses, faBookOpen, faCouch, faSpa, faSkiing, faUmbrellaBeach,
-  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit
-  , faChevronDown
+  faPaintRoller, faAirFreshener, faBirthdayCake, faEdit, faChevronDown
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -24,6 +23,31 @@ const moodIconMap = {
   meh: faMeh,
   smile: faSmile,
   'laugh-beam': faLaughBeam
+}
+
+const activityIconMap = {
+  Work: faBriefcase,
+  Family: faUsers,
+  Exercise: faRunning,
+  Friends: faUserGroup,
+  School: faUserGraduate,
+  Date: faHeart,
+  Movie: faTicket,
+  Party: faChampagneGlasses,
+  Gaming: faGamepad,
+  Travel: faPersonWalkingLuggage,
+  Workout: faDumbbell,
+  Shopping: faCartShopping,
+  Sick: faViruses,
+  Reading: faBookOpen,
+  Relax: faCouch,
+  Spa: faSpa,
+  Skiing: faSkiing,
+  Vacation: faUmbrellaBeach,
+  Redecorating: faPaintRoller,
+  Clean: faAirFreshener,
+  Birthday: faBirthdayCake,
+  Custom: faEdit
 }
 
 const template = document.createElement('template')
@@ -105,7 +129,7 @@ h3 {
   font-size: .8rem;
 }
 
-.entry-feelings {
+.entry-activities {
   grid-column: 2;
   grid-row: 3;
   display: flex;
@@ -334,6 +358,48 @@ export class MoodHistory extends HTMLElement {
         <span class="time">${entry.time}</span>
       `
 
+      if (entry.activities && entry.activities.length > 0) {
+        const activitiesContainer = document.createElement('div')
+        activitiesContainer.className = 'entry-activities'
+        activitiesContainer.style.display = 'flex'
+        activitiesContainer.style.flexWrap = 'wrap'
+        activitiesContainer.style.gap = '0.5rem'
+        activitiesContainer.style.marginTop = '0.3rem'
+
+        entry.activities.forEach(act => {
+          const label = act.label
+          // Om det finns en icon-sträng använd den, annars fallback faEdit
+          const actIcon = act.icon ? activityIconMap[label] || faEdit : faEdit
+
+          const activityDiv = document.createElement('div')
+          activityDiv.style.display = 'flex'
+          activityDiv.style.flexDirection = 'column'
+          activityDiv.style.alignItems = 'center'
+
+          const iconCircle = document.createElement('div')
+          iconCircle.className = 'icon-circle'
+          iconCircle.style.width = '1.2rem'
+          iconCircle.style.height = '1.2rem'
+          iconCircle.style.color = entry.mood.color
+          iconCircle.style.display = 'flex'
+          iconCircle.style.justifyContent = 'center'
+          iconCircle.style.alignItems = 'center'
+          iconCircle.style.borderRadius = '50%'
+          iconCircle.appendChild(icon(actIcon).node[0])
+
+          const labelP = document.createElement('p')
+          labelP.textContent = label
+          labelP.style.fontSize = '.6rem'
+          labelP.style.textAlign = 'center'
+          labelP.style.margin = '0'
+
+          activityDiv.append(iconCircle, labelP)
+          activitiesContainer.appendChild(activityDiv)
+        })
+
+        wrapper.appendChild(activitiesContainer)
+      }
+
       /* CHEVRON */
       const detailsBtn = document.createElement('button')
       detailsBtn.className = 'details-btn'
@@ -344,9 +410,9 @@ export class MoodHistory extends HTMLElement {
       details.className = 'entry-details'
       details.innerHTML = `
         <div class="details-content">
-          <span>Energy: ${entry.energy}</span>
-          <span>Sleep: ${entry.sleep?.hours || '-'}h (${entry.sleep?.quality || '-'})</span>
-          <span>Notes: ${entry.notes || '-'}</span>
+          <span><strong>Energy:</strong> ${entry.energy}</span>
+          <span><strong>Sleep:</strong> ${entry.sleep?.hours || '-'}h (${entry.sleep?.quality || '-'})</span>
+          <span><strong>Notes:</strong> ${entry.notes || '-'}</span>
         </div>
       `
 

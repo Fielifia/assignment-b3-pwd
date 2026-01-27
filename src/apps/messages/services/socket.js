@@ -16,8 +16,7 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
   let socket
   let lastPong = Date.now()
   let pingInterval = null
-  let reconnectTimeout = null
-  let manualClose = false
+  const manualClose = false
 
   /**
    * Creates and connects a new WebSocket, sets up event listeners.
@@ -31,7 +30,7 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
       onStatusChange?.('online')
 
       pingInterval = setInterval(() => {
-        if (socket.readyState !== WebSocket.OPEN) {
+        if (socket.readyState === WebSocket.OPEN) {
           socket.send(JSON.stringify({ type: 'ping', key: API_KEY }))
         }
 
@@ -54,10 +53,8 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
       }
 
       if (msg.type !== 'message') return
+      if (msg.username === state.username) return
       if (!msg.data?.trim()) return
-
-      const exists = messages.some(m => m.text === msg.data && m.username === msg.username && m.timestamp === msg.timestamp)
-      if (exists) return // Ignore duplicate messages
 
       messages.push({
         from: msg.username === state.username ? 'me' : 'them',
@@ -78,7 +75,7 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
       onStatusChange?.('offline')
 
       if (!manualClose) {
-        reconnectTimeout = setTimeout(() => {
+        setTimeout(() => {
           console.log('Reconnecting...')
           connect()
         }, 2000)
@@ -93,24 +90,7 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
 
   connect()
 
-  return {
-    /**
-     * Returns the current WebSocket instance.
-     *
-     * @returns {WebSocket} The current WebSocket instance.
-     */
-    getSocket: () => socket,
-    /**
-     * Closes the WebSocket connection and stops reconnection attempts.
-     * Clears all related intervals and timeouts.
-     */
-    close: () => {
-      manualClose = true
-      clearInterval(pingInterval)
-      clearTimeout(reconnectTimeout)
-      socket.close()
-    }
-  }
+  return socket
 }
 /**
  * Sends a message over an open WebSocket connection.

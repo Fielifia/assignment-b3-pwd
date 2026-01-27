@@ -161,6 +161,11 @@ div.selected-mood-top > svg{
     background: #8fb3cc;
     transform: scale(1.1);
 }
+
+.activity-buttons .icon-circle.active {
+    background: #8fb3cc;
+    transform: scale(1.1);
+}
     
 input[type="text"] {
     width: 100%;
@@ -488,12 +493,21 @@ export class MoodEntry extends HTMLElement {
     this.moodButtons.innerHTML = ''
     this.moodValues.forEach((m) => {
       const moodButton = document.createElement('span')
+      moodButton.tabIndex = 0
+      moodButton.setAttribute('role', 'button')
 
       const moodIcon = document.createElement('div')
       moodIcon.innerHTML = icon({ prefix: m.prefix, iconName: m.icon }).html[0]
       moodIcon.classList.add('mood-icon')
       moodIcon.style.color = m.color
       moodButton.appendChild(moodIcon)
+
+      moodButton.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          moodButton.click()
+        }
+      })
 
       const label = document.createElement('p')
       label.textContent = m.label
@@ -519,6 +533,14 @@ export class MoodEntry extends HTMLElement {
           this.topContainer.addEventListener('click', () => {
             this.showMoodSelection()
           })
+          this.topContainer.tabIndex = 0
+          this.topContainer.setAttribute('role', 'button')
+          this.topContainer.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              this.showMoodSelection()
+            }
+          })
         }, 250)
       })
       this.moodButtons.appendChild(moodButton)
@@ -539,18 +561,31 @@ export class MoodEntry extends HTMLElement {
       checkbox.type = 'checkbox'
       checkbox.value = a.label
 
-      checkbox.addEventListener('change', () => {
-        if (checkbox.checked) {
-          this.selectedActivities.push(a.icon, a.label)
-        } else this.selectedActivities = this.selectedActivities.filter(f => f !== a.label)
-      })
-
       const circle = document.createElement('div')
       circle.classList.add('icon-circle')
+      circle.tabIndex = 0
+      circle.setAttribute('role', 'checkbox')
       circle.innerHTML = icon({ prefix: a.prefix, iconName: a.icon }).html[0]
 
       const text = document.createElement('p')
       text.textContent = a.label
+
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          this.selectedActivities.push({ icon: a.icon, label: a.label })
+        } else {
+          this.selectedActivities = this.selectedActivities.filter(act => act.label !== a.label)
+          circle.classList.remove('active')
+        }
+      })
+
+      circle.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          checkbox.checked = !checkbox.checked
+          checkbox.dispatchEvent(new Event('change'))
+        }
+      })
 
       label.append(checkbox, circle, text)
       this.activityButtons.appendChild(label)
@@ -559,25 +594,25 @@ export class MoodEntry extends HTMLElement {
     for (let i = 0; i < 2; i++) {
       const label = document.createElement('label')
 
+      const checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      checkbox.style.display = 'none'
+
       const circle = document.createElement('div')
       circle.classList.add('icon-circle')
       circle.innerHTML = icon({ prefix: 'fas', iconName: 'edit' }).html[0]
+      circle.tabIndex = 0
+      circle.setAttribute('role', 'checkbox')
 
       const input = document.createElement('input')
       input.type = 'text'
       input.placeholder = 'Custom'
 
-      circle.addEventListener('input', () => {
-        input.textContent = input.value.trim() || 'Custom'
-
-        this.selectedActivities = this.selectedActivities.filter(
-          (f) => !f.startsWith(`custom${i}:`)
-        )
-        if (input.value.trim()) {
-          this.selectedActivities.push(`custom${i}:${input.value.trim()}`)
-          label.classList.add('active')
-        } else {
-          label.classList.remove('active')
+      circle.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          checkbox.checked = !checkbox.checked
+          checkbox.dispatchEvent(new Event('change'))
         }
       })
 
@@ -585,9 +620,29 @@ export class MoodEntry extends HTMLElement {
         input.placeholder = ''
       })
       input.addEventListener('blur', () => {
-        if (!input.value.trim()) input.placeholder = 'Custom'
+        const value = input.value.trim()
+        if (!value) {
+          checkbox.checked = false
+          circle.classList.remove('active')
+          this.selectedActivities = this.selectedActivities.filter(act => act.inputId !== input.dataset.id)
+          return
+        }
+        if (checkbox.checked) {
+          this.selectedActivities = this.selectedActivities.filter(act => act.inputId !== input.dataset.id)
+          this.selectedActivities.push({
+            icon: 'edit',
+            prefix: 'fas',
+            label: value,
+            inputId: input.dataset.id
+          })
+          circle.classList.add('active')
+        }
       })
-      label.append(circle, input)
+
+      // Assign a unique id to track this input
+      input.dataset.id = crypto.randomUUID()
+
+      label.append(checkbox, circle, input)
       this.activityButtons.appendChild(label)
     }
   }
