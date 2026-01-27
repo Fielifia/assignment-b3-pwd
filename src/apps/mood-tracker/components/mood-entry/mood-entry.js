@@ -369,11 +369,11 @@ export class MoodEntry extends HTMLElement {
 
     /** @type {Array<{icon:string,label:string,color:string}>} */
     this.moodValues = [
-      { icon: 'tired', label: 'Awful', color: '#af6b6a', prefix: 'far' },
-      { icon: 'frown', label: 'Bad', color: '#95b4c8', prefix: 'far' },
-      { icon: 'meh', label: 'Meh', color: '#fad6a2', prefix: 'far' },
-      { icon: 'smile', label: 'Good', color: '#c9dcc9', prefix: 'far' },
-      { icon: 'laugh-beam', label: 'Rad', color: '#a2b5a2', prefix: 'far' }
+      { icon: 'tired', label: 'Awful', color: '#9c4f4e', prefix: 'far' },
+      { icon: 'frown', label: 'Bad', color: '#668aa6', prefix: 'far' },
+      { icon: 'meh', label: 'Meh', color: '#e2b06d', prefix: 'far' },
+      { icon: 'smile', label: 'Good', color: '#a4c0a4', prefix: 'far' },
+      { icon: 'laugh-beam', label: 'Rad', color: '#7d997d', prefix: 'far' }
     ]
 
     /** @type {Array<{icon:string,label:string,prefix:string}>} */

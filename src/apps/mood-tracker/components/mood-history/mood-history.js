@@ -57,22 +57,24 @@ template.innerHTML = `
     display: none;
     background: #edf2f7;
     box-sizing: border-box;
+    line-height: 1.5;
 }
 
 .history-container {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 2rem;
     width: 100%;
     font-size: .9rem;
-    padding: 1rem;
+    padding: .5rem;
     box-sizing: border-box;
 }
 
 .entries-list {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 1rem;
+    padding: 2rem 1rem;
     max-height: 600px;
     overflow-y: auto;
 }
@@ -84,65 +86,86 @@ h3 {
 .entry {
     display: grid;
     grid-template-columns: auto 1fr;
-    grid-template-rows: auto auto auto auto;
     position: relative;
-    gap: 1rem;
     padding: 1rem;
     min-width: 0;
     border-radius: 8px;
     background: #edf2f7;
-    align-items: center;
-    box-shadow: 2px 6px 12px rgba(0,0,0,0.1);
-}
-
-.entry-date {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  text-align: center;
-  text-transform: uppercase;
-  font-size: .8rem;
+     border: 1px solid #cbd5e0; 
 }
 
 .entry-icon {
   grid-column: 1;
-  grid-row: 2 / 4;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 1rem;
   display: flex;
-  width: 3rem;
-  height: 3rem;
+  align-self: start;
 }
 
-.entry-mood-time {
-  grid-column: 2;
-  grid-row: 2;
+.entry-header {
+grid-column: 2;
   display: flex;
-  flex-direction: row;
-  align-items: end;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: .8rem;
   gap: 1rem;
 }
 
-.entry-mood-time .mood {
-  font-size: 1.6rem;
-  text-transform: uppercase;
+.entry-time {
+  color: #555;
 }
 
-.entry-mood-time .time {
-  font-size: .8rem;
+.entry-content {
+  grid-column: 2;
+  display: flex;
+  gap: .5rem;
+  align-items: end;
+}
+
+.entry-content .mood-label {
+font-size: 1.2rem;
 }
 
 .entry-activities {
+  margin-top: 1rem;
   grid-column: 2;
-  grid-row: 3;
   display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.activity-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-circle {
+  width: 1.2rem;
+  height: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.activity-label {
+  margin: 0;
+  font-size: .6rem;
+  text-align: center;
 }
 
 .entry-details {
   grid-column: 1 / -1;
   overflow: hidden;
   max-height: 0;
+  max-width: 400px;
   opacity: 0;
   transition: max-height .35s ease, opacity .25s ease;
   border-top: 1px solid #ccc;
-  padding-top: 0;
+  padding-top: .5rem;
+  margin-top: 1rem;
 }
 
 .entry-details.open {
@@ -151,7 +174,6 @@ h3 {
   padding-top: .75rem;
 }
 
-
 .details-content {
   display: flex;
   flex-direction: column;
@@ -159,23 +181,15 @@ h3 {
   position: relative;
 }
 
-.delete-btn {
-  align-self: flex-end;
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-top: .5rem;
-}
-
 .details-btn {
-  grid-column: 3;
-  grid-row: 2;
-  justify-self: end;
+  position: absolute;
+  top: 1rem;
+  right: .5rem;
   background: none;
   border: none;
   cursor: pointer;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.6rem;
+  height: 1.6rem;
   transition: .2s ease;
 }
 
@@ -190,8 +204,8 @@ h3 {
 
 .delete-btn {
     position: absolute;
-    bottom: .6rem;
-    right: .6rem;
+    top: 0;
+    right: 0;
     justify-self: end;
     background: none;
     border: none;
@@ -332,13 +346,32 @@ export class MoodHistory extends HTMLElement {
     this.entries.forEach(entry => {
       const wrapper = document.createElement('div')
       wrapper.className = 'entry'
+      wrapper.style.borderColor = entry.mood.color
 
-      /* DATE */
-      wrapper.innerHTML = `
-        <span class="entry-date">${entry.date}</span>
-      `
+      /**
+       * Convertts a hex color to an RGB string.
+       *
+       * @param {string} hex - Hex color string.
+       * @returns {string} - RGB color string.
+       */
+      const hexToRgb = (hex) => {
+        const bigint = parseInt(hex.replace('#', ''), 16)
+        const r = (bigint >> 16) & 255
+        const g = (bigint >> 8) & 255
+        const b = bigint & 255
+        return `${r},${g},${b}`
+      }
 
-      /* ICON */
+      const rgb = hexToRgb(entry.mood.color)
+      wrapper.style.boxShadow = `0 4px 12px rgba(${rgb}, 0.15)`
+
+      const header = document.createElement('div')
+      header.className = 'entry-header'
+
+      const date = document.createElement('div')
+      date.className = 'entry-date'
+      date.textContent = entry.date
+
       const iconDiv = document.createElement('div')
       iconDiv.className = 'entry-icon'
       iconDiv.style.color = entry.mood.color
@@ -348,55 +381,48 @@ export class MoodHistory extends HTMLElement {
         iconDiv.appendChild(icon(moodFa).node[0])
       }
 
-      /* MOOD + TIME */
-      const moodTime = document.createElement('div')
-      moodTime.className = 'entry-mood-time'
-      moodTime.innerHTML = `
-        <span class="mood" style="color:${entry.mood.color}">
-          ${entry.mood.label}
-        </span>
-        <span class="time">${entry.time}</span>
-      `
+      const entryContent = document.createElement('div')
+      entryContent.className = 'entry-content'
+
+      const moodLabel = document.createElement('div')
+      moodLabel.className = 'mood-label'
+      moodLabel.textContent = entry.mood.label
+      moodLabel.style.color = entry.mood.color
+
+      const time = document.createElement('div')
+      time.className = 'entry-time'
+      time.textContent = entry.time
+
+      header.appendChild(date)
+      entryContent.appendChild(moodLabel)
+      entryContent.appendChild(time)
+      wrapper.appendChild(iconDiv)
+      wrapper.appendChild(header)
+      wrapper.appendChild(entryContent)
 
       if (entry.activities && entry.activities.length > 0) {
         const activitiesContainer = document.createElement('div')
         activitiesContainer.className = 'entry-activities'
-        activitiesContainer.style.display = 'flex'
-        activitiesContainer.style.flexWrap = 'wrap'
-        activitiesContainer.style.gap = '0.5rem'
-        activitiesContainer.style.marginTop = '0.3rem'
 
         entry.activities.forEach(act => {
           const label = act.label
-          // Om det finns en icon-sträng använd den, annars fallback faEdit
           const actIcon = act.icon ? activityIconMap[label] || faEdit : faEdit
 
           const activityDiv = document.createElement('div')
-          activityDiv.style.display = 'flex'
-          activityDiv.style.flexDirection = 'column'
-          activityDiv.style.alignItems = 'center'
+          activityDiv.classList.add('activity-item')
 
           const iconCircle = document.createElement('div')
           iconCircle.className = 'icon-circle'
-          iconCircle.style.width = '1.2rem'
-          iconCircle.style.height = '1.2rem'
           iconCircle.style.color = entry.mood.color
-          iconCircle.style.display = 'flex'
-          iconCircle.style.justifyContent = 'center'
-          iconCircle.style.alignItems = 'center'
-          iconCircle.style.borderRadius = '50%'
           iconCircle.appendChild(icon(actIcon).node[0])
 
           const labelP = document.createElement('p')
+          labelP.classList.add('activity-label')
           labelP.textContent = label
-          labelP.style.fontSize = '.6rem'
-          labelP.style.textAlign = 'center'
-          labelP.style.margin = '0'
 
           activityDiv.append(iconCircle, labelP)
           activitiesContainer.appendChild(activityDiv)
         })
-
         wrapper.appendChild(activitiesContainer)
       }
 
@@ -435,7 +461,7 @@ export class MoodHistory extends HTMLElement {
         }))
       })
 
-      wrapper.append(iconDiv, moodTime, detailsBtn, details)
+      wrapper.append(detailsBtn, details)
       this.entryList.appendChild(wrapper)
     })
   }
