@@ -64,11 +64,15 @@ nickname-form {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     padding: .2rem;
-    height: 1rem;
-    width: 1rem;
+    height: 1.5rem;
+    width: 1.5rem;
     align-items: center;
     justify-content: center;
     transition: transform .2s ease, background .2s ease;
+}
+   .sidebar-toggle:focus-visible {
+  outline: 2px solid #5f86a1;
+  transform: translateX(.2rem);
 }
 
 .sidebar.visible + .sidebar-toggle {
@@ -318,9 +322,9 @@ textarea:focus, button:focus {
 <date-time-display datetime="" format="datetime" show-seconds></date-time-display>
 <div class="sidebar">
 </div>
-<div class="sidebar-toggle">
+<button class="sidebar-toggle">
 <i class="fas fa-chevron-right"></i>
-</div>
+</button>
 <div class="container">
 <avatar-picker></avatar-picker>
 <nickname-form label-text="Enter username:" button-text="Join"></nickname-form>
