@@ -103,10 +103,35 @@ div.sidebar.visible nickname-form..in-sidebar {
 #chat-msg {
     flex: 1;
     min-width: 0;
+    max-height: 150px;
     background: none;
     resize: none;
     font-size: .9rem;
     border: none;
+    min-height: 40px;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: #5f86a1 #cbdde8;
+    direction: rtl;
+    text-align: left;
+}
+
+#chat-msg::--webkit-scrollbar {
+    width: 6px;
+}
+#chat-msg::--webkit-scrollbar-thumb {
+    background: #5f86a1;
+    border-radius: 3px;
+    border: 1px solid #3f5f73;
+}
+
+#chat-msg::--webkit-scrollbar-thumb:hover {
+    background: #3f5f73;
+}
+
+#chat-msg::--webkit-scrollbar-track {
+    background: #cbdde8;
+    border-radius: 3px;
 }
 
 .message {

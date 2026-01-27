@@ -62,6 +62,22 @@ export function initUI ({ avatarPicker, usernameForm, sidebar, chatContainer, te
   // Listen for sending message via button click
   sendBtn.addEventListener('click', () => sendCallback())
 
+  /**
+   * Adjust the height of the textarea automatically based on its content.
+   *
+   * Sets the height to 'auto' first to shrink it if text is deleted,
+   * then sets it to the scrollHeight, capped at 50% of chat container height.
+   */
+  const autoResize = () => {
+    const maxHeight = chatContainer.clientHeight * 0.5
+    textarea.style.height = 'auto'
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
+  }
+
+  textarea.addEventListener('input', autoResize)
+
+  autoResize()
+
   // Listen for sending message vid Enter key
   textarea.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {

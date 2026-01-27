@@ -13,77 +13,105 @@ const TIMEOUT = 20_000
  * @returns {WebSocket} The initialized WebSocket instance.
  */
 export function initSocket (state, messages, onMessage, onStatusChange) {
-  const socket = new WebSocket(SOCKET_URL)
-
+  let socket
   let lastPong = Date.now()
-  let pingInterval
+  let pingInterval = null
+  let reconnectTimeout = null
+  let manualClose = false
 
   /**
-   * Sends a ping message to keep the connection alive
-   * and detect stalled connections.
-   *
-   * @private
+   * Creates and connects a new WebSocket, sets up event listeners.
    */
-  const sendPing = () => {
-    if (socket.readyState !== WebSocket.OPEN) return
+  const connect = () => {
+    socket = new WebSocket(SOCKET_URL)
 
-    socket.send(JSON.stringify({
-      type: 'ping',
-      key: API_KEY
-    }))
-  }
+    socket.addEventListener('open', () => {
+      console.log('Connected')
+      lastPong = Date.now()
+      onStatusChange?.('online')
 
-  socket.addEventListener('open', () => {
-    console.log('Connected')
-    lastPong = Date.now()
-    onStatusChange?.('online')
+      pingInterval = setInterval(() => {
+        if (socket.readyState !== WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'ping', key: API_KEY }))
+        }
 
-    pingInterval = setInterval(() => {
-      sendPing()
-
-      if (Date.now() - lastPong > TIMEOUT) {
-        onStatusChange?.('offline')
-      }
-    }, PING_INTERVAL)
-  })
-
-  socket.addEventListener('close', () => {
-    console.log('Disconnected')
-    clearInterval(pingInterval)
-    onStatusChange?.('offline')
-  })
-
-  socket.addEventListener('message', (e) => {
-    lastPong = Date.now()
-
-    let msg
-    try {
-      msg = JSON.parse(e.data)
-    } catch {
-      return
-    }
-
-    if (msg.type !== 'message') return
-    if (!msg.data?.trim()) return
-
-    const exists = messages.some(m => m.text === msg.data && m.username === msg.username && m.timestamp === msg.timestamp)
-    if (exists) return // Ignore duplicate messages
-
-    messages.push({
-      from: msg.username === state.username ? 'me' : 'them',
-      username: msg.username,
-      avatar: msg.username === state.username ? state.avatar : '👤',
-      text: msg.data,
-      timestamp: msg.timestamp || new Date().toISOString(),
-      channel: msg.channel
+        if (Date.now() - lastPong > TIMEOUT) {
+          console.log('Connection timed out')
+          onStatusChange?.('offline')
+          socket.close()
+        }
+      }, PING_INTERVAL)
     })
 
-    onMessage()
-  })
+    socket.addEventListener('message', (e) => {
+      lastPong = Date.now()
 
-  return socket
+      let msg
+      try {
+        msg = JSON.parse(e.data)
+      } catch {
+        return
+      }
+
+      if (msg.type !== 'message') return
+      if (!msg.data?.trim()) return
+
+      const exists = messages.some(m => m.text === msg.data && m.username === msg.username && m.timestamp === msg.timestamp)
+      if (exists) return // Ignore duplicate messages
+
+      messages.push({
+        from: msg.username === state.username ? 'me' : 'them',
+        username: msg.username,
+        avatar: msg.username === state.username ? state.avatar : '👤',
+        text: msg.data,
+        timestamp: msg.timestamp || new Date().toISOString(),
+        channel: msg.channel
+      })
+
+      onMessage?.()
+    })
+
+    socket.addEventListener('close', () => {
+      console.log('Disconnected')
+      clearInterval(pingInterval)
+      pingInterval = null
+      onStatusChange?.('offline')
+
+      if (!manualClose) {
+        reconnectTimeout = setTimeout(() => {
+          console.log('Reconnecting...')
+          connect()
+        }, 2000)
+      }
+    })
+
+    socket.addEventListener('error', (err) => {
+      console.error('Socket error:', err)
+      socket.close()
+    })
+  }
+
+  connect()
+
+  return {
+    /**
+     * Returns the current WebSocket instance.
+     *
+     * @returns {WebSocket} The current WebSocket instance.
+     */
+    getSocket: () => socket,
+    /**
+     * Closes the WebSocket connection and stops reconnection attempts.
+     * Clears all related intervals and timeouts.
+     */
+    close: () => {
+      manualClose = true
+      clearInterval(pingInterval)
+      clearTimeout(reconnectTimeout)
+      socket.close()
+    }
+  }
 }
-
 /**
  * Sends a message over an open WebSocket connection.
  *

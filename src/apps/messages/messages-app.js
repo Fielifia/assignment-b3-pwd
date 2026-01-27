@@ -160,7 +160,6 @@ class MessagesApp extends HTMLElement {
     (status) => {
       this.setAttribute('data-status', status)
       this.updateConnectionStatus(status)
-      console.log('Socket status:', status)
     }
     )
   }
