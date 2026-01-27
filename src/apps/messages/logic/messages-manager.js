@@ -24,20 +24,21 @@ export function addMessage (
   const trimmed = text.trim()
   if (!trimmed) return // Don't add empty messages
 
+  const timestamp = new Date().toISOString()
   // Add message to the local array
   messages.push({
     from: 'me',
     username: state.username,
     avatar: state.avatar,
     text: trimmed,
-    timestamp: new Date().toISOString(),
+    timestamp,
     replyTo,
     channel: state.channel
   })
   // Re-renders messages in the DOM
   renderMessages(messagesList, messages, () => { }, onReply)
   // Send the message trough WebSocket to the server
-  sendMessage(socket, trimmed, state)
+  sendMessage(socket, trimmed, state, timestamp)
 }
 
 /**

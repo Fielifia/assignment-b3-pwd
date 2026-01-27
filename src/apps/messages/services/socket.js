@@ -66,12 +66,15 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
     if (msg.type !== 'message') return
     if (!msg.data?.trim()) return
 
+    const exists = messages.some(m => m.text === msg.data && m.username === msg.username && m.timestamp === msg.timestamp)
+    if (exists) return // Ignore duplicate messages
+
     messages.push({
       from: msg.username === state.username ? 'me' : 'them',
       username: msg.username,
       avatar: msg.username === state.username ? state.avatar : '👤',
       text: msg.data,
-      timestamp: new Date().toISOString(),
+      timestamp: msg.timestamp || new Date().toISOString(),
       channel: msg.channel
     })
 
@@ -87,14 +90,16 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
  * @param {WebSocket} socket - Active WebSocket connection.
  * @param {string} text - The message text to send.
  * @param {object} state - Component state object containing username and channel.
+ * @param {string} timestamp - The timestamp of the message.
  */
-export function sendMessage (socket, text, state) {
+export function sendMessage (socket, text, state, timestamp) {
   if (socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({
       type: 'message',
       data: text,
       username: state.username,
       channel: state.channel,
+      timestamp,
       key: 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd'
     }))
   }

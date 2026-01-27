@@ -37,11 +37,11 @@ export function initUI ({ avatarPicker, usernameForm, sidebar, chatContainer, te
   const moveToSidebar = () => {
     usernameForm.setAttribute('variant', 'sidebar')
     usernameForm.setAttribute('button-text', 'Ok')
+    usernameForm.setAttribute('label-text', 'change username')
     avatarPicker.setAttribute('variant', 'sidebar')
+
     sidebar.appendChild(usernameForm)
     sidebar.appendChild(avatarPicker)
-
-    usernameForm.setAttribute('label-text', 'change username')
 
     chatContainer.style.display = 'flex'
     requestAnimationFrame(() => textarea.focus())
