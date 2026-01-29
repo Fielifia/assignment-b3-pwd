@@ -63,31 +63,35 @@ template.innerHTML = `
 .history-container {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
     width: 100%;
+    min-width: 250px;
+    max-width: 400px;
+    margin: 0 auto;
     font-size: .9rem;
     padding: .5rem;
     box-sizing: border-box;
+}
+
+h3 {
+    text-align: center;
+    text-transform: uppercase;
+    margin: 1rem;;
 }
 
 .entries-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 2rem 1rem;
+    padding: 1rem;
     max-height: 600px;
     overflow-y: auto;
-}
-
-h3 {
-  margin: 0 auto;
 }
 
 .entry {
     display: grid;
     grid-template-columns: auto 1fr;
     position: relative;
-    padding: 1rem;
+    padding: 1rem 1rem 0;
     min-width: 0;
     border-radius: 8px;
     background: #edf2f7;
@@ -106,7 +110,6 @@ h3 {
 .entry-header {
 grid-column: 2;
   display: flex;
-  text-align: center;
   text-transform: uppercase;
   font-size: .8rem;
   gap: 1rem;
@@ -116,15 +119,22 @@ grid-column: 2;
   color: #555;
 }
 
-.entry-content {
+.entry-heading {
   grid-column: 2;
   display: flex;
   gap: .5rem;
-  align-items: end;
+  align-items: baseline;
 }
 
-.entry-content .mood-label {
+.entry-heading .mood-label {
 font-size: 1.2rem;
+padding: 0;
+}
+
+.entry-heading .entry-time {
+  font-size: .8rem;
+  color: #555;
+  padding: 0;
 }
 
 .entry-activities {
@@ -160,18 +170,16 @@ font-size: 1.2rem;
   grid-column: 1 / -1;
   overflow: hidden;
   max-height: 0;
-  max-width: 400px;
   opacity: 0;
   transition: max-height .35s ease, opacity .25s ease;
   border-top: 1px solid #ccc;
-  padding-top: .5rem;
   margin-top: 1rem;
 }
 
 .entry-details.open {
   max-height: 300px;
   opacity: 1;
-  padding-top: .75rem;
+  padding: .5rem;
 }
 
 .details-content {
@@ -382,7 +390,7 @@ export class MoodHistory extends HTMLElement {
       }
 
       const entryContent = document.createElement('div')
-      entryContent.className = 'entry-content'
+      entryContent.className = 'entry-heading'
 
       const moodLabel = document.createElement('div')
       moodLabel.className = 'mood-label'

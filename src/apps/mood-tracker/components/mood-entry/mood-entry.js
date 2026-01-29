@@ -35,6 +35,13 @@ template.innerHTML = `
 .mood-entry-container {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.mood-selection-container {
+    display: flex;
+    flex-direction: column;
     padding: 0;
     width: 100%;
 }
@@ -245,6 +252,12 @@ select {
     padding: .25rem .5rem;
 }
 
+.saved-feedback {
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  color: #4d5f6a;
+}
 /* Buttons */
 .buttons {
     display: flex;
@@ -289,6 +302,7 @@ button, .mood-buttons span, select, input[type="number"], .icon-circle, .selecte
 }
 </style>
 <div class="mood-entry-container">
+<div class="mood-selection-container">
 <div class="select-mood">
 <span id="heading">How are you?
 </span>
@@ -331,10 +345,12 @@ button, .mood-buttons span, select, input[type="number"], .icon-circle, .selecte
 
 <textarea placeholder="Notes..."></textarea>
 </div>
+<div class="saved-feedback" style="display:none"></div>
 <div class="buttons">
 <button class="save-btn" style="display:none;">Save</button>
 <button class="go-back-btn">Go back</button>
 <button class="view-history-btn">View History</button>
+</div>
 </div>
 </div>
 `
@@ -404,6 +420,7 @@ export class MoodEntry extends HTMLElement {
     this.selectedMood = null
     this.selectedActivities = []
 
+    this.entryContainer = this.shadowRoot.querySelector('.mood-entry-container')
     this.dateInput = this.shadowRoot.querySelector('#date')
     this.moodButtons = this.shadowRoot.querySelector('.mood-buttons')
     this.topContainer = this.shadowRoot.querySelector('.selected-mood-top')
@@ -456,14 +473,27 @@ export class MoodEntry extends HTMLElement {
     })
 
     this.saveBtn.addEventListener('click', () => {
+      const savedFeedback = this.shadowRoot.querySelector('.saved-feedback')
+      savedFeedback.style.display = 'block'
+      savedFeedback.textContent = 'Entry saved!'
+
+      const dateValue = this.dateInput.value
       const now = new Date()
-      const formattedDate = now.toLocaleDateString('en-US', { timeZone: 'Europe/Stockholm', weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
+      const date = new Date(dateValue + 'T00:00:00')
+      const formattedDate = date.toLocaleDateString('en-US', {
+      timeZone: 'Europe/Stockholm',
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+      const defaultDate = now.toLocaleDateString('en-US', { timeZone: 'Europe/Stockholm', weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
       const formattedTime = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', hour12: true })
 
       /** @type {MoodEntryData} */
       const data = {
         id: crypto.randomUUID(),
-        date: formattedDate,
+        date: formattedDate || defaultDate,
         time: formattedTime,
         mood: this.selectedMood,
         energy: this.energyLevel.value,

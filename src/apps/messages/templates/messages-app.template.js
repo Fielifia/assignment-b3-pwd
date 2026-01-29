@@ -116,8 +116,6 @@ div.sidebar.visible nickname-form..in-sidebar {
     box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: #5f86a1 #cbdde8;
-    direction: rtl;
-    text-align: left;
 }
 
 #chat-msg::--webkit-scrollbar {

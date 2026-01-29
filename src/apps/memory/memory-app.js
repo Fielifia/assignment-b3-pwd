@@ -178,6 +178,8 @@ class MemoryApp extends HTMLElement {
     if (nickname) this.nickname = nickname
     if (!this.nickname) return
 
+    stopTimer(this.state)
+
     this.setView(VIEWS.IN_GAME)
 
     initGameState(this.state, this.state.level)

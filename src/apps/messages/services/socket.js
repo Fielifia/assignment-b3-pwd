@@ -16,7 +16,7 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
   let socket
   let lastPong = Date.now()
   let pingInterval = null
-  const manualClose = false
+  let manualClose = false
 
   /**
    * Creates and connects a new WebSocket, sets up event listeners.
