@@ -90,7 +90,16 @@ export function initSocket (state, messages, onMessage, onStatusChange) {
 
   connect()
 
-  return socket
+  /**
+   * Closes the WebSocket connection and prevents automatic reconnection.
+   */
+  const closeSocket = () => {
+    if (!socket || socket.readyState === WebSocket.CLOSED) return
+    manualClose = true
+    socket.close()
+  }
+
+  return { socket, closeSocket }
 }
 /**
  * Sends a message over an open WebSocket connection.

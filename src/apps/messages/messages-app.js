@@ -35,6 +35,8 @@ class MessagesApp extends HTMLElement {
   #replyTo = null
   /** @type {WebSocket} WebSocket connection */
   #socket
+  /** @type {Function} Function to close the WebSocket connection */
+  #closeSocket
   /** @type {AbortController|null} Controller for removing event listeners on disconnect */
   #abortController
 
@@ -148,7 +150,7 @@ class MessagesApp extends HTMLElement {
     })
 
     // Initialize WebSocket connection
-    this.#socket = initSocket(this.state, this.#messages, () => {
+    const { socket, closeSocket } = initSocket(this.state, this.#messages, () => {
       this.#renderMessages()
 
       // Show notification if the last message is from another user
@@ -162,6 +164,8 @@ class MessagesApp extends HTMLElement {
       this.updateConnectionStatus(status)
     }
     )
+    this.#socket = socket
+    this.#closeSocket = closeSocket
   }
 
   /**
@@ -170,6 +174,7 @@ class MessagesApp extends HTMLElement {
   disconnectedCallback () {
     this.#abortController.abort()
     this.#socket?.close()
+    this.#closeSocket?.()
   }
 
   /**

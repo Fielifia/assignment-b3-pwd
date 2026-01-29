@@ -481,12 +481,12 @@ export class MoodEntry extends HTMLElement {
       const now = new Date()
       const date = new Date(dateValue + 'T00:00:00')
       const formattedDate = date.toLocaleDateString('en-US', {
-      timeZone: 'Europe/Stockholm',
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
+        timeZone: 'Europe/Stockholm',
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
       const defaultDate = now.toLocaleDateString('en-US', { timeZone: 'Europe/Stockholm', weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
       const formattedTime = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', hour12: true })
 
