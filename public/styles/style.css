@@ -1,0 +1,220 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: clamp(.9rem, 1.6vw, 1.1rem);
+    color: #333;
+    background: #f5f5f5;
+    background: linear-gradient(135deg, #f5f5f5, #8fb3cc);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/*
+========== DOCK
+*/
+.dock-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    padding: .5rem 1rem;
+    display: flex;
+    gap: .8rem;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    background: linear-gradient(135deg, #8fb3cc, #5f86a1);
+    border-top: 1px solid #ddd;
+}
+
+.dock-icon {
+    width: 50px;
+    height: 50px;
+    background: #f0f0f050;
+    color: #555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 0 5px;
+    font-size: 1.8rem;
+    transition: all .3s ease;
+    position: relative;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #5f86a1;
+    color: #000;
+    border-radius: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+    font-size: 0.7rem;
+}
+
+.popup {
+    position: absolute;
+    display: none;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: .8rem;
+    padding: 0;
+    background: #ffffffc5;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    flex-direction: column;
+    white-space: nowrap;
+}
+
+.popup-titel-el {
+    cursor: pointer;
+    padding: 2px 5px;
+    color: #555;
+    border-radius: 6px;
+    background: transparent;
+    transition: .2s ease;
+    margin: .2rem;
+}
+
+.popup-item:hover {
+    color: #000;
+}
+
+.dock-icon:hover,
+.dock-icon:focus {
+    transform: translateY(-5px) scale(1.1);
+    background: #f0f0f060;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+
+/*
+========== WINDOW
+*/
+.window {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    resize: both;
+    width: fit-content;
+    height: fit-content;
+    max-width: 90vw;
+    max-height: 90vh;
+    min-width: 300px;
+    min-height: 250px;
+    border-radius: 12px;
+    background: #edf2f7;
+    border: 1px solid #ccc;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+
+:focus-visible {
+    outline: 2px solid #5f86a1;
+}
+
+.window:focus-within {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(1.01);
+}
+
+.title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem;
+    background: linear-gradient(135deg, #5f86a1, #8fb3cc);
+    color: #000;
+    cursor: grab;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.title-bar-buttons {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+}
+
+.title-bar:active {
+    cursor: grabbing;
+}
+
+.button-container {
+    display: flex;
+    gap: .3rem;
+}
+
+.minimize-btn,
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #000;
+    font-size: 1rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s ease;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.minimize-btn {
+    padding-bottom: .3rem;
+}
+
+.minimize-btn:hover,
+.close-btn:hover {
+    background: #5f86a1;
+    transform: scale(1.15);
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+}
+
+.content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: rgba(150, 150, 150, 0.4);
+    border-radius: 5px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+messages-app,
+memory-app,
+mood-tracker-app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}

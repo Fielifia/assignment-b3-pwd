@@ -1,49 +1,48 @@
 {
   "name": "assignment-b3-pwd",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "1DV025 - Examination Assignment Module B - PWD",
   "type": "module",
-  "browser": "js/index.js",
+  "browser": "src/js/index.js",
   "scripts": {
-    "start": "snowpack dev",
-    "build": "snowpack build",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
     "lint": "npx eslint ./src || exit 0",
     "lint:fix": "npx eslint ./src --fix || exit 0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://gitlab.lnu.se/1dv025/templates/assignment-b3-pwd"
-  },
   "contributors": [
-    "Johan Leitet <johan.leitet@lnu.se>",
-    "Mats Loock <mats.loock@lnu.se>"
+    {
+      "name": "Johan Leitet",
+      "email": "johan.leitet@lnu.se"
+    },
+    {
+      "name": "Mats Loock",
+      "email": "mats.loock@lnu.se"
+    },
+    {
+      "name": "Sofia Andersson",
+      "email": "sa226@student.lnu.se"
+    }
   ],
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "@lnu/eslint-config": "^1.1.0",
-    "chai": "^4.2.0",
-    "eslint": "^7.9.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jsdoc": "^30.5.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "snowpack": "^2.11.1"
+    "@lnu/eslint-config": "^1.1.10",
+    "eslint": "^8.57.1",
+    "vite": "^4.4.9"
   },
-  "eslintConfig": {
-    "extends": "@lnu"
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.lnu.se:1dv025/student/sa226jf/assignment-b3-pwd.git"
   },
-  "snowpack": {
-    "scripts": {
-      "run:info": "echo Press Ctrl+C to terminate"
-    },
-    "mount": {
-      "public": "/",
-      "src": "/js"
-    },
-    "devOptions": {
-      "bundle": false
-    }
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-regular-svg-icons": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/react-fontawesome": "^3.1.1"
   }
 }
