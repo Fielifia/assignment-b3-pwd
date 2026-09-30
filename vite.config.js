@@ -1,6 +1,6 @@
 export default {
   build: {
-    outDir: '../dist',
+    outDir: 'dist',
     target: 'esnext'
   }
 }
